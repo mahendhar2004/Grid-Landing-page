@@ -8,7 +8,7 @@ export default function DownloadCTA() {
         <AnimatedSection direction="scale">
           <div className="bg-primary rounded-[40px] py-20 sm:py-24 px-8 text-center text-white">
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6">
-              The Grid<span className="brand-dot" style={{ background: 'white' }} /> is <span className="opacity-50">Coming Soon</span>.
+              The Grid is <span className="opacity-50">Coming Soon</span>.
             </h2>
             <p className="text-lg sm:text-xl opacity-90 max-w-xl mx-auto mb-10">
               Be the first in your batch to experience the smarter campus marketplace.

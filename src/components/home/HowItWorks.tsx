@@ -34,7 +34,7 @@ export default function HowItWorks() {
       <div className="max-w-7xl mx-auto px-6">
         <AnimatedSection className="text-center mb-16">
           <h2 className="text-4xl sm:text-5xl font-extrabold text-secondary mb-5">
-            How <span className="text-primary">Grid<span className="brand-dot" /></span> Works
+            How <span className="text-primary">Grid</span> Works
           </h2>
           <p className="text-text-muted text-lg max-w-2xl mx-auto">
             Four simple steps from signup to sealed deal. It's that easy.

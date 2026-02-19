@@ -15,10 +15,10 @@ export default function PrivacyPolicyPage() {
         <div className="prose-custom space-y-10">
           <section>
             <p className="text-text-muted leading-relaxed">
-              At Grid. ("we," "our," or "us"), we respect your privacy and are committed to protecting the personal information you share with us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and services.
+              At Grid ("we," "our," or "us"), we respect your privacy and are committed to protecting the personal information you share with us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and services.
             </p>
             <p className="text-text-muted leading-relaxed mt-4">
-              By using Grid., you agree to the collection and use of information in accordance with this policy.
+              By using Grid, you agree to the collection and use of information in accordance with this policy.
             </p>
           </section>
 
@@ -58,11 +58,11 @@ export default function PrivacyPolicyPage() {
           </Section>
 
           <Section title="3. College-Scoped Data">
-            <p>Grid. is designed as a college-exclusive marketplace. Your college affiliation determines which products you can see. Product listings are only visible to students at the same college. This scoping is a core privacy and safety feature — your listings are not exposed to the general public or students at other institutions.</p>
+            <p>Grid is designed as a college-exclusive marketplace. Your college affiliation determines which products you can see. Product listings are only visible to students at the same college. This scoping is a core privacy and safety feature — your listings are not exposed to the general public or students at other institutions.</p>
           </Section>
 
           <Section title="4. Data Sharing">
-            <p>We do not sell, trade, or rent your personal information to third parties. We share data only with the following service providers who are essential to operating Grid.:</p>
+            <p>We do not sell, trade, or rent your personal information to third parties. We share data only with the following service providers who are essential to operating Grid:</p>
             <ul className="list-disc pl-6 space-y-2 text-text-muted mt-4">
               <li><strong>Supabase</strong> — Cloud database infrastructure (PostgreSQL hosting, authentication, real-time subscriptions, file storage)</li>
               <li><strong>Razorpay</strong> — Payment processing for listing fees and wallet top-ups</li>
@@ -97,7 +97,7 @@ export default function PrivacyPolicyPage() {
           </Section>
 
           <Section title="7. Cookies & Local Storage">
-            <p>Grid. uses local device storage (AsyncStorage) to maintain your session and cache user preferences. We do not use third-party tracking cookies. No advertising trackers or analytics cookies are used in the app.</p>
+            <p>Grid uses local device storage (AsyncStorage) to maintain your session and cache user preferences. We do not use third-party tracking cookies. No advertising trackers or analytics cookies are used in the app.</p>
           </Section>
 
           <Section title="8. Data Retention">
@@ -105,18 +105,18 @@ export default function PrivacyPolicyPage() {
           </Section>
 
           <Section title="9. Children's Privacy">
-            <p>Grid. is designed for college students aged 18 and above. We do not knowingly collect personal information from anyone under the age of 18. If we become aware that we have collected data from a minor, we will take steps to delete that information promptly.</p>
+            <p>Grid is designed for college students aged 18 and above. We do not knowingly collect personal information from anyone under the age of 18. If we become aware that we have collected data from a minor, we will take steps to delete that information promptly.</p>
           </Section>
 
           <Section title="10. Changes to This Policy">
-            <p>We may update this Privacy Policy from time to time. When we make changes, we will update the "Last Updated" date at the top of this page and notify users through the app. Your continued use of Grid. after changes constitutes acceptance of the updated policy.</p>
+            <p>We may update this Privacy Policy from time to time. When we make changes, we will update the "Last Updated" date at the top of this page and notify users through the app. Your continued use of Grid after changes constitutes acceptance of the updated policy.</p>
           </Section>
 
           <Section title="11. Contact Us">
             <p>If you have any questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
             <ul className="list-none space-y-2 text-text-muted mt-4">
               <li><strong>Email:</strong> <a href="mailto:support@grid.app" className="text-primary hover:underline">support@grid.app</a></li>
-              <li><strong>Entity:</strong> Grid.</li>
+              <li><strong>Entity:</strong> Grid</li>
             </ul>
           </Section>
         </div>

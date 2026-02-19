@@ -13,28 +13,28 @@ export const faqCategories: FAQCategory[] = [
     name: 'Getting Started',
     faqs: [
       {
-        question: 'What is Grid.?',
-        answer: 'Grid. is a campus-exclusive marketplace designed for Indian college students. It allows you to buy and sell items like textbooks, electronics, furniture, and more — exclusively within your college community. Think of it as a trusted marketplace where every buyer and seller is a verified student from your campus.',
+        question: 'What is Grid?',
+        answer: 'Grid is a campus-exclusive marketplace designed for Indian college students. It allows you to buy and sell items like textbooks, electronics, furniture, and more — exclusively within your college community. Think of it as a trusted marketplace where every buyer and seller is a verified student from your campus.',
       },
       {
         question: 'How do I sign up?',
-        answer: 'Signing up is quick and easy. Simply download the Grid. app, tap "Sign in with Google," and use your email to create your account. You\'ll then select your college, set your graduation year, and you\'re ready to start browsing and selling.',
+        answer: 'Signing up is quick and easy. Simply download the Grid app, tap "Sign in with Google," and use your email to create your account. You\'ll then select your college, set your graduation year, and you\'re ready to start browsing and selling.',
       },
       {
         question: 'Which colleges are supported?',
-        answer: 'Grid. is expanding to 900+ premier institutions across India, including IITs, NITs, BITS, IIMs, VIT, SRM, Manipal, and many more. If your college isn\'t listed yet, you can request it to be added directly from the app.',
+        answer: 'Grid is expanding to 900+ premier institutions across India, including IITs, NITs, BITS, IIMs, VIT, SRM, Manipal, and many more. If your college isn\'t listed yet, you can request it to be added directly from the app.',
       },
       {
-        question: 'Is Grid. free to use?',
-        answer: 'Yes, Grid. is free to download and browse. There are affordable listing fees when you want to post an item for sale, which helps maintain quality and prevents spam. You can also earn free listing credits through our referral program.',
+        question: 'Is Grid free to use?',
+        answer: 'Yes, Grid is free to download and browse. There are affordable listing fees when you want to post an item for sale, which helps maintain quality and prevents spam. You can also earn free listing credits through our referral program.',
       },
       {
         question: 'How do I set up my profile?',
         answer: 'After signing in, you\'ll be guided through a simple onboarding flow where you select your college, graduation year, and hostel. You can later update your profile with a photo, phone number, and other details from the Profile section.',
       },
       {
-        question: 'Can I use Grid. if I\'ve graduated?',
-        answer: 'Grid. is primarily designed for currently enrolled students. However, recent graduates may still have access depending on their graduation year setting. The marketplace is scoped to your college community to ensure trust and relevance.',
+        question: 'Can I use Grid if I\'ve graduated?',
+        answer: 'Grid is primarily designed for currently enrolled students. However, recent graduates may still have access depending on their graduation year setting. The marketplace is scoped to your college community to ensure trust and relevance.',
       },
     ],
   },
@@ -51,7 +51,7 @@ export const faqCategories: FAQCategory[] = [
       },
       {
         question: 'Can I see items from other colleges?',
-        answer: 'No. Grid. is intentionally college-scoped, meaning you can only see items listed by students at your own college. This ensures easy, local transactions with trusted community members — no traveling across the city for a meetup.',
+        answer: 'No. Grid is intentionally college-scoped, meaning you can only see items listed by students at your own college. This ensures easy, local transactions with trusted community members — no traveling across the city for a meetup.',
       },
       {
         question: 'How do I save items for later?',
@@ -72,7 +72,7 @@ export const faqCategories: FAQCategory[] = [
       },
       {
         question: 'What are listing fees?',
-        answer: 'Grid. charges a small, affordable listing fee for each item you post. This helps maintain marketplace quality by preventing spam and ensuring serious listings. You can pay via Razorpay, wallet balance, or use free listing credits earned through referrals.',
+        answer: 'Grid charges a small, affordable listing fee for each item you post. This helps maintain marketplace quality by preventing spam and ensuring serious listings. You can pay via Razorpay, wallet balance, or use free listing credits earned through referrals.',
       },
       {
         question: 'How many images can I upload?',
@@ -88,7 +88,7 @@ export const faqCategories: FAQCategory[] = [
       },
       {
         question: 'What categories are available?',
-        answer: 'Grid. offers 112+ categories across 8 groups: Tech & Electronics, Academic, Furniture, Kitchen & Appliances, Room Essentials, Fashion & Accessories, Sports & Fitness, and Lifestyle & Entertainment. From laptops to yoga mats, we\'ve got every student need covered.',
+        answer: 'Grid offers 112+ categories across 8 groups: Tech & Electronics, Academic, Furniture, Kitchen & Appliances, Room Essentials, Fashion & Accessories, Sports & Fitness, and Lifestyle & Entertainment. From laptops to yoga mats, we\'ve got every student need covered.',
       },
     ],
   },
@@ -97,7 +97,7 @@ export const faqCategories: FAQCategory[] = [
     faqs: [
       {
         question: 'What payment methods are accepted?',
-        answer: 'Grid. supports multiple payment options through Razorpay including credit/debit cards and UPI. You can also use your Grid Wallet balance or free listing credits. The payment process is secure and seamless.',
+        answer: 'Grid supports multiple payment options through Razorpay including credit/debit cards and UPI. You can also use your Grid Wallet balance or free listing credits. The payment process is secure and seamless.',
       },
       {
         question: 'How does the wallet work?',
@@ -113,7 +113,7 @@ export const faqCategories: FAQCategory[] = [
       },
       {
         question: 'Is my payment information secure?',
-        answer: 'Absolutely. All payments are processed through Razorpay, a PCI DSS compliant payment gateway trusted by millions of businesses. Grid. never stores your card or bank details — all sensitive payment data is handled by Razorpay\'s secure infrastructure.',
+        answer: 'Absolutely. All payments are processed through Razorpay, a PCI DSS compliant payment gateway trusted by millions of businesses. Grid never stores your card or bank details — all sensitive payment data is handled by Razorpay\'s secure infrastructure.',
       },
     ],
   },
@@ -121,8 +121,8 @@ export const faqCategories: FAQCategory[] = [
     name: 'Safety & Privacy',
     faqs: [
       {
-        question: 'How does Grid. keep me safe?',
-        answer: 'Grid. employs multiple safety layers: college-scoped access ensures you\'re only interacting with verified campus students, a dedicated admin moderation team reviews reports, and you can block or report any suspicious users or listings instantly.',
+        question: 'How does Grid keep me safe?',
+        answer: 'Grid employs multiple safety layers: college-scoped access ensures you\'re only interacting with verified campus students, a dedicated admin moderation team reviews reports, and you can block or report any suspicious users or listings instantly.',
       },
       {
         question: 'How do I report a suspicious listing or user?',
@@ -134,7 +134,7 @@ export const faqCategories: FAQCategory[] = [
       },
       {
         question: 'Who moderates the content?',
-        answer: 'Grid. has a dedicated admin team with a full moderation dashboard. Admins review user reports, can view chat evidence, ban or warn users, remove inappropriate listings, and track platform activity in real-time.',
+        answer: 'Grid has a dedicated admin team with a full moderation dashboard. Admins review user reports, can view chat evidence, ban or warn users, remove inappropriate listings, and track platform activity in real-time.',
       },
       {
         question: 'How is my data protected?',
@@ -151,7 +151,7 @@ export const faqCategories: FAQCategory[] = [
     faqs: [
       {
         question: 'How does the referral program work?',
-        answer: 'Every Grid. user gets a unique referral code. Share it with friends — when they sign up using your code, both of you earn free listing credits. It\'s our way of rewarding you for growing the campus community.',
+        answer: 'Every Grid user gets a unique referral code. Share it with friends — when they sign up using your code, you earn a free listing credit. It\'s our way of rewarding you for growing the campus community.',
       },
       {
         question: 'Where do I find my referral code?',
@@ -163,7 +163,7 @@ export const faqCategories: FAQCategory[] = [
       },
       {
         question: 'Can I refer myself?',
-        answer: 'No. Grid. has fraud prevention measures including self-referral detection, device fingerprinting, and rate limiting. Each referral must be a genuine new user signing up for the first time.',
+        answer: 'No. Grid has fraud prevention measures including self-referral detection, device fingerprinting, and rate limiting. Each referral must be a genuine new user signing up for the first time.',
       },
     ],
   },

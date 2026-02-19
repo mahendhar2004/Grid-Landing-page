@@ -13,7 +13,7 @@ export default function Safety() {
               You're in <span className="text-primary">Control</span>.
             </h2>
             <p className="text-text-muted text-lg mb-10 leading-relaxed">
-              Your privacy matters. Grid. puts you in charge of your campus presence with granular controls and a dedicated moderation team.
+              Your privacy matters. Grid puts you in charge of your campus presence with granular controls and a dedicated moderation team.
             </p>
 
             <div className="space-y-6">

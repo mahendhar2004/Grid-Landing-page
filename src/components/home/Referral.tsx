@@ -9,7 +9,7 @@ export default function Referral() {
           <div className="bg-secondary rounded-[40px] p-10 sm:p-16 lg:p-20 flex flex-col lg:flex-row items-center justify-between gap-12">
             <div>
               <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-6">
-                Grow the Grid<span className="brand-dot" />,<br />
+                Grow the Grid,<br />
                 <span className="text-primary">Earn Rewards</span>.
               </h2>
               <p className="text-white/60 text-lg max-w-md mb-8">
@@ -19,7 +19,7 @@ export default function Referral() {
                 {[
                   { icon: Gift, label: 'Free Listings' },
                   { icon: Zap, label: 'Grid Credits' },
-                  { icon: Award, label: 'Both Get Rewarded' },
+                  { icon: Award, label: 'Reward Per Referral' },
                 ].map((perk) => (
                   <div key={perk.label} className="flex items-center gap-3">
                     <perk.icon size={18} className="text-primary" />

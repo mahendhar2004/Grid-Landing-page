@@ -24,7 +24,7 @@ export default function Hero() {
 
             <AnimatedSection delay={0.1}>
               <p className="text-lg sm:text-xl text-text-muted max-w-[540px] mb-10 leading-relaxed">
-                Grid<span className="brand-dot" /> is the marketplace built for students. With 112+ categories,
+                Grid is the marketplace built for students. With 112+ categories,
                 real-time chat, and trusted campus circles — experience the safest way to trade.
               </p>
             </AnimatedSection>
@@ -49,8 +49,7 @@ export default function Hero() {
           <AnimatedSection direction="right" className="hidden lg:flex justify-end">
             <div className="w-[300px] h-[620px] bg-black rounded-[40px] p-3 border-[8px] border-[#1a1a1a] shadow-[0_50px_100px_rgba(0,0,0,0.15)]">
               <div className="w-full h-full bg-surface rounded-3xl overflow-hidden p-10 flex flex-col items-center">
-                <img src="/icon.png" className="w-10 h-10 mb-10 rounded-lg" alt="Grid" />
-                <div className="w-full bg-white rounded-xl p-3 border border-border text-xs text-text-muted mb-8">
+                <div className="w-full bg-white rounded-xl p-3 border border-border text-xs text-text-muted mb-8 mt-6">
                   Search "Engineering Books"
                 </div>
                 <div className="grid grid-cols-2 gap-3 w-full">
