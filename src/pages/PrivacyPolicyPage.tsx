@@ -93,7 +93,7 @@ export default function PrivacyPolicyPage() {
               <li><strong>Block Users</strong> — Prevent specific users from contacting you</li>
               <li><strong>Notification Preferences</strong> — Choose which notifications you receive</li>
             </ul>
-            <p className="mt-4">To request data export or account deletion, contact us at <a href="mailto:support@grid.app" className="text-primary hover:underline">support@grid.app</a>.</p>
+            <p className="mt-4">To request data export or account deletion, contact us at <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">contact.galvam@gmail.com</a>.</p>
           </Section>
 
           <Section title="7. Cookies & Local Storage">
@@ -115,7 +115,7 @@ export default function PrivacyPolicyPage() {
           <Section title="11. Contact Us">
             <p>If you have any questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
             <ul className="list-none space-y-2 text-text-muted mt-4">
-              <li><strong>Email:</strong> <a href="mailto:support@grid.app" className="text-primary hover:underline">support@grid.app</a></li>
+              <li><strong>Email:</strong> <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">contact.galvam@gmail.com</a></li>
               <li><strong>Entity:</strong> Grid</li>
             </ul>
           </Section>

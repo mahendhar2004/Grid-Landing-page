@@ -142,7 +142,7 @@ export default function TermsPage() {
               <li>Grid may suspend or terminate your account at any time for violation of these Terms, with or without notice.</li>
               <li>Temporary bans range from 1 day to 30 days depending on the severity of the violation.</li>
               <li>Permanent bans are issued for severe or repeated violations.</li>
-              <li>You may request account deletion by contacting <a href="mailto:support@grid.app" className="text-primary hover:underline">support@grid.app</a>.</li>
+              <li>You may request account deletion by contacting <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">contact.galvam@gmail.com</a>.</li>
               <li>Upon termination, your listings will be removed and your account data will be deleted in accordance with our Privacy Policy.</li>
             </ul>
           </Section>
@@ -151,7 +151,7 @@ export default function TermsPage() {
             <ul className="list-disc pl-6 space-y-2">
               <li>Users are encouraged to resolve disputes between themselves directly.</li>
               <li>Grid may facilitate dispute resolution at its discretion but is not obligated to do so.</li>
-              <li>For unresolved disputes, you agree to first attempt informal resolution by contacting us at <a href="mailto:support@grid.app" className="text-primary hover:underline">support@grid.app</a>.</li>
+              <li>For unresolved disputes, you agree to first attempt informal resolution by contacting us at <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">contact.galvam@gmail.com</a>.</li>
             </ul>
           </Section>
 
@@ -166,7 +166,7 @@ export default function TermsPage() {
           <Section title="16. Contact Us">
             <p>If you have any questions about these Terms, please contact us:</p>
             <ul className="list-none space-y-2 mt-4">
-              <li><strong>Email:</strong> <a href="mailto:support@grid.app" className="text-primary hover:underline">support@grid.app</a></li>
+              <li><strong>Email:</strong> <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">contact.galvam@gmail.com</a></li>
               <li><strong>Entity:</strong> Grid</li>
             </ul>
           </Section>

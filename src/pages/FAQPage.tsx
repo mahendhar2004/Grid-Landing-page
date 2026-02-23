@@ -20,7 +20,7 @@ export default function FAQPage() {
           </h1>
           <p className="text-text-muted text-lg">
             Everything you need to know about Grid. Can't find what you're looking for?{' '}
-            <a href="mailto:support@grid.app" className="text-primary hover:underline">Contact support</a>.
+            <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">Contact support</a>.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export default function FAQPage() {
             We're here to help. Reach out to our support team and we'll get back to you as soon as possible.
           </p>
           <a
-            href="mailto:support@grid.app"
+            href="mailto:contact.galvam@gmail.com"
             className="inline-block bg-primary text-white px-8 py-3 rounded-full font-semibold hover:bg-primary-dark transition-colors"
           >
             Contact Support

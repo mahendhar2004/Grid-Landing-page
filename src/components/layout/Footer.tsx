@@ -44,7 +44,7 @@ export default function Footer() {
                 Support
               </h4>
               <div className="flex flex-col gap-3">
-                <a href="mailto:support@grid.app" className="text-text-muted text-sm hover:text-primary transition-colors">Contact Us</a>
+                <a href="mailto:contact.galvam@gmail.com" className="text-text-muted text-sm hover:text-primary transition-colors">Contact Us</a>
                 <a href="/#safety" className="text-text-muted text-sm hover:text-primary transition-colors">Safety Center</a>
                 <Link to="/faqs" className="text-text-muted text-sm hover:text-primary transition-colors">Help</Link>
               </div>
