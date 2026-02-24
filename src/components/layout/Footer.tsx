@@ -8,8 +8,11 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between gap-12 mb-16">
           {/* Brand */}
           <div className="max-w-xs">
-            <div className="text-2xl font-extrabold tracking-tight text-secondary mb-4">
-              Grid<span className="brand-dot" />
+            <div className="flex items-center gap-2.5 mb-4">
+              
+              <span className="text-3xl font-extrabold tracking-tight text-secondary">
+                Grid<span className="brand-dot" />
+              </span>
             </div>
             <p className="text-text-muted text-sm leading-relaxed">
               The smarter campus marketplace. Simplifying student life across India.

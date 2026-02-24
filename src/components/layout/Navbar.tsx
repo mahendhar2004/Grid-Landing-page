@@ -48,8 +48,11 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-extrabold tracking-tight text-secondary">
-            Grid<span className="brand-dot" />
+          <Link to="/" className="flex items-center gap-2.5">
+            
+            <span className="text-3xl font-extrabold tracking-tight text-secondary">
+              Grid<span className="brand-dot" />
+            </span>
           </Link>
 
           {/* Desktop nav */}
