@@ -22,7 +22,10 @@ export default function Navbar() {
   const navLinks = isHome
     ? [
         { label: 'Features', href: '#features' },
+        { label: 'How It Works', href: '#how-it-works' },
+        { label: 'Categories', href: '#categories' },
         { label: 'Safety', href: '#safety' },
+        { label: 'Pricing', href: '#pricing' },
         { label: 'FAQs', to: '/faqs' },
       ]
     : [
@@ -33,36 +36,29 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Announcement bar */}
-      <div className="bg-secondary text-white text-center py-2.5 px-4 text-[13px] font-medium tracking-wide">
-        Expanding to 900+ Premier Institutions across India. Coming soon on iOS & Android.
-      </div>
-
-      {/* Navbar */}
       <nav
-        className={`sticky top-0 z-50 transition-all duration-300 ${
+        className={`sticky top-0 z-50 transition-all duration-500 ${
           scrolled
-            ? 'bg-white/90 backdrop-blur-xl shadow-sm h-[72px]'
-            : 'bg-white/80 backdrop-blur-xl h-[80px]'
-        } border-b border-border`}
+            ? 'bg-white/60 backdrop-blur-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_8px_30px_rgba(0,0,0,0.04)] h-[64px] border-b border-white/60'
+            : 'bg-white/40 backdrop-blur-xl h-[72px] border-b border-transparent'
+        }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5">
-            
             <span className="text-3xl font-extrabold tracking-tight text-secondary">
               Grid<span className="brand-dot" />
             </span>
           </Link>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-7">
             {navLinks.map((link) =>
               'href' in link ? (
                 <a
                   key={link.label}
                   href={link.href}
-                  className="text-text-muted font-semibold text-[15px] hover:text-primary transition-colors"
+                  className="text-text-muted font-medium text-[14px] hover:text-primary transition-colors"
                 >
                   {link.label}
                 </a>
@@ -70,7 +66,7 @@ export default function Navbar() {
                 <Link
                   key={link.label}
                   to={link.to!}
-                  className="text-text-muted font-semibold text-[15px] hover:text-primary transition-colors"
+                  className="text-text-muted font-medium text-[14px] hover:text-primary transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -78,7 +74,7 @@ export default function Navbar() {
             )}
             <a
               href="#download"
-              className="bg-primary text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-primary-dark transition-colors hover:-translate-y-0.5 transform"
+              className="bg-primary text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-primary-dark transition-all hover:-translate-y-0.5"
             >
               Get the App
             </a>
@@ -87,7 +83,7 @@ export default function Navbar() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 text-secondary"
+            className="lg:hidden p-2 text-secondary"
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -96,7 +92,7 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden bg-white border-t border-border shadow-lg">
+          <div className="lg:hidden bg-white/80 backdrop-blur-2xl border-t border-border/50">
             <div className="px-6 py-4 flex flex-col gap-3">
               {navLinks.map((link) =>
                 'href' in link ? (

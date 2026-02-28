@@ -61,7 +61,7 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Grid. All rights reserved.
           </p>
           <div className="flex gap-5">
-            <a href="#" className="text-text-muted hover:text-primary transition-colors" aria-label="Instagram">
+            <a href="https://www.instagram.com/grid_galvam" target="_blank" rel="noopener noreferrer" className="text-text-muted hover:text-primary transition-colors" aria-label="Instagram">
               <Instagram size={18} />
             </a>
             <a href="#" className="text-text-muted hover:text-primary transition-colors" aria-label="Twitter">
