@@ -1,12 +1,13 @@
 import { CheckCircle } from 'lucide-react'
+import { motion } from 'framer-motion'
 import AnimatedSection from '../ui/AnimatedSection'
 
 export default function DownloadCTA() {
   return (
     <section id="download" className="py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6">
-        <AnimatedSection>
-          <div className="relative overflow-hidden rounded-[40px] py-20 sm:py-24 px-8 text-center text-white">
+        <AnimatedSection direction="scale">
+          <div className="relative overflow-hidden rounded-[40px] py-20 sm:py-24 px-8 text-center text-white will-change-transform">
             {/* Dark gradient background */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#111113] to-[#0a0a0a]" />
 
@@ -19,16 +20,28 @@ export default function DownloadCTA() {
               }}
             />
 
-            {/* Accent glow - top left (CSS animation) */}
-            <div
-              className="absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full blur-[100px] will-change-transform animate-[glow-pulse_6s_ease-in-out_infinite]"
-              style={{ background: 'radial-gradient(circle, #007BFF, transparent 70%)' }}
+            {/* Accent glow - top left */}
+            <motion.div
+              className="absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(0,123,255,0.25), transparent 70%)',
+                filter: 'blur(100px)',
+                willChange: 'transform',
+              }}
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
             />
 
-            {/* Accent glow - bottom right (CSS animation) */}
-            <div
-              className="absolute -bottom-32 -right-32 w-[400px] h-[400px] rounded-full blur-[100px] will-change-transform animate-[glow-pulse_7s_ease-in-out_1s_infinite]"
-              style={{ background: 'radial-gradient(circle, #7c3aed, transparent 70%)' }}
+            {/* Accent glow - bottom right */}
+            <motion.div
+              className="absolute -bottom-32 -right-32 w-[400px] h-[400px] rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(124,58,237,0.2), transparent 70%)',
+                filter: 'blur(100px)',
+                willChange: 'transform',
+              }}
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
             />
 
             {/* Content */}
