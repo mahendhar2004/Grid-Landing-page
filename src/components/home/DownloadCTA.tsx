@@ -1,12 +1,11 @@
 import { CheckCircle } from 'lucide-react'
-import { motion } from 'framer-motion'
 import AnimatedSection from '../ui/AnimatedSection'
 
 export default function DownloadCTA() {
   return (
     <section id="download" className="py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6">
-        <AnimatedSection direction="scale">
+        <AnimatedSection>
           <div className="relative overflow-hidden rounded-[40px] py-20 sm:py-24 px-8 text-center text-white">
             {/* Dark gradient background */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#111113] to-[#0a0a0a]" />
@@ -20,20 +19,16 @@ export default function DownloadCTA() {
               }}
             />
 
-            {/* Accent glow - top left */}
-            <motion.div
-              className="absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full opacity-20 blur-[100px]"
+            {/* Accent glow - top left (CSS animation) */}
+            <div
+              className="absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full blur-[100px] will-change-transform animate-[glow-pulse_6s_ease-in-out_infinite]"
               style={{ background: 'radial-gradient(circle, #007BFF, transparent 70%)' }}
-              animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.25, 0.2] }}
-              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
             />
 
-            {/* Accent glow - bottom right */}
-            <motion.div
-              className="absolute -bottom-32 -right-32 w-[400px] h-[400px] rounded-full opacity-15 blur-[100px]"
+            {/* Accent glow - bottom right (CSS animation) */}
+            <div
+              className="absolute -bottom-32 -right-32 w-[400px] h-[400px] rounded-full blur-[100px] will-change-transform animate-[glow-pulse_7s_ease-in-out_1s_infinite]"
               style={{ background: 'radial-gradient(circle, #7c3aed, transparent 70%)' }}
-              animate={{ scale: [1, 1.15, 1], opacity: [0.15, 0.2, 0.15] }}
-              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
             />
 
             {/* Content */}
@@ -77,7 +72,7 @@ export default function DownloadCTA() {
 
               <div className="flex items-center justify-center gap-2 text-sm text-white/30 font-medium">
                 <CheckCircle size={15} />
-                <span>Available for 900+ colleges across India</span>
+                <span>Available across Indian campuses</span>
               </div>
             </div>
           </div>
