@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-const lastUpdated = 'February 19, 2026'
+const lastUpdated = 'March 13, 2026'
 
 export default function TermsPage() {
   return (
@@ -33,6 +33,7 @@ export default function TermsPage() {
               <li>You must provide accurate information during registration, including your college, graduation year, and contact details.</li>
               <li>You are responsible for all activity that occurs under your account.</li>
               <li>Notify us immediately if you suspect unauthorized access to your account.</li>
+              <li>By completing account setup on the Grid app, you confirm that you have read, understood, and accepted these Terms. We record the date and time of your acceptance.</li>
             </ul>
           </Section>
 
@@ -142,8 +143,9 @@ export default function TermsPage() {
               <li>Grid may suspend or terminate your account at any time for violation of these Terms, with or without notice.</li>
               <li>Temporary bans range from 1 day to 30 days depending on the severity of the violation.</li>
               <li>Permanent bans are issued for severe or repeated violations.</li>
-              <li>You may request account deletion by contacting <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">contact.galvam@gmail.com</a>.</li>
-              <li>Upon termination, your listings will be removed and your account data will be deleted in accordance with our Privacy Policy.</li>
+              <li><strong>Self-service deletion:</strong> You can delete your account directly in the app by going to Profile → Edit Profile → scroll to the <em>Offboarding</em> section → tap <em>Delete Account</em> and follow the confirmation steps. Deletion is permanent and immediate.</li>
+              <li>Alternatively, you may request account deletion by emailing <a href="mailto:contact.galvam@gmail.com?subject=Account%20Deletion%20Request" className="text-primary hover:underline">contact.galvam@gmail.com</a> with the subject "Account Deletion Request".</li>
+              <li>Upon account deletion, your active listings are anonymised, your personal data is permanently removed, and your wallet balance is forfeited. Messages you sent in existing conversations are retained for the other party's transaction history but your identity is scrubbed.</li>
             </ul>
           </Section>
 

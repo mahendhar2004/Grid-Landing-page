@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-const lastUpdated = 'February 19, 2026'
+const lastUpdated = 'March 13, 2026'
 
 export default function PrivacyPolicyPage() {
   return (
@@ -39,7 +39,7 @@ export default function PrivacyPolicyPage() {
               <p>We collect data about how you interact with the app, including product views, searches, saved items, notification interactions, and feature usage. This helps us improve the service.</p>
             </Subsection>
             <Subsection title="Device Information">
-              <p>We collect device identifiers for push notification delivery via Expo Notifications. We may also collect device type, operating system, and app version for debugging and optimization.</p>
+              <p>We collect device identifiers for push notification delivery via Expo Notifications. We may also collect device type, operating system, and app version for debugging and optimization. For referral fraud prevention, we may collect device identifiers and IP addresses to detect self-referral, duplicate accounts, or coordinated abuse of the referral programme.</p>
             </Subsection>
           </Section>
 
@@ -85,15 +85,21 @@ export default function PrivacyPolicyPage() {
           <Section title="6. Your Rights & Controls">
             <p>You have the following controls over your data:</p>
             <ul className="list-disc pl-6 space-y-2 text-text-muted mt-4">
-              <li><strong>View & Edit Profile</strong> — Access and update your personal information at any time</li>
-              <li><strong>Online Status</strong> — Toggle whether other users can see your online status</li>
-              <li><strong>Read Receipts</strong> — Control whether others know when you've read messages</li>
-              <li><strong>Anonymous Listings</strong> — Sell items without revealing your identity</li>
+              <li><strong>View & Edit Profile</strong> — Access and update your name, phone, hostel, and profile photo at any time via Profile → Edit Profile</li>
+              <li><strong>Online Status</strong> — Toggle whether other users can see your online status (Settings → Privacy)</li>
+              <li><strong>Read Receipts</strong> — Control whether others know when you've read messages (Settings → Privacy)</li>
+              <li><strong>Anonymous Mode</strong> — Enable anonymous mode so your identity is hidden from buyers when messaging (Settings → Privacy)</li>
+              <li><strong>Anonymous Listings</strong> — Post individual listings without revealing your identity to viewers</li>
               <li><strong>Delete Conversations</strong> — Remove chat history from your view</li>
               <li><strong>Block Users</strong> — Prevent specific users from contacting you</li>
-              <li><strong>Notification Preferences</strong> — Choose which notifications you receive</li>
+              <li><strong>Notification Preferences</strong> — Choose which push and email notifications you receive (Settings → Notifications)</li>
+              <li>
+                <strong>Delete Account</strong> — You can permanently delete your account and all associated personal data directly in the app:
+                go to <em>Profile → Edit Profile → Offboarding → Delete Account</em>.
+                Deletion is immediate and irreversible. Your active listings will be anonymised, your wallet balance forfeited, and your identity scrubbed from message history.
+                Alternatively, email <a href="mailto:contact.galvam@gmail.com?subject=Account%20Deletion%20Request" className="text-primary hover:underline">contact.galvam@gmail.com</a> with the subject "Account Deletion Request".
+              </li>
             </ul>
-            <p className="mt-4">To request data export or account deletion, contact us at <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">contact.galvam@gmail.com</a>.</p>
           </Section>
 
           <Section title="7. Cookies & Local Storage">
@@ -101,7 +107,9 @@ export default function PrivacyPolicyPage() {
           </Section>
 
           <Section title="8. Data Retention">
-            <p>We retain your account data for as long as your account is active. Deleted conversations are removed from your view but may be retained temporarily in our systems. Product listings that are delisted remain in our database for record-keeping but are not displayed to other users. If you request account deletion, we will remove your personal data within 30 days, subject to legal retention requirements.</p>
+            <p>We retain your account data for as long as your account is active. Deleted conversations are removed from your view but may be retained temporarily in our systems. Product listings that are delisted remain in our database for record-keeping but are not displayed to other users.</p>
+            <p className="mt-3">When you delete your account via the in-app Offboarding flow, your personal data is removed atomically and immediately — there is no delay. Active and pending listings are anonymised (seller identity scrubbed), sold/expired listings are de-identified, pending referrals are expired, and your wallet and transaction history are permanently deleted. An audit log entry is retained for fraud prevention and legal compliance purposes.</p>
+            <p className="mt-3">We store the timestamp of your Terms acceptance (<em>terms_accepted_at</em>) for legal compliance purposes. This record is deleted along with your account upon deletion.</p>
           </Section>
 
           <Section title="9. Children's Privacy">
