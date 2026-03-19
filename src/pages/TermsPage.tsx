@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-const lastUpdated = 'March 13, 2026'
+const lastUpdated = 'March 19, 2026'
 
 export default function TermsPage() {
   return (
@@ -69,7 +69,7 @@ export default function TermsPage() {
             <ul className="list-disc pl-6 space-y-2">
               <li>Listing fees are charged per product posted and are non-refundable once the listing is published.</li>
               <li>Payment processing is handled by Razorpay, a PCI DSS compliant payment gateway. By making a payment, you also agree to Razorpay's terms of service.</li>
-              <li>The Grid Wallet allows you to add funds and use them for listing fees. Wallet top-ups are processed through Razorpay.</li>
+              <li>The Grid Wallet allows you to add funds and use them for listing fees. Wallet top-ups are processed through Razorpay. Wallet funds are non-refundable — once added, they can only be used within the app and cannot be withdrawn or transferred.</li>
               <li>Free listing credits earned through the referral program can be used in place of paid listing fees. Credits are non-transferable and have no cash value.</li>
               <li>Grid does not facilitate transactions between buyers and sellers. All purchase transactions occur directly between users.</li>
             </ul>
@@ -90,6 +90,7 @@ export default function TermsPage() {
           <Section title="7. Content Moderation & Enforcement">
             <ul className="list-disc pl-6 space-y-2">
               <li>Grid maintains a dedicated admin moderation team that reviews user reports and monitors platform activity.</li>
+              <li>When a report involves a conversation, our moderation team may review recent messages from that conversation — including text and image attachments — to evaluate the report. Only messages relevant to the reported incident are accessed.</li>
               <li>We reserve the right to remove any listing, message, or content that violates these Terms or our community guidelines.</li>
               <li>Enforcement actions include warnings, temporary bans (1 day to 30 days), and permanent account suspension.</li>
               <li>Users who receive multiple reports may face accelerated enforcement action.</li>

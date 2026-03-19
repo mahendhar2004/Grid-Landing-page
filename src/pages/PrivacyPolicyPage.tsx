@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-const lastUpdated = 'March 13, 2026'
+const lastUpdated = 'March 19, 2026'
 
 export default function PrivacyPolicyPage() {
   return (
@@ -24,13 +24,13 @@ export default function PrivacyPolicyPage() {
 
           <Section title="1. Information We Collect">
             <Subsection title="Account Information">
-              <p>When you sign up using Google OAuth, we collect your email address and display name from your Google account. You may also provide additional information including your phone number, profile picture, college, hostel, and graduation year.</p>
+              <p>When you sign up using Google OAuth, we collect your email address and display name from your Google account. You must also provide your phone number, college, and graduation year to complete registration. You may optionally provide a profile picture and hostel name.</p>
             </Subsection>
             <Subsection title="Listing Data">
-              <p>When you create a product listing, we collect the title, description, price, category, condition, images (up to 5), and availability date you provide. If you choose to list anonymously, your identity is hidden from other users but retained in our systems.</p>
+              <p>When you create a product listing, we collect the title, description, price, category, condition, images (up to 5), and availability date you provide. If you choose to list anonymously, your identity is hidden from other users but retained in our systems and remains visible to Grid's moderation team for safety purposes.</p>
             </Subsection>
             <Subsection title="Messaging Data">
-              <p>Messages sent through our in-app chat feature are stored to enable real-time communication. This includes message text, timestamps, read receipts, and typing indicators.</p>
+              <p>Messages sent through our in-app chat feature are stored to enable real-time communication. This includes message text, image attachments, timestamps, read receipts, and typing indicators.</p>
             </Subsection>
             <Subsection title="Payment Information">
               <p>Payment transactions are processed through Razorpay. We store transaction records (amount, type, timestamp) for your wallet and listing fees, but we do not store credit card, debit card, or bank account details — these are handled entirely by Razorpay's secure infrastructure.</p>
@@ -40,6 +40,12 @@ export default function PrivacyPolicyPage() {
             </Subsection>
             <Subsection title="Device Information">
               <p>We collect device identifiers for push notification delivery via Expo Notifications. We may also collect device type, operating system, and app version for debugging and optimization. For referral fraud prevention, we may collect device identifiers and IP addresses to detect self-referral, duplicate accounts, or coordinated abuse of the referral programme.</p>
+            </Subsection>
+            <Subsection title="Reports & Blocks">
+              <p>When you report a user or listing, we store the report including the reason you selected, the target of the report, and a timestamp. This information is used solely for moderation purposes. When you block another user, we store that relationship to prevent them from contacting you. Neither your reports nor your block list are visible to other users.</p>
+            </Subsection>
+            <Subsection title="Bug Reports">
+              <p>When you voluntarily submit a bug report via the in-app Bug Report feature, we collect your description of the issue, selected category and severity, any screenshots you choose to attach (up to 4), and automatically-captured device information including device model, operating system version, and app version. Submission of bug reports is entirely optional.</p>
             </Subsection>
           </Section>
 
@@ -51,10 +57,14 @@ export default function PrivacyPolicyPage() {
               <li>Send push notifications and in-app alerts</li>
               <li>Verify user identity through Google OAuth and college affiliation</li>
               <li>Prevent fraud, spam, and abuse through our referral fraud detection</li>
-              <li>Moderate content and enforce community guidelines</li>
+              <li>Moderate content and enforce community guidelines, including reviewing messages when a user or conversation is reported</li>
               <li>Deliver college-scoped product feeds (showing items only from your college)</li>
               <li>Generate anonymized analytics to improve the platform</li>
             </ul>
+          </Section>
+
+          <Section title="2a. Message Review for Moderation">
+            <p>When a user report is submitted that involves a conversation, Grid's moderation team may review recent messages from that conversation — including text and any image attachments — solely for the purpose of evaluating the report and enforcing our Community Guidelines. Only the messages directly relevant to the report are accessed. This review is conducted by authorised Grid administrators and is subject to strict internal access controls. We do not routinely monitor or read private messages outside of the report review process.</p>
           </Section>
 
           <Section title="3. College-Scoped Data">
@@ -88,7 +98,7 @@ export default function PrivacyPolicyPage() {
               <li><strong>View & Edit Profile</strong> — Access and update your name, phone, hostel, and profile photo at any time via Profile → Edit Profile</li>
               <li><strong>Online Status</strong> — Toggle whether other users can see your online status (Settings → Privacy)</li>
               <li><strong>Read Receipts</strong> — Control whether others know when you've read messages (Settings → Privacy)</li>
-              <li><strong>Anonymous Mode</strong> — Enable anonymous mode so your identity is hidden from buyers when messaging (Settings → Privacy)</li>
+              <li><strong>Anonymous Mode</strong> — Enable anonymous mode so your identity is hidden from buyers when messaging (Settings → Privacy). Note: your identity remains visible to Grid's moderation team regardless of this setting.</li>
               <li><strong>Anonymous Listings</strong> — Post individual listings without revealing your identity to viewers</li>
               <li><strong>Delete Conversations</strong> — Remove chat history from your view</li>
               <li><strong>Block Users</strong> — Prevent specific users from contacting you</li>
