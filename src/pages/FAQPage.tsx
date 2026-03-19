@@ -11,7 +11,7 @@ export default function FAQPage() {
   const currentFaqs = faqCategories[activeCategory].faqs
 
   return (
-    <div className="py-16 lg:py-24">
+    <div className="pt-8 pb-16 lg:pt-10 lg:pb-24">
       <div className="max-w-4xl mx-auto px-6">
         <div className="mb-12">
           <Link to="/" className="text-primary text-sm font-semibold hover:underline">&larr; Back to Home</Link>

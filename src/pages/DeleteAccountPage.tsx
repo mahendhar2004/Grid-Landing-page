@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 export default function DeleteAccountPage() {
   return (
-    <div className="py-16 lg:py-24">
+    <div className="pt-8 pb-16 lg:pt-10 lg:pb-24">
       <div className="max-w-3xl mx-auto px-6">
         <div className="mb-12">
           <Link to="/" className="text-primary text-sm font-semibold hover:underline">&larr; Back to Home</Link>
