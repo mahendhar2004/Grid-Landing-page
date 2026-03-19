@@ -31,6 +31,7 @@ export default function Navbar() {
     : [
         { label: 'Home', to: '/' },
         { label: 'FAQs', to: '/faqs' },
+        { label: 'Delete Account', to: '/delete-account' },
         { label: 'Privacy', to: '/privacy' },
       ]
 

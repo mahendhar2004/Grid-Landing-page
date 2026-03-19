@@ -40,6 +40,7 @@ export default function Footer() {
                 <Link to="/privacy" className="text-text-muted text-sm hover:text-primary transition-colors">Privacy Policy</Link>
                 <Link to="/terms" className="text-text-muted text-sm hover:text-primary transition-colors">Terms & Conditions</Link>
                 <Link to="/faqs" className="text-text-muted text-sm hover:text-primary transition-colors">FAQs</Link>
+                <Link to="/delete-account" className="text-text-muted text-sm hover:text-primary transition-colors">Delete Account</Link>
               </div>
             </div>
             <div>
