@@ -203,27 +203,47 @@ export default function PhoneMockup3D() {
           {/* Screen */}
           <div className="w-full h-full bg-white rounded-[36px] overflow-hidden relative">
             {/* Dynamic Island */}
-            <div className="absolute top-0 left-0 right-0 flex justify-center pt-2 z-30">
-              <div className="w-[100px] h-[28px] bg-black rounded-full flex items-center justify-center gap-2">
-                <div className="w-[8px] h-[8px] rounded-full bg-[#1a1a2e] ring-1 ring-[#333]" />
+            <div className="absolute top-0 left-0 right-0 z-30">
+              {/* Island pill */}
+              <div className="flex justify-center pt-[12px]">
+                <div className="w-[90px] h-[24px] bg-black rounded-full flex items-center justify-end pr-[9px]">
+                  {/* Camera dot */}
+                  <div className="w-[9px] h-[9px] rounded-full bg-[#1c1c1e] ring-[1.5px] ring-[#2a2a2a]" />
+                </div>
               </div>
-            </div>
 
-            {/* Status bar */}
-            <div className="relative z-20 flex justify-between items-center px-6 pt-3 pb-1">
-              <span className="text-[10px] font-bold text-slate-900">9:41</span>
-              <div className="flex items-center gap-1">
-                <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><rect x="0" y="3" width="2" height="7" rx="0.5" fill="#1a1a1a"/><rect x="3" y="2" width="2" height="8" rx="0.5" fill="#1a1a1a"/><rect x="6" y="1" width="2" height="9" rx="0.5" fill="#1a1a1a"/><rect x="9" y="0" width="2" height="10" rx="0.5" fill="#1a1a1a"/></svg>
-                <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M1 7.5C3.5 3 10.5 3 13 7.5" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/><circle cx="7" cy="8.5" r="1" fill="#1a1a1a"/></svg>
-                <div className="w-[22px] h-[10px] rounded-[3px] border border-slate-900 relative ml-0.5">
-                  <div className="absolute inset-[1.5px] right-[3px] bg-green-500 rounded-[1.5px]" />
-                  <div className="absolute -right-[2px] top-[2.5px] w-[1.5px] h-[5px] bg-slate-900 rounded-r-sm" />
+              {/* Status bar — sits beside the island */}
+              <div className="flex justify-between items-center px-[18px] -mt-[26px] pb-[6px]">
+                <span className="text-[11px] font-semibold text-slate-900 tabular-nums">9:41</span>
+                {/* Right icons */}
+                <div className="flex items-center gap-[5px]">
+                  {/* Signal bars */}
+                  <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
+                    <rect x="0"  y="6"   width="3" height="5"  rx="0.8" fill="#1a1a1a"/>
+                    <rect x="4"  y="3.5" width="3" height="7.5" rx="0.8" fill="#1a1a1a"/>
+                    <rect x="8"  y="1.5" width="3" height="9.5" rx="0.8" fill="#1a1a1a"/>
+                    <rect x="12" y="0"   width="3" height="11" rx="0.8" fill="#1a1a1a"/>
+                  </svg>
+                  {/* WiFi — 3 arcs + dot */}
+                  <svg width="14" height="11" viewBox="0 0 14 11" fill="none">
+                    <path d="M1 4.5C3.2 1.7 10.8 1.7 13 4.5" stroke="#1a1a1a" strokeWidth="1.4" strokeLinecap="round"/>
+                    <path d="M2.8 6.8C4.4 4.8 9.6 4.8 11.2 6.8" stroke="#1a1a1a" strokeWidth="1.4" strokeLinecap="round"/>
+                    <path d="M4.7 9C5.5 7.8 8.5 7.8 9.3 9" stroke="#1a1a1a" strokeWidth="1.4" strokeLinecap="round"/>
+                    <circle cx="7" cy="10.2" r="0.9" fill="#1a1a1a"/>
+                  </svg>
+                  {/* Battery */}
+                  <div className="relative flex items-center">
+                    <div className="w-[22px] h-[11px] rounded-[3px] border-[1.2px] border-slate-800 relative">
+                      <div className="absolute inset-[1.5px] right-[2px] bg-green-500 rounded-[1.5px]" />
+                    </div>
+                    <div className="w-[2px] h-[5px] bg-slate-800 rounded-r-[1px] -ml-[0.5px]" />
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Screen content with auto-cycling */}
-            <div className="px-0 pt-1 pb-2 flex-1 overflow-hidden h-[calc(100%-100px)]">
+            <div className="px-0 pt-[56px] pb-2 flex-1 overflow-hidden h-[calc(100%-100px)]">
               <AnimatePresence mode="wait">
                 {activeScreen === 0 && <HomeScreen key="home" />}
                 {activeScreen === 1 && <ChatScreen key="chat" />}
@@ -465,11 +485,11 @@ function ProfileScreen() {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3 }}
-      className="h-full overflow-y-auto pb-2 px-4"
+      className="h-full overflow-y-auto pb-2 px-3"
       style={{ scrollbarWidth: 'none' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2">
         <p className="text-[15px] font-extrabold text-slate-900 tracking-tight">Profile</p>
         <div className="w-7 h-7 rounded-full bg-white border border-slate-200 flex items-center justify-center">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#18181b" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -481,7 +501,7 @@ function ProfileScreen() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="rounded-2xl p-3.5 mb-2.5"
+        className="rounded-2xl p-3 mb-2"
         style={{ background: 'linear-gradient(135deg, #323235 0%, #131316 40%, #000 100%)' }}
       >
         <div className="flex items-center gap-2.5">
@@ -507,7 +527,7 @@ function ProfileScreen() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
-        className="flex items-center rounded-xl py-3 px-4 mb-3 border border-zinc-800"
+        className="flex items-center rounded-xl py-2 px-4 mb-2 border border-zinc-800"
         style={{ background: '#111' }}
       >
         <div className="flex-1 text-center">
@@ -523,7 +543,7 @@ function ProfileScreen() {
 
       {/* Menu Sections */}
       {menuSections.map((section, sIdx) => (
-        <div key={section.title} className="mb-2.5">
+        <div key={section.title} className="mb-1.5">
           <p className="text-[7px] font-bold text-zinc-400 uppercase tracking-[1.5px] ml-1 mb-1">{section.title}</p>
           <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
             {section.items.map((item, i) => (
@@ -532,7 +552,7 @@ function ProfileScreen() {
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 * i + 0.2 + sIdx * 0.1 }}
-                className={`flex items-center gap-2 px-2.5 py-2 ${i < section.items.length - 1 ? 'border-b border-slate-50' : ''}`}
+                className={`flex items-center gap-2 px-2.5 py-1.5 ${i < section.items.length - 1 ? 'border-b border-slate-50' : ''}`}
               >
                 <div className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0 text-slate-600">
                   {item.icon}

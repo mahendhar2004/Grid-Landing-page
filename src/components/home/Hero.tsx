@@ -32,7 +32,7 @@ export default function Hero() {
 
             <AnimatedSection delay={0.1}>
               <p className="text-lg sm:text-xl text-text-muted max-w-[480px] mb-10 leading-relaxed">
-                The student marketplace with real-time chat, trusted campus circles, and listings starting at just ₹5.
+                Sell what you no longer need, find what you do — all within your campus, from students like you.
               </p>
             </AnimatedSection>
 

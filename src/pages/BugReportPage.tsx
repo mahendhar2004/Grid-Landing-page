@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -221,12 +222,26 @@ export default function BugReportPage() {
             ))}
           </div>
 
-          <p className="mt-8 text-xs text-text-muted">
-            Need direct help?{' '}
-            <a href="mailto:contact.galvam@gmail.com" className="text-primary font-medium hover:underline">
-              contact.galvam@gmail.com
-            </a>
-          </p>
+          {/* Quick links */}
+          <div className="mt-8 pt-8 border-t border-border/50">
+            <p className="text-[10px] font-bold uppercase tracking-[2px] text-text-muted/60 mb-4">Quick Links</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: 'FAQs', to: '/faqs' },
+                { label: 'Contact Us', to: '/contact' },
+                { label: 'Leave a Review', to: '/reviews' },
+              ].map(link => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-white border border-border/60 px-3 py-1.5 rounded-full hover:text-primary hover:border-primary/30 transition-colors"
+                >
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* ── Right panel — form ── */}
