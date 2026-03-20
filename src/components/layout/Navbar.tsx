@@ -6,6 +6,7 @@ const MORE_LINKS = [
   { label: 'Terms & Conditions', to: '/terms' },
   { label: 'Delete Account', to: '/delete-account' },
   { label: 'Report a Bug', to: '/bug-report' },
+  { label: 'Leave a Review', to: '/reviews' },
 ]
 
 export default function Navbar() {
@@ -65,12 +66,12 @@ export default function Navbar() {
               Home
             </Link>
 
-            <a
-              href="mailto:contact.galvam@gmail.com"
-              className="text-text-muted font-medium text-[14px] hover:text-primary transition-colors"
+            <Link
+              to="/contact"
+              className={`font-medium text-[14px] transition-colors ${pathname === '/contact' ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
             >
               Contact Us
-            </a>
+            </Link>
 
             <Link
               to="/faqs"
@@ -148,12 +149,12 @@ export default function Navbar() {
               >
                 Home
               </Link>
-              <a
-                href="mailto:contact.galvam@gmail.com"
-                className="text-text-muted font-semibold text-base py-2.5 hover:text-primary transition-colors"
+              <Link
+                to="/contact"
+                className={`font-semibold text-base py-2.5 transition-colors ${pathname === '/contact' ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
               >
                 Contact Us
-              </a>
+              </Link>
 
               <Link
                 to="/faqs"

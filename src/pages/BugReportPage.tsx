@@ -57,7 +57,7 @@ function validateFile(f: File): string | null {
 
 function storagePath(f: File) {
   const ext = (f.name.split('.').pop() ?? 'jpg').toLowerCase()
-  return `landing-page/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`
+  return `landing-page/${crypto.randomUUID()}.${ext}`
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────

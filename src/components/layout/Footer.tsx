@@ -48,10 +48,11 @@ export default function Footer() {
                 Support
               </h4>
               <div className="flex flex-col gap-3">
-                <a href="mailto:contact.galvam@gmail.com" className="text-text-muted text-sm hover:text-primary transition-colors">Contact Us</a>
+                <Link to="/contact" className="text-text-muted text-sm hover:text-primary transition-colors">Contact Us</Link>
                 <a href="/#safety" className="text-text-muted text-sm hover:text-primary transition-colors">Safety Center</a>
                 <Link to="/faqs" className="text-text-muted text-sm hover:text-primary transition-colors">Help</Link>
                 <Link to="/bug-report" className="text-text-muted text-sm hover:text-primary transition-colors">Report a Bug</Link>
+                <Link to="/reviews" className="text-text-muted text-sm hover:text-primary transition-colors">Leave a Review</Link>
               </div>
             </div>
           </div>
