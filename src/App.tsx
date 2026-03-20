@@ -6,6 +6,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import TermsPage from './pages/TermsPage'
 import FAQPage from './pages/FAQPage'
 import DeleteAccountPage from './pages/DeleteAccountPage'
+import BugReportPage from './pages/BugReportPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function ScrollToTop() {
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/faqs" element={<FAQPage />} />
           <Route path="/delete-account" element={<DeleteAccountPage />} />
+          <Route path="/bug-report" element={<BugReportPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

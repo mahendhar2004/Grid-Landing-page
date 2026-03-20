@@ -51,6 +51,7 @@ export default function Footer() {
                 <a href="mailto:contact.galvam@gmail.com" className="text-text-muted text-sm hover:text-primary transition-colors">Contact Us</a>
                 <a href="/#safety" className="text-text-muted text-sm hover:text-primary transition-colors">Safety Center</a>
                 <Link to="/faqs" className="text-text-muted text-sm hover:text-primary transition-colors">Help</Link>
+                <Link to="/bug-report" className="text-text-muted text-sm hover:text-primary transition-colors">Report a Bug</Link>
               </div>
             </div>
           </div>
