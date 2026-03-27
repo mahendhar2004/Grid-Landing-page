@@ -1,4 +1,4 @@
-import { Zap, BanIcon, Sparkles, Layers, Search, MessageCircle, MegaphoneOff, ShoppingBag, ScanEye, Wand2, Vibrate, Moon } from 'lucide-react'
+import { Zap, BanIcon, Sparkles, Layers, Search, MessageCircle, MegaphoneOff, ShoppingBag, ScanEye, Wand2, Vibrate, ImageIcon } from 'lucide-react'
 import AnimatedSection from '../ui/AnimatedSection'
 
 const cards = [
@@ -51,7 +51,7 @@ const cards = [
     rows: [
       { icon: Wand2,   label: 'Animations',      value: 'Native smooth' },
       { icon: Vibrate, label: 'Haptic feedback',  value: 'Every tap'    },
-      { icon: Moon,    label: 'Dark mode',        value: 'Built-in'     },
+      { icon: ImageIcon, label: 'Multi-image listings', value: 'Up to 5'   },
     ],
     glow: { pos: '-top-20 -right-20', color: 'rgba(139,92,246,0.2)' },
     bg: 'linear-gradient(145deg, #0d0814 0%, #090810 100%)',
