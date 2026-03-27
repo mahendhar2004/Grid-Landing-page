@@ -1,7 +1,7 @@
 import Hero from '../components/home/Hero'
 import Features from '../components/home/Features'
 import HowItWorks from '../components/home/HowItWorks'
-import Categories from '../components/home/Categories'
+import AppExperience from '../components/home/AppExperience'
 import Safety from '../components/home/Safety'
 import Pricing from '../components/home/Pricing'
 import Referral from '../components/home/Referral'
@@ -14,7 +14,7 @@ export default function HomePage() {
       <Hero />
       <Features />
       <HowItWorks />
-      <Categories />
+      <AppExperience />
       <Safety />
       <Pricing />
       <Referral />

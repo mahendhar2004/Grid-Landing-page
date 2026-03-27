@@ -18,7 +18,8 @@ export default function Navbar() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
@@ -59,39 +60,30 @@ export default function Navbar() {
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-7">
 
-            <Link
-              to="/"
-              className={`font-medium text-[14px] transition-colors ${pathname === '/' ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
-            >
-              Home
-            </Link>
-
-            <Link
-              to="/contact"
-              className={`font-medium text-[14px] transition-colors ${pathname === '/contact' ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
-            >
-              Contact Us
-            </Link>
-
-            <Link
-              to="/faqs"
-              className={`font-medium text-[14px] transition-colors ${pathname === '/faqs' ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
-            >
-              FAQs
-            </Link>
-
-            <Link
-              to="/privacy"
-              className={`font-medium text-[14px] transition-colors ${pathname === '/privacy' ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
-            >
-              Privacy Policy
-            </Link>
+            {[
+              { label: 'Home', to: '/' },
+              { label: 'Contact Us', to: '/contact' },
+              { label: 'FAQs', to: '/faqs' },
+              { label: 'Privacy Policy', to: '/privacy' },
+            ].map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`font-medium text-[14px] transition-colors duration-300 ${
+                  pathname === link.to
+                    ? 'text-primary'
+                    : 'text-text-muted hover:text-primary'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
 
             {/* More dropdown */}
             <div ref={moreRef} className="relative">
               <button
                 onClick={() => setMoreOpen((o) => !o)}
-                className="flex items-center gap-1 text-text-muted font-medium text-[14px] hover:text-primary transition-colors"
+                className="flex items-center gap-1 font-medium text-[14px] transition-colors duration-300 text-text-muted hover:text-primary"
               >
                 More
                 <ChevronDown
@@ -101,16 +93,16 @@ export default function Navbar() {
               </button>
 
               {moreOpen && (
-                <div className="absolute right-0 top-full mt-3 w-52 bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] border border-border/60 overflow-hidden">
+                <div className="absolute right-0 top-full mt-3 w-52 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] border border-border/60 bg-white overflow-hidden">
                   <div className="py-1.5">
                     {MORE_LINKS.map((link) => (
                       <Link
                         key={link.to}
                         to={link.to}
-                        className={`block px-4 py-2.5 text-sm transition-colors ${
+                        className={`block px-4 py-2.5 text-sm transition-colors font-medium ${
                           pathname === link.to
-                            ? 'text-primary font-semibold bg-primary/5'
-                            : 'text-text-muted hover:text-secondary hover:bg-muted/50 font-medium'
+                            ? 'text-primary bg-primary/5'
+                            : 'text-text-muted hover:text-secondary hover:bg-muted/50'
                         }`}
                       >
                         {link.label}
@@ -132,7 +124,7 @@ export default function Navbar() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-secondary"
+            className="lg:hidden p-2 transition-colors duration-300 text-secondary"
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -141,43 +133,37 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="lg:hidden bg-white/95 backdrop-blur-2xl border-t border-border/50">
+          <div className="lg:hidden backdrop-blur-2xl border-t bg-white/95 border-border/50">
             <div className="px-6 py-4 flex flex-col gap-1">
-              <Link
-                to="/"
-                className={`font-semibold text-base py-2.5 transition-colors ${pathname === '/' ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
-              >
-                Home
-              </Link>
-              <Link
-                to="/contact"
-                className={`font-semibold text-base py-2.5 transition-colors ${pathname === '/contact' ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
-              >
-                Contact Us
-              </Link>
+              {[
+                { label: 'Home', to: '/' },
+                { label: 'Contact Us', to: '/contact' },
+                { label: 'FAQs', to: '/faqs' },
+                { label: 'Privacy Policy', to: '/privacy' },
+              ].map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`font-semibold text-base py-2.5 transition-colors ${
+                    pathname === link.to
+                      ? 'text-primary'
+                      : 'text-text-muted hover:text-primary'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
 
-              <Link
-                to="/faqs"
-                className={`font-semibold text-base py-2.5 transition-colors ${pathname === '/faqs' ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
-              >
-                FAQs
-              </Link>
-
-              <Link
-                to="/privacy"
-                className={`font-semibold text-base py-2.5 transition-colors ${pathname === '/privacy' ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
-              >
-                Privacy Policy
-              </Link>
-
-              <div className="border-t border-border/50 mt-2 pt-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted/50 mb-2 px-0.5">More</p>
+              <div className="border-t mt-2 pt-3 border-border/50">
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2 px-0.5 text-text-muted/50">More</p>
                 {MORE_LINKS.map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
                     className={`block py-2 text-sm font-medium transition-colors ${
-                      pathname === link.to ? 'text-primary' : 'text-text-muted hover:text-primary'
+                      pathname === link.to
+                        ? 'text-primary'
+                        : 'text-text-muted hover:text-primary'
                     }`}
                   >
                     {link.label}

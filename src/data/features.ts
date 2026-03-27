@@ -1,6 +1,6 @@
 import {
   School, Layers, MessageCircle, SlidersHorizontal,
-  ShieldCheck, Heart, EyeOff, Gift,
+  ShieldCheck, Heart, EyeOff, Gift, Archive, BanIcon, Sparkles, HandCoins,
 } from 'lucide-react'
 
 export const features = [
@@ -23,6 +23,12 @@ export const features = [
     color: 'green' as const,
   },
   {
+    icon: HandCoins,
+    title: 'Make an Offer',
+    description: 'Negotiate directly in-chat. Send an offer, counter-offer, or accept a deal — the full buying flow without ever leaving the app.',
+    color: 'cyan' as const,
+  },
+  {
     icon: SlidersHorizontal,
     title: 'Smart Filters',
     description: 'Find exactly what you need. Filter by category, price range, and condition. Sort by newest, price, or popularity.',
@@ -41,10 +47,28 @@ export const features = [
     color: 'pink' as const,
   },
   {
+    icon: Archive,
+    title: 'Chat Archive',
+    description: 'Tidy up your inbox without losing history. Archive any conversation and bring it back instantly — your messages are always safe.',
+    color: 'rose' as const,
+  },
+  {
+    icon: BanIcon,
+    title: 'Zero Ads. Always.',
+    description: 'Grid is completely ad-free. No banners, no pop-ups, no tracking pixels. Just a clean campus marketplace built for students.',
+    color: 'indigo' as const,
+  },
+  {
     icon: EyeOff,
     title: 'Anonymous Listings',
     description: 'Want to sell discreetly? List items without revealing your identity. Your privacy, your choice.',
     color: 'slate' as const,
+  },
+  {
+    icon: Sparkles,
+    title: 'Beautifully Designed',
+    description: 'Every screen, animation, and interaction is crafted to delight. Grid isn\'t just functional — it\'s a joy to use.',
+    color: 'violet' as const,
   },
   {
     icon: Gift,
@@ -61,6 +85,10 @@ export const featureColors: Record<string, { bg: string; text: string }> = {
   purple: { bg: 'bg-purple-50', text: 'text-purple-600' },
   teal: { bg: 'bg-teal-50', text: 'text-teal-600' },
   pink: { bg: 'bg-pink-50', text: 'text-pink-600' },
+  rose: { bg: 'bg-rose-50', text: 'text-rose-600' },
+  indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600' },
   slate: { bg: 'bg-slate-100', text: 'text-slate-600' },
+  violet: { bg: 'bg-violet-50', text: 'text-violet-600' },
+  cyan: { bg: 'bg-cyan-50', text: 'text-cyan-600' },
   amber: { bg: 'bg-amber-50', text: 'text-amber-600' },
 }
