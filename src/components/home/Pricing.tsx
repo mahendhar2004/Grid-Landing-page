@@ -262,7 +262,7 @@ export default function Pricing() {
                   initial={{ opacity: 0, scale: 0.93 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.35, delay: 0.38 + i * 0.07 }}
+                  transition={{ duration: 0.35, delay: 0.38 + i * 0.07, type: 'spring', stiffness: 340, damping: 24 }}
                   whileHover={{
                     y: -4,
                     scale: 1.03,
@@ -270,7 +270,6 @@ export default function Pricing() {
                     backgroundColor: 'rgba(37,99,235,0.025)',
                     boxShadow: '0 6px 20px rgba(37,99,235,0.10)',
                   }}
-                  transition={{ type: 'spring', stiffness: 340, damping: 24 }}
                 >
                   <motion.div
                     className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center flex-shrink-0"
