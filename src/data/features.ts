@@ -1,6 +1,6 @@
 import {
   School, Layers, MessageCircle, SlidersHorizontal,
-  ShieldCheck, Heart, EyeOff, Gift, Archive, BanIcon, Sparkles, HandCoins,
+  ShieldCheck, Heart, EyeOff, Gift, Archive, Sparkles, HandCoins,
 } from 'lucide-react'
 
 export const features = [
@@ -51,12 +51,6 @@ export const features = [
     title: 'Chat Archive',
     description: 'Tidy up your inbox without losing history. Archive any conversation and bring it back instantly — your messages are always safe.',
     color: 'rose' as const,
-  },
-  {
-    icon: BanIcon,
-    title: 'Zero Ads. Always.',
-    description: 'Grid is completely ad-free. No banners, no pop-ups, no tracking pixels. Just a clean campus marketplace built for students.',
-    color: 'indigo' as const,
   },
   {
     icon: EyeOff,

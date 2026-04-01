@@ -1,4 +1,4 @@
-import { Zap, BanIcon, Sparkles, Layers, Search, MessageCircle, MegaphoneOff, ShoppingBag, ScanEye, Wand2, Vibrate, ImageIcon } from 'lucide-react'
+import { Zap, Sparkles, Layers, Search, MessageCircle, GraduationCap, MapPin, BadgeCheck, Building2, Wand2, Vibrate, ImageIcon } from 'lucide-react'
 import AnimatedSection from '../ui/AnimatedSection'
 
 const cards = [
@@ -21,22 +21,22 @@ const cards = [
     bg: 'linear-gradient(145deg, #080c18 0%, #0a0e20 100%)',
   },
   {
-    icon: BanIcon,
-    title: 'Zero Ads. Always.',
-    description: 'Grid is 100% ad-free. No one can pay to appear higher — every listing earns its place on its own.',
+    icon: GraduationCap,
+    title: 'Campus-Only Access',
+    description: 'Every listing, every chat, every deal — exclusively within your verified college community. No outsiders.',
     accent: {
-      icon: 'bg-rose-500/15 text-rose-400',
-      row: 'border-rose-500/15 bg-rose-500/[0.06]',
-      dot: 'bg-rose-500/20 text-rose-400',
-      value: 'text-rose-300 bg-rose-500/10 border-rose-500/20',
+      icon: 'bg-teal-500/15 text-teal-400',
+      row: 'border-teal-500/15 bg-teal-500/[0.06]',
+      dot: 'bg-teal-500/20 text-teal-400',
+      value: 'text-teal-300 bg-teal-500/10 border-teal-500/20',
     },
     rows: [
-      { icon: MegaphoneOff, label: 'Sponsored banners', value: 'Zero' },
-      { icon: ShoppingBag,  label: 'Paid listing boosts', value: 'Zero' },
-      { icon: ScanEye,      label: 'Tracking pixels',   value: 'Zero' },
+      { icon: MapPin,       label: 'Marketplace scope',  value: 'Your campus'  },
+      { icon: BadgeCheck,   label: 'Buyer verification', value: 'Student only' },
+      { icon: Building2,    label: 'Colleges covered',   value: '885+'         },
     ],
-    glow: { pos: '-top-20 left-1/2 -translate-x-1/2', color: 'rgba(244,63,94,0.15)' },
-    bg: 'linear-gradient(145deg, #0e0809 0%, #0b0a0c 100%)',
+    glow: { pos: '-top-20 left-1/2 -translate-x-1/2', color: 'rgba(20,184,166,0.15)' },
+    bg: 'linear-gradient(145deg, #060e0d 0%, #080b0a 100%)',
   },
   {
     icon: Sparkles,
@@ -66,10 +66,10 @@ export default function AppExperience() {
         <AnimatedSection className="text-center mb-16">
           <span className="inline-block text-primary font-bold text-sm tracking-wide uppercase mb-4">The Grid Experience</span>
           <h2 className="text-4xl sm:text-5xl font-extrabold text-secondary mb-5">
-            Built for <span className="text-primary">Students</span>, Not Ads.
+            Built for <span className="text-primary">Students</span>, By Design.
           </h2>
           <p className="text-text-muted text-lg max-w-2xl mx-auto">
-            No clutter. No interruptions. Just a beautifully designed marketplace that respects your time.
+            Fast. Campus-focused. Beautifully crafted. Every detail engineered around how students actually live.
           </p>
         </AnimatedSection>
 
