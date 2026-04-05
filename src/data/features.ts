@@ -1,6 +1,6 @@
 import {
   School, Layers, MessageCircle, SlidersHorizontal,
-  ShieldCheck, Heart, EyeOff, Gift, Archive, Sparkles, HandCoins,
+  ShieldCheck, Heart, EyeOff, Gift, Archive, HandCoins, Calendar,
 } from 'lucide-react'
 
 export const features = [
@@ -41,9 +41,9 @@ export const features = [
     color: 'orange' as const,
   },
   {
-    icon: Sparkles,
-    title: 'Beautifully Designed',
-    description: 'Every screen, animation, and interaction is crafted to delight. Grid isn\'t just functional — it\'s a joy to use.',
+    icon: Calendar,
+    title: 'Availability Sync',
+    description: 'Set exactly when your gear is ready to go. Whether it\'s today or the end of the semester, buyers can see your timeline and plan accordingly.',
     color: 'violet' as const,
   },
   {

@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from 'framer-motion'
-import { Sun, Moon, ArrowLeft, Send, Check, CheckCheck, Tag, CheckCircle2, XCircle, ArrowLeftRight, MapPin, Home, Clock } from 'lucide-react'
+import { Sun, Moon, ArrowLeft, Send, Check, CheckCheck, Tag, CheckCircle2, XCircle, ArrowLeftRight, MapPin, Home, Clock, User } from 'lucide-react'
 
 /* ─── Product data for realistic feed ─── */
 const feedProducts = [
@@ -37,11 +37,11 @@ const feedProducts = [
 ]
 
 const navItems = [
-  { label: 'Home', icon: <HomeSvg />, active: true },
-  { label: 'Chat', icon: <ChatSvg />, active: false, badge: 3 },
-  { label: 'Sell', icon: <SellSvg />, active: false, primary: true },
-  { label: 'List', icon: <ListSvg />, active: false },
-  { label: 'Profile', icon: <ProfileSvg />, active: false },
+  { label: 'Home', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.42 4.95-4.95 1.42 1.42-4.95 4.95-1.42Z"/></svg>, active: true },
+  { label: 'Chat', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>, active: false, badge: 3 },
+  { label: 'Create', icon: null, active: false, primary: true },
+  { label: 'MyListings', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 12H3m18-6H3m18 12H3"/></svg>, active: false },
+  { label: 'Profile', icon: <User size={20} />, active: false },
 ]
 
 /* ─── Notification card data ─── */
@@ -281,39 +281,67 @@ export default function PhoneMockup3D() {
               </AnimatePresence>
             </div>
 
-            {/* Bottom Navigation - Hidden when in conversation */}
+            {/* Premium Floating Tab Bar - Hidden when in conversation */}
             {!isInConversation && (
-              <div className={`absolute bottom-0 left-0 right-0 border-t backdrop-blur-md px-2 pb-4 pt-2 z-50 transition-colors duration-300 ${isDarkMode ? 'bg-black/80 border-white/[0.1]' : 'bg-white/90 border-slate-100'}`}>
-              <div className="flex justify-around items-center">
-                {navItems.map((item, idx) => {
-                  const isActive = activeScreen === (idx === 0 ? 0 : idx === 1 ? 1 : idx === 4 ? 2 : -1)
+              <div className="absolute bottom-2 left-0 right-0 px-4 z-50 pointer-events-none">
+                <div className="flex justify-center relative">
+                  {/* The Floating Pill */}
+                  <div className={`flex justify-around items-center w-[250px] h-[54px] rounded-full border shadow-2xl transition-all duration-500 overflow-hidden pointer-events-auto ${
+                    isDarkMode 
+                      ? 'bg-gradient-to-br from-zinc-800 to-black border-white/10 shadow-black/40' 
+                      : 'bg-gradient-to-br from-white to-slate-50 border-slate-200 shadow-slate-200/50'
+                  }`}>
+                    {navItems.map((item, idx) => {
+                      const isActive = activeScreen === (idx === 0 ? 0 : idx === 1 ? 1 : idx === 4 ? 2 : -1)
+                      
+                      // Spacer for the center FAB
+                      if (item.primary) return <div key="fab-spacer" className="w-12" />
 
-                  return (
-                    <div key={item.label} className="flex flex-col items-center gap-0.5 relative">
-                      {item.primary ? (
-                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center -mt-5 shadow-lg shadow-primary/30">
-                          {item.icon}
+                      return (
+                        <div key={item.label} className="flex flex-col items-center justify-center relative group p-2">
+                          <div className={`transition-all duration-300 ${
+                            isActive 
+                              ? (isDarkMode ? 'text-white' : 'text-primary scale-110') 
+                              : (isDarkMode ? 'text-white/40' : 'text-slate-300')
+                          }`}>
+                            {item.icon}
+                          </div>
+                          
+                          {/* Active Dot Indicator */}
+                          {isActive && (
+                            <motion.div 
+                              layoutId="navDot"
+                              className={`absolute -bottom-1 w-1.5 h-1.5 rounded-full ${isDarkMode ? 'bg-white' : 'bg-primary'}`}
+                              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                            />
+                          )}
+
+                          {item.badge && item.badge > 0 && (
+                            <div className="absolute -top-1 -right-1 min-w-[14px] h-[14px] bg-red-500 rounded-full border-2 border-white flex items-center justify-center px-1">
+                              <span className="text-[7px] text-white font-black leading-none">{item.badge}</span>
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <div className={`w-6 h-6 ${isActive ? 'text-primary' : 'text-slate-400'}`}>
-                          {item.icon}
-                        </div>
-                      )}
-                      {item.badge && (
-                        <div className="absolute -top-0.5 right-0 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center">
-                          <span className="text-[7px] text-white font-bold">{item.badge}</span>
-                        </div>
-                      )}
-                      <span className={`text-[8px] font-medium ${isActive ? 'text-primary' : 'text-slate-400'} ${item.primary ? 'mt-0.5' : ''}`}>
-                        {item.label}
-                      </span>
+                      )
+                    })}
+                  </div>
+
+                  {/* Center Floating Action Button (SELL/CREATE) */}
+                  <div className="absolute bottom-[4px] left-1/2 -translate-x-1/2 pointer-events-auto">
+                    <div className={`w-[44px] h-[44px] rounded-full bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center shadow-xl border-[2.5px] transition-transform hover:scale-105 active:scale-95 ${
+                      isDarkMode ? 'border-zinc-800' : 'border-white'
+                    }`}>
+                      <div className="relative">
+                        <div className="w-[14px] h-[2px] bg-white rounded-full" />
+                        <div className="w-[2px] h-[14px] bg-white rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                      </div>
                     </div>
-                  )
-                })}
-              </div>
-                {/* Home indicator */}
-                <div className="flex justify-center mt-auto pb-4 pt-2">
-                  <div className={`w-16 h-1 rounded-full transition-colors ${isDarkMode ? 'bg-zinc-700' : 'bg-slate-200'}`} />
+                  </div>
+                </div>
+                
+                {/* Visual Home Indicator below pill */}
+                <div className="flex justify-center mt-1.5">
+                   <div className={`w-12 h-1 rounded-full transition-colors ${isDarkMode ? 'bg-zinc-800' : 'bg-slate-200'}`} />
                 </div>
               </div>
             )}
@@ -813,47 +841,6 @@ function ProfileScreen({ isDarkMode }: { isDarkMode: boolean }) {
   )
 }
 
-/* ─── SVG Icons for bottom nav ─── */
-
-function HomeSvg() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-      <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z" />
-    </svg>
-  )
-}
-
-function ChatSvg() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-full h-full">
-      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-    </svg>
-  )
-}
-
-function SellSvg() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" className="w-5 h-5">
-      <path d="M12 5v14M5 12h14" />
-    </svg>
-  )
-}
-
-function ListSvg() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-full h-full">
-      <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
-    </svg>
-  )
-}
-
-function ProfileSvg() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-full h-full">
-      <circle cx="12" cy="8" r="4" /><path d="M20 21a8 8 0 10-16 0" />
-    </svg>
-  )
-}
 
 /* ─── Notification Icon SVGs ─── */
 

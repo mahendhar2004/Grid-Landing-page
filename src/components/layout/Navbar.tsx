@@ -117,10 +117,9 @@ export default function Navbar() {
 
             <div className="h-6 w-[1.5px] bg-border mx-2" />
 
-            {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className={`p-2.5 rounded-xl border transition-all ${
+              className={`p-2.5 rounded-xl border transition-all duration-500 scale-100 hover:scale-105 active:scale-95 cursor-pointer ${
                 theme === 'dark' 
                 ? 'bg-zinc-900 border-zinc-800 text-primary shadow-[0_0_20px_rgba(37,99,235,0.1)]' 
                 : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-primary/30'
@@ -142,7 +141,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4 lg:hidden">
             <button
               onClick={toggleTheme}
-              className={`p-2.5 rounded-xl border transition-all ${
+              className={`p-2.5 rounded-xl border transition-all duration-500 ${
                 theme === 'dark' 
                 ? 'bg-zinc-900 border-zinc-800 text-primary' 
                 : 'bg-slate-50 border-slate-200 text-slate-400'

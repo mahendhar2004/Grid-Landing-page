@@ -24,7 +24,7 @@ export default function Hero() {
             </AnimatedSection>
 
             <AnimatedSection delay={0.05}>
-              <h1 className="text-5xl sm:text-6xl lg:text-[80px] font-black leading-[1] tracking-tighter text-secondary mb-6 transition-colors italic">
+              <h1 className="text-[44px] sm:text-6xl lg:text-[80px] font-black leading-[0.95] sm:leading-[1] tracking-tighter text-secondary mb-6 transition-colors italic">
                 Buy and Sell<br />
                 <span className="bg-gradient-to-r from-primary via-blue-500 to-primary bg-clip-text text-transparent not-italic">Within Your Campus.</span>
               </h1>
@@ -57,8 +57,8 @@ export default function Hero() {
             </AnimatedSection>
           </div>
 
-          {/* 3D Interactive Phone Mockup */}
-          <div className="hidden lg:flex justify-end pr-12">
+          {/* 3D Interactive Phone Mockup - Now visible on mobile */}
+          <div className="flex justify-center lg:justify-end lg:pr-12 transform scale-[0.8] sm:scale-90 lg:scale-100 mt-8 lg:mt-0 transition-all duration-700">
             <PhoneMockup3D />
           </div>
         </div>

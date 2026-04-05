@@ -20,33 +20,27 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      // Only update if the user hasn't manually set a theme in this session
-      // OR we can just update it immediately if you want it truly dynamic.
-      // Given the request "set it accordingly automatically", we'll follow system.
+    const handleSystemChange = (e: MediaQueryListEvent) => {
       if (!localStorage.getItem('grid-theme')) {
         setTheme(e.matches ? 'dark' : 'light');
       }
     };
 
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', handleSystemChange);
+    return () => mediaQuery.removeEventListener('change', handleSystemChange);
   }, []);
 
   useEffect(() => {
     const root = window.document.documentElement;
+    root.classList.remove('light', 'dark', 'ambient');
     if (theme === 'dark') {
       root.classList.add('dark');
       root.style.colorScheme = 'dark';
     } else {
-      root.classList.remove('dark');
+      root.classList.add('light');
       root.style.colorScheme = 'light';
     }
-    // We only save to localStorage if the user MANUALLY toggles it
-    // so we can distinguish between "System" and "Manual".
   }, [theme]);
 
   const toggleTheme = () => {

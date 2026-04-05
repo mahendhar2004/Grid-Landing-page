@@ -94,7 +94,7 @@ export default function UseCases() {
 
       <div className="max-w-7xl mx-auto px-6 relative">
         
-        <div className="text-center mb-52">
+        <div className="text-center mb-32 lg:mb-52">
           <AnimatedSection>
             <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 mb-8 font-medium backdrop-blur-md">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
@@ -128,7 +128,7 @@ export default function UseCases() {
             />
           </motion.div>
 
-          <div className="space-y-64 relative z-10">
+          <div className="space-y-32 lg:space-y-64 relative z-10">
             {useCases.map((useCase, index) => {
               const isEven = index % 2 === 0
               return (
@@ -142,12 +142,12 @@ export default function UseCases() {
                     <span className="text-[10px] font-black uppercase tracking-[5px] text-text-muted opacity-30 bg-background px-3 transition-opacity group-hover:opacity-100 italic">{useCase.year}</span>
                   </div>
                   
-                  <div className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-48 ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
+                  <div className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-48 ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
                     
                     {/* Material Text Tile */}
                     <div className="flex-1 w-full lg:max-w-md">
                       <AnimatedSection direction={isEven ? 'left' : 'right'}>
-                        <div className={`${isEven ? 'lg:text-right' : 'lg:text-left'} space-y-6`}>
+                        <div className={`${isEven ? 'lg:text-right' : 'text-left'} space-y-6`}>
                           <motion.h3 
                             className="text-4xl sm:text-6xl font-black text-secondary leading-none tracking-tighter italic"
                             whileHover={{ skewX: -5 }}
@@ -157,7 +157,7 @@ export default function UseCases() {
                           <p className="text-text-muted text-base sm:text-lg leading-relaxed font-semibold italic opacity-80">
                             {useCase.description}
                           </p>
-                          <div className={`flex flex-wrap gap-4 pt-6 ${isEven ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`flex flex-wrap gap-4 pt-6 ${isEven ? 'lg:justify-end' : 'justify-start'}`}>
                             {useCase.tags.map(tag => (
                               <span key={tag} className="text-[10px] font-black uppercase tracking-widest text-primary border-l-2 border-primary/20 pl-2">
                                 {tag}
@@ -201,7 +201,7 @@ export default function UseCases() {
         </div>
 
         {/* Minimal Footer Signature */}
-        <div className="mt-64 text-center">
+        <div className="mt-32 lg:mt-64 text-center">
           <AnimatedSection>
              <span className="text-[11px] font-black uppercase tracking-[12px] text-text-muted opacity-20 italic">
               Fund your campus lifestyle.

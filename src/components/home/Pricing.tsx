@@ -33,17 +33,17 @@ export default function Pricing() {
       <div className="relative max-w-7xl mx-auto px-6">
         
         {/* ── Header: Minimal & High Impact ── */}
-        <AnimatedSection className="text-center mb-20">
+        <AnimatedSection className="text-center mb-16 lg:mb-20">
           <span className="inline-block text-primary font-bold text-xs tracking-[3px] uppercase mb-6">Economics of Trust</span>
-          <h2 className="text-5xl sm:text-7xl font-black text-secondary leading-[1] tracking-tighter mb-8 italic transition-colors">
+          <h2 className="text-4xl lg:text-7xl font-black text-secondary leading-[1] tracking-tighter mb-8 italic transition-colors">
             Zero <span className="text-primary not-italic">Commission</span>.
           </h2>
-          <p className="text-text-muted text-lg max-w-xl mx-auto leading-relaxed transition-colors">
+          <p className="text-text-muted text-base lg:text-lg max-w-xl mx-auto leading-relaxed transition-colors">
             Marketplace purity. Sell for free, keep every rupee. We only charge a small listing fee to keep the campus circle spam-free.
           </p>
         </AnimatedSection>
 
-        <div className="grid lg:grid-cols-[1fr_400px] gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 items-start">
           
           {/* ── Left: The "Zero" Laboratory Card ── */}
           <AnimatedSection direction="left">
@@ -56,12 +56,12 @@ export default function Pricing() {
               >
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-violet-500 to-primary" />
                 
-                <div className="p-10 lg:p-14">
-                  <div className="flex flex-col sm:flex-row items-center gap-12 sm:gap-20">
+                <div className="p-6 sm:p-10 lg:p-14">
+                  <div className="flex flex-col sm:flex-row items-center gap-10 sm:gap-20">
                     {/* Big Hero Number */}
                     <div className="relative">
                       <motion.div 
-                        className="text-[140px] sm:text-[180px] font-black leading-none tracking-tighter text-secondary select-none transition-colors"
+                        className="text-[80px] sm:text-[140px] lg:text-[180px] font-black leading-none tracking-tighter text-secondary select-none transition-colors"
                         animate={{ y: [0, -4, 0] }}
                         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                       >
