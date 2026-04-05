@@ -14,7 +14,7 @@ export const faqCategories: FAQCategory[] = [
     faqs: [
       {
         question: 'What is Grid?',
-        answer: 'Grid is a campus-exclusive marketplace designed for Indian college students. It allows you to buy and sell items like textbooks, electronics, furniture, and more — exclusively within your college community. Think of it as a trusted marketplace where every buyer and seller is a verified student from your campus.',
+        answer: 'Grid is a campus-exclusive marketplace designed for Indian college students. It allows you to buy and sell items like textbooks, electronics, furniture, and more — exclusively within your college community. Think of it as a trusted marketplace where every buyer and seller is a real student from your campus.',
       },
       {
         question: 'How do I sign up?',
@@ -122,7 +122,7 @@ export const faqCategories: FAQCategory[] = [
     faqs: [
       {
         question: 'How does Grid keep me safe?',
-        answer: 'Grid employs multiple safety layers: college-scoped access ensures you\'re only interacting with verified campus students, a dedicated admin moderation team reviews reports, and you can block or report any suspicious users or listings instantly.',
+        answer: 'Grid employs multiple safety layers: college-scoped access ensures you\'re only interacting with actual campus students, a dedicated admin moderation team reviews reports, and you can block or report any suspicious users or listings instantly.',
       },
       {
         question: 'How do I report a suspicious listing or user?',

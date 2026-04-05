@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from 'framer-motion'
+import { Sun, Moon, ArrowLeft, Send, Check, CheckCheck, Tag, CheckCircle2, XCircle, ArrowLeftRight, MapPin, Home, Clock } from 'lucide-react'
 
 /* ─── Product data for realistic feed ─── */
 const feedProducts = [
@@ -47,7 +48,6 @@ const navItems = [
 const notifications = [
   { icon: <CheckCircleSvg />, bg: 'bg-green-50', iconColor: 'text-green-600', title: 'Sold!', sub: 'HP Laptop • ₹28,000' },
   { icon: <MessageBubbleSvg />, bg: 'bg-blue-50', iconColor: 'text-blue-600', title: 'New Message', sub: '"Is this still available?"' },
-  { icon: <StarSvg />, bg: 'bg-amber-50', iconColor: 'text-amber-500', title: '5.0 Rating', sub: 'Trusted Seller' },
   { icon: <BellRingSvg />, bg: 'bg-violet-50', iconColor: 'text-violet-600', title: 'Price Drop', sub: 'MacBook Air • ₹42,000' },
   { icon: <UserPlusSvg />, bg: 'bg-pink-50', iconColor: 'text-pink-600', title: 'New Buyer', sub: 'Priya wants your textbook' },
   { icon: <PackageSvg />, bg: 'bg-teal-50', iconColor: 'text-teal-600', title: 'Listed!', sub: 'Calculator • ₹650' },
@@ -65,6 +65,9 @@ export default function PhoneMockup3D() {
   const [activeScreen, setActiveScreen] = useState(0)
   const [visibleCards, setVisibleCards] = useState<number[]>([])
   const [cardSet, setCardSet] = useState(0)
+  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [activeChatUser, setActiveChatUser] = useState<any>(null)
+  const [isInConversation, setIsInConversation] = useState(false)
 
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
@@ -201,7 +204,7 @@ export default function PhoneMockup3D() {
           <div className="absolute -right-[3px] top-[180px] w-[3px] h-[60px] bg-[#2a2a2a] rounded-r-sm" />
 
           {/* Screen */}
-          <div className="w-full h-full bg-white rounded-[36px] overflow-hidden relative">
+          <div className={`w-full h-full rounded-[36px] overflow-hidden relative transition-colors duration-500 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
             {/* Dynamic Island */}
             <div className="absolute top-0 left-0 right-0 z-30">
               {/* Island pill */}
@@ -214,73 +217,106 @@ export default function PhoneMockup3D() {
 
               {/* Status bar — sits beside the island */}
               <div className="flex justify-between items-center px-[18px] -mt-[26px] pb-[6px]">
-                <span className="text-[11px] font-semibold text-slate-900 tabular-nums">9:41</span>
+                <div className="flex items-center gap-1.5">
+                  <span className={`text-[11px] font-semibold tabular-nums ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>9:41</span>
+                  {/* Dark mode toggle icon */}
+                  <button
+                    onClick={() => setIsDarkMode(!isDarkMode)}
+                    className={`p-0.5 rounded-full transition-colors ${isDarkMode ? 'hover:bg-white/10 text-amber-400' : 'hover:bg-black/5 text-slate-400'}`}
+                  >
+                    {isDarkMode ? <Sun size={9} /> : <Moon size={9} />}
+                  </button>
+                </div>
                 {/* Right icons */}
                 <div className="flex items-center gap-[5px]">
                   {/* Signal bars */}
                   <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
-                    <rect x="0"  y="6"   width="3" height="5"  rx="0.8" fill="#1a1a1a"/>
-                    <rect x="4"  y="3.5" width="3" height="7.5" rx="0.8" fill="#1a1a1a"/>
-                    <rect x="8"  y="1.5" width="3" height="9.5" rx="0.8" fill="#1a1a1a"/>
-                    <rect x="12" y="0"   width="3" height="11" rx="0.8" fill="#1a1a1a"/>
+                    <rect x="0"  y="6"   width="3" height="5"  rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"}/>
+                    <rect x="4"  y="3.5" width="3" height="7.5" rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"}/>
+                    <rect x="8"  y="1.5" width="3" height="9.5" rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"}/>
+                    <rect x="12" y="0"   width="3" height="11" rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"}/>
                   </svg>
                   {/* WiFi — 3 arcs + dot */}
                   <svg width="14" height="11" viewBox="0 0 14 11" fill="none">
-                    <path d="M1 4.5C3.2 1.7 10.8 1.7 13 4.5" stroke="#1a1a1a" strokeWidth="1.4" strokeLinecap="round"/>
-                    <path d="M2.8 6.8C4.4 4.8 9.6 4.8 11.2 6.8" stroke="#1a1a1a" strokeWidth="1.4" strokeLinecap="round"/>
-                    <path d="M4.7 9C5.5 7.8 8.5 7.8 9.3 9" stroke="#1a1a1a" strokeWidth="1.4" strokeLinecap="round"/>
-                    <circle cx="7" cy="10.2" r="0.9" fill="#1a1a1a"/>
+                    <path d="M1 4.5C3.2 1.7 10.8 1.7 13 4.5" stroke={isDarkMode ? "#FFF" : "#1a1a1a"} strokeWidth="1.4" strokeLinecap="round"/>
+                    <path d="M2.8 6.8C4.4 4.8 9.6 4.8 11.2 6.8" stroke={isDarkMode ? "#FFF" : "#1a1a1a"} strokeWidth="1.4" strokeLinecap="round"/>
+                    <path d="M4.7 9C5.5 7.8 8.5 7.8 9.3 9" stroke={isDarkMode ? "#FFF" : "#1a1a1a"} strokeWidth="1.4" strokeLinecap="round"/>
+                    <circle cx="7" cy="10.2" r="0.9" fill={isDarkMode ? "#FFF" : "#1a1a1a"}/>
                   </svg>
                   {/* Battery */}
                   <div className="relative flex items-center">
-                    <div className="w-[22px] h-[11px] rounded-[3px] border-[1.2px] border-slate-800 relative">
+                    <div className={`w-[22px] h-[11px] rounded-[3px] border-[1.2px] relative ${isDarkMode ? 'border-white/80' : 'border-slate-800'}`}>
                       <div className="absolute inset-[1.5px] right-[2px] bg-green-500 rounded-[1.5px]" />
                     </div>
-                    <div className="w-[2px] h-[5px] bg-slate-800 rounded-r-[1px] -ml-[0.5px]" />
+                    <div className={`w-[2px] h-[5px] rounded-r-[1px] -ml-[0.5px] ${isDarkMode ? 'bg-white/80' : 'bg-slate-800'}`} />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Screen content with auto-cycling */}
-            <div className="px-0 pt-[56px] pb-2 flex-1 overflow-hidden h-[calc(100%-100px)]">
+            {/* Screen content area */}
+            <div className={`px-0 pt-[56px] pb-2 flex-1 overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
               <AnimatePresence mode="wait">
-                {activeScreen === 0 && <HomeScreen key="home" />}
-                {activeScreen === 1 && <ChatScreen key="chat" />}
-                {activeScreen === 2 && <ProfileScreen key="profile" />}
+                {activeScreen === 0 && <HomeScreen key="home" isDarkMode={isDarkMode} />}
+                {activeScreen === 1 && (
+                  isInConversation ? (
+                    <ConversationScreen
+                      key="convo"
+                      user={activeChatUser}
+                      isDarkMode={isDarkMode}
+                      onBack={() => setIsInConversation(false)}
+                    />
+                  ) : (
+                    <ChatScreen
+                      key="chat"
+                      isDarkMode={isDarkMode}
+                      onSelectChat={(user) => {
+                        setActiveChatUser(user)
+                        setIsInConversation(true)
+                      }}
+                    />
+                  )
+                )}
+                {activeScreen === 2 && <ProfileScreen key="profile" isDarkMode={isDarkMode} />}
               </AnimatePresence>
             </div>
 
-            {/* Bottom Navigation */}
-            <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 px-2 pb-4 pt-2">
+            {/* Bottom Navigation - Hidden when in conversation */}
+            {!isInConversation && (
+              <div className={`absolute bottom-0 left-0 right-0 border-t backdrop-blur-md px-2 pb-4 pt-2 z-50 transition-colors duration-300 ${isDarkMode ? 'bg-black/80 border-white/[0.1]' : 'bg-white/90 border-slate-100'}`}>
               <div className="flex justify-around items-center">
-                {navItems.map((item) => (
-                  <div key={item.label} className="flex flex-col items-center gap-0.5 relative">
-                    {item.primary ? (
-                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center -mt-5 shadow-lg shadow-primary/30">
-                        {item.icon}
-                      </div>
-                    ) : (
-                      <div className={`w-6 h-6 ${item.active ? 'text-primary' : 'text-slate-400'}`}>
-                        {item.icon}
-                      </div>
-                    )}
-                    {item.badge && (
-                      <div className="absolute -top-0.5 right-0 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center">
-                        <span className="text-[7px] text-white font-bold">{item.badge}</span>
-                      </div>
-                    )}
-                    <span className={`text-[8px] font-medium ${item.active ? 'text-primary' : 'text-slate-400'} ${item.primary ? 'mt-0.5' : ''}`}>
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
+                {navItems.map((item, idx) => {
+                  const isActive = activeScreen === (idx === 0 ? 0 : idx === 1 ? 1 : idx === 4 ? 2 : -1)
+
+                  return (
+                    <div key={item.label} className="flex flex-col items-center gap-0.5 relative">
+                      {item.primary ? (
+                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center -mt-5 shadow-lg shadow-primary/30">
+                          {item.icon}
+                        </div>
+                      ) : (
+                        <div className={`w-6 h-6 ${isActive ? 'text-primary' : 'text-slate-400'}`}>
+                          {item.icon}
+                        </div>
+                      )}
+                      {item.badge && (
+                        <div className="absolute -top-0.5 right-0 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center">
+                          <span className="text-[7px] text-white font-bold">{item.badge}</span>
+                        </div>
+                      )}
+                      <span className={`text-[8px] font-medium ${isActive ? 'text-primary' : 'text-slate-400'} ${item.primary ? 'mt-0.5' : ''}`}>
+                        {item.label}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
-              {/* Home indicator */}
-              <div className="flex justify-center mt-2">
-                <div className="w-[100px] h-[4px] bg-slate-900 rounded-full" />
+                {/* Home indicator */}
+                <div className="flex justify-center mt-auto pb-4 pt-2">
+                  <div className={`w-16 h-1 rounded-full transition-colors ${isDarkMode ? 'bg-zinc-700' : 'bg-slate-200'}`} />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </motion.div>
@@ -301,7 +337,7 @@ export default function PhoneMockup3D() {
 
 /* ─── Screen Components ─── */
 
-function HomeScreen() {
+function HomeScreen({ isDarkMode }: { isDarkMode: boolean }) {
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -314,17 +350,17 @@ function HomeScreen() {
       <div className="px-4 mb-2">
         {/* App name + action icons row */}
         <div className="flex items-center justify-between mb-2.5">
-          <p className="text-[16px] font-extrabold text-slate-900 tracking-tight">
+          <p className={`text-[16px] font-extrabold tracking-tight transition-colors ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
             Grid<span className="text-primary">.</span>
           </p>
           <div className="flex items-center gap-2">
             {/* Search icon */}
-            <div className="w-7 h-7 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+            <div className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-100'}`}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
             </div>
             {/* Notification bell with badge */}
-            <div className="relative w-7 h-7 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <div className={`relative w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-100'}`}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="2.5" strokeLinecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
               <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
                 <span className="text-[5px] text-white font-bold">4</span>
               </div>
@@ -334,20 +370,20 @@ function HomeScreen() {
 
         {/* Filter chips row */}
         <div className="flex gap-1.5 mb-2">
-          <div className="flex items-center gap-1 bg-slate-50 border border-slate-100 rounded-lg px-2 py-1">
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
-            <span className="text-[8px] font-semibold text-slate-600">Filters</span>
+          <div className={`flex items-center gap-1 border rounded-lg px-2 py-1 transition-colors ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-100'}`}>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="2.5" strokeLinecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            <span className={`text-[8px] font-semibold transition-colors ${isDarkMode ? 'text-zinc-400' : 'text-slate-600'}`}>Filters</span>
           </div>
-          <div className="flex items-center gap-1 bg-slate-50 border border-slate-100 rounded-lg px-2 py-1">
-            <span className="text-[8px] font-semibold text-slate-600">Sort: Relevant</span>
-            <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="3" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          <div className={`flex items-center gap-1 border rounded-lg px-2 py-1 transition-colors ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-100'}`}>
+            <span className={`text-[8px] font-semibold transition-colors ${isDarkMode ? 'text-zinc-400' : 'text-slate-600'}`}>Sort: Relevant</span>
+            <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="3" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
           </div>
         </div>
 
         {/* Items count */}
         <div className="flex items-center gap-2 mb-1.5">
           <span className="text-[8px] font-semibold text-slate-400">24 items</span>
-          <div className="flex-1 h-px bg-slate-100" />
+          <div className={`flex-1 h-px transition-colors ${isDarkMode ? 'bg-zinc-800' : 'bg-slate-100'}`} />
         </div>
       </div>
 
@@ -392,14 +428,14 @@ function HomeScreen() {
             </div>
 
             {/* Product info row below image */}
-            <div className="bg-white px-2.5 py-2">
-              <p className="text-[10px] font-bold text-slate-900 truncate">{p.title}</p>
+            <div className={`px-2.5 py-2 transition-colors ${isDarkMode ? 'bg-zinc-900 border-t border-zinc-800' : 'bg-white'}`}>
+              <p className={`text-[10px] font-bold truncate transition-colors ${isDarkMode ? 'text-zinc-100' : 'text-slate-900'}`}>{p.title}</p>
               <div className="flex items-center justify-between mt-0.5">
                 <div className="flex items-center gap-1">
-                  <svg width="7" height="7" viewBox="0 0 24 24" fill="#94a3b8" stroke="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
-                  <span className="text-[7px] text-slate-400">{p.location}</span>
+                  <svg width="7" height="7" viewBox="0 0 24 24" fill={isDarkMode ? "#71717a" : "#94a3b8"} stroke="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
+                  <span className={`text-[7px] transition-colors ${isDarkMode ? 'text-zinc-500' : 'text-slate-400'}`}>{p.location}</span>
                 </div>
-                <span className="text-[7px] text-slate-400">{p.time}</span>
+                <span className={`text-[7px] transition-colors ${isDarkMode ? 'text-zinc-500' : 'text-slate-400'}`}>{p.time}</span>
               </div>
             </div>
           </motion.div>
@@ -409,7 +445,199 @@ function HomeScreen() {
   )
 }
 
-function ChatScreen() {
+function ConversationScreen({ user, isDarkMode, onBack }: { user: any, isDarkMode: boolean, onBack: () => void }) {
+  const messages = [
+    { text: "Hey! Is the laptop still available?", isMe: false, time: "10:02 AM", read: true },
+    { text: "Yes it is! Multiple people are asking though.", isMe: true, time: "10:03 AM", read: true },
+    { type: 'offer', price: 25000, isMe: false, time: "10:03 AM", read: true, status: 'pending' },
+    { text: "Could you do ₹27,000? It's in mint condition.", isMe: true, time: "10:05 AM", read: true },
+    { type: 'counter', price: 27000, isMe: true, time: "10:05 AM", read: true, status: 'pending' },
+    { type: 'fee', fee: 149, isMe: false, time: "10:06 AM", read: true },
+    { type: 'accept', price: 27000, isMe: false, time: "10:08 AM", read: true },
+    { text: "Perfect! Where can I collect it?", isMe: false, time: "10:09 AM", read: true },
+    { type: 'pickup', address: "Library Wing, Level 2", timeSlot: "Today, 4:00 PM", isMe: true, time: "10:10 AM", read: true },
+    { text: "See you there! Thanks.", isMe: false, time: "10:11 AM", read: true },
+  ]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+      className="absolute inset-0 z-40 flex flex-col h-full"
+    >
+      {/* Header */}
+      <div className={`px-4 py-3 flex items-center gap-3 border-b transition-colors ${isDarkMode ? 'bg-black border-zinc-800' : 'bg-white border-slate-100'}`}>
+        <button onClick={onBack} className={`p-1 rounded-full transition-colors ${isDarkMode ? 'hover:bg-zinc-800 text-zinc-400' : 'hover:bg-slate-100 text-slate-600'}`}>
+          <ArrowLeft size={16} strokeWidth={2.5} />
+        </button>
+        <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${user?.color || 'from-primary to-blue-600'} flex items-center justify-center flex-shrink-0 shadow-sm text-white text-[10px] font-bold`}>
+          {user?.avatar || '?'}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={`text-[11px] font-bold truncate transition-colors ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{user?.name || 'User'}</p>
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+            <span className="text-[7px] text-green-500 font-bold uppercase tracking-wider">Online</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 scrollbar-hide">
+        {messages.map((m: any, i) => (
+          <div key={i} className={`flex flex-col ${m.isMe ? 'items-end' : 'items-start'}`}>
+            {m.type === 'offer' || m.type === 'counter' || m.type === 'accept' || m.type === 'pickup' || m.type === 'fee' ? (
+              <div className="max-w-[82%] w-full">
+                <DealCard type={m.type} data={m} isMe={m.isMe} />
+                <div className={`flex items-center justify-end gap-1 mt-1 opacity-50 px-1`}>
+                  <span className="text-[6px] font-bold tabular-nums transition-colors duration-300" style={{ color: isDarkMode ? '#888' : '#64748b' }}>{m.time}</span>
+                  {m.isMe && (
+                    m.read ? <CheckCheck size={8} className="text-primary" /> : <Check size={8} className="text-zinc-400" />
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className={`max-w-[85%] px-3 py-2 rounded-2xl relative ${
+                m.isMe
+                  ? 'bg-primary text-white rounded-tr-none shadow-md shadow-primary/10'
+                  : (isDarkMode ? 'bg-zinc-800 text-zinc-100 rounded-tl-none' : 'bg-slate-100 text-slate-800 rounded-tl-none')
+              }`}>
+                <p className="text-[10px] leading-[1.4] font-medium">{m.text}</p>
+                <div className={`flex items-center justify-end gap-1 mt-1 opacity-70`}>
+                  <span className="text-[6px] font-bold tabular-nums">{m.time}</span>
+                  {m.isMe && (
+                    m.read ? <CheckCheck size={8} className="text-white" /> : <Check size={8} className="text-white" />
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Input */}
+      <div className={`p-3 border-t transition-colors ${isDarkMode ? 'bg-black border-zinc-800' : 'bg-white border-slate-100'}`}>
+        <div className={`flex items-center gap-2 rounded-2xl px-3 py-2 transition-colors ${isDarkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-slate-50 border border-slate-100'}`}>
+          <input
+            type="text"
+            placeholder="Type a message..."
+            readOnly
+            className="flex-1 bg-transparent border-none text-[10px] placeholder:text-zinc-500 focus:outline-none"
+          />
+          <button className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white shadow-sm shadow-primary/20">
+            <Send size={10} strokeWidth={3} />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+function DealCard({ type, data, isMe }: { type: string, data: any, isMe: boolean }) {
+  let gradient = 'from-zinc-700 to-zinc-900'
+  let label = ''
+  let IconComp: any = Tag
+  let content = null
+
+  if (type === 'offer') {
+    gradient = 'from-indigo-500 to-indigo-700'
+    label = 'OFFER RECEIVED'
+    IconComp = Tag
+    content = (
+      <>
+        <p className="text-[16px] font-black text-white leading-tight">₹{data.price.toLocaleString()}</p>
+        <p className="text-[6px] font-bold text-white/60 mt-0.5">Respond via the action bar</p>
+      </>
+    )
+  } else if (type === 'counter') {
+    gradient = 'from-amber-500 to-amber-600'
+    label = 'COUNTER OFFER'
+    IconComp = ArrowLeftRight
+    content = (
+      <>
+        <p className="text-[16px] font-black text-white leading-tight">₹{data.price.toLocaleString()}</p>
+        <p className="text-[6px] font-bold text-white/70 mt-0.5">{isMe ? 'Your counter offer' : 'Seller proposed this price'}</p>
+      </>
+    )
+  } else if (type === 'accept') {
+    gradient = 'from-emerald-500 to-emerald-600'
+    label = 'OFFER ACCEPTED'
+    IconComp = CheckCircle2
+    content = (
+      <>
+        <p className="text-[14px] font-black text-white leading-tight">Deal Confirmed</p>
+        <div className="flex items-center gap-1.5 mt-1">
+          <Tag size={10} className="text-white/70" />
+          <p className="text-[16px] font-bold text-white">₹{data.price.toLocaleString()}</p>
+        </div>
+      </>
+    )
+  } else if (type === 'pickup') {
+    gradient = 'from-violet-500 to-violet-600'
+    label = 'PICKUP DETAILS'
+    IconComp = MapPin
+    content = (
+      <div className="flex flex-col gap-1.5 mt-2 p-2 bg-black/20 rounded-xl">
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-lg bg-white/10 flex items-center justify-center">
+            <Home size={10} className="text-white" />
+          </div>
+          <span className="text-[9px] font-bold text-white truncate">{data.address}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-lg bg-white/10 flex items-center justify-center">
+            <Clock size={10} className="text-white" />
+          </div>
+          <span className="text-[9px] font-bold text-white">{data.timeSlot}</span>
+        </div>
+      </div>
+    )
+  } else if (type === 'fee') {
+    gradient = 'from-zinc-800 to-zinc-950 border-white/5'
+    label = 'GRID TRUST FEE'
+    IconComp = CheckCircle2
+    content = (
+      <div className="flex items-center justify-between mt-1">
+        <div>
+          <p className="text-[14px] font-black text-white leading-tight">₹{data.fee}</p>
+          <p className="text-[6px] font-bold text-white/40 mt-0.5 uppercase tracking-wide">Platform Protection</p>
+        </div>
+        <div className="px-2 py-1 rounded-lg bg-white/5 border border-white/10">
+          <span className="text-[7px] font-bold text-green-400">SECURE DEAL</span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`w-full bg-gradient-to-br ${gradient} rounded-[20px] p-3 shadow-xl border border-white/10 relative overflow-hidden transition-all duration-500 hover:scale-[1.02]`}>
+      {/* Decorative glass effect */}
+      <div className="absolute -right-4 -top-4 w-16 h-16 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute -left-4 -bottom-4 w-12 h-12 bg-black/10 rounded-full blur-xl pointer-events-none" />
+      
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <div className="w-2 h-2 rounded-full bg-white/30 animate-pulse" />
+          <span className="text-[7px] font-black text-white/80 uppercase tracking-[1.5px]">{label}</span>
+        </div>
+        <div className={`w-5 h-5 rounded-full bg-white/20 flex items-center justify-center`}>
+          <IconComp size={10} className="text-white" />
+        </div>
+      </div>
+      {content}
+      {data.status === 'declined' && (
+        <div className="mt-2 inline-flex items-center gap-1 bg-red-500/30 border border-red-500/20 rounded-full px-2 py-0.5">
+          <XCircle size={8} className="text-white" />
+          <span className="text-[7px] font-black text-white uppercase tracking-wider">Declined</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ChatScreen({ isDarkMode, onSelectChat }: { isDarkMode: boolean, onSelectChat: (user: any) => void }) {
   const chats = [
     { name: 'Rahul K.', msg: 'Is the laptop still available?', time: '2m', avatar: 'R', color: 'from-blue-400 to-blue-600', unread: 2 },
     { name: 'Priya S.', msg: 'Can we meet at canteen?', time: '15m', avatar: 'P', color: 'from-pink-400 to-rose-500', unread: 0 },
@@ -426,7 +654,7 @@ function ChatScreen() {
       transition={{ duration: 0.3 }}
       className="px-4"
     >
-      <p className="text-[14px] font-bold text-slate-900 mb-3">Messages</p>
+      <p className={`text-[14px] font-bold mb-3 transition-colors ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Messages</p>
       <div className="flex flex-col gap-2">
         {chats.map((c, i) => (
           <motion.div
@@ -434,17 +662,18 @@ function ChatScreen() {
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.07 * i + 0.1 }}
-            className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-colors"
+            onClick={() => onSelectChat(c)}
+            className={`flex items-center gap-2.5 p-2 rounded-xl transition-colors cursor-pointer ${isDarkMode ? 'hover:bg-zinc-900' : 'hover:bg-slate-50'}`}
           >
-            <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${c.color} flex items-center justify-center flex-shrink-0`}>
+            <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${c.color} flex items-center justify-center flex-shrink-0 shadow-sm`}>
               <span className="text-white text-[11px] font-bold">{c.avatar}</span>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-bold text-slate-900">{c.name}</p>
-                <span className="text-[8px] text-slate-400">{c.time}</span>
+                <p className={`text-[10px] font-bold transition-colors ${isDarkMode ? 'text-zinc-200' : 'text-slate-900'}`}>{c.name}</p>
+                <span className={`text-[8px] transition-colors ${isDarkMode ? 'text-zinc-500' : 'text-slate-400'}`}>{c.time}</span>
               </div>
-              <p className="text-[9px] text-slate-500 truncate">{c.msg}</p>
+              <p className={`text-[9px] truncate transition-colors ${isDarkMode ? 'text-zinc-400' : 'text-slate-500'}`}>{c.msg}</p>
             </div>
             {c.unread > 0 && (
               <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
@@ -458,7 +687,7 @@ function ChatScreen() {
   )
 }
 
-function ProfileScreen() {
+function ProfileScreen({ isDarkMode }: { isDarkMode: boolean }) {
   const menuSections = [
     {
       title: 'MY ACTIVITY',
@@ -490,9 +719,9 @@ function ProfileScreen() {
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[15px] font-extrabold text-slate-900 tracking-tight">Profile</p>
-        <div className="w-7 h-7 rounded-full bg-white border border-slate-200 flex items-center justify-center">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#18181b" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <p className={`text-[15px] font-extrabold tracking-tight transition-colors ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Profile</p>
+        <div className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-200'}`}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#18181b"} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         </div>
       </div>
 
@@ -545,26 +774,26 @@ function ProfileScreen() {
       {menuSections.map((section, sIdx) => (
         <div key={section.title} className="mb-1.5">
           <p className="text-[7px] font-bold text-zinc-400 uppercase tracking-[1.5px] ml-1 mb-1">{section.title}</p>
-          <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+          <div className={`rounded-xl border overflow-hidden transition-colors ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-100'}`}>
             {section.items.map((item, i) => (
               <motion.div
                 key={item.label}
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 * i + 0.2 + sIdx * 0.1 }}
-                className={`flex items-center gap-2 px-2.5 py-1.5 ${i < section.items.length - 1 ? 'border-b border-slate-50' : ''}`}
+                className={`flex items-center gap-2 px-2.5 py-1.5 transition-colors ${i < section.items.length - 1 ? (isDarkMode ? 'border-b border-zinc-800' : 'border-b border-slate-50') : ''}`}
               >
-                <div className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0 text-slate-600">
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${isDarkMode ? 'bg-zinc-800 text-zinc-400' : 'bg-slate-50 text-slate-600'}`}>
                   {item.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[9px] font-semibold text-slate-900">{item.label}</p>
-                  {'sub' in item && item.sub && <p className="text-[7px] text-zinc-400">{item.sub}</p>}
+                  <p className={`text-[9px] font-semibold transition-colors ${isDarkMode ? 'text-zinc-200' : 'text-slate-900'}`}>{item.label}</p>
+                  {'sub' in item && item.sub && <p className="text-[7px] text-zinc-500">{item.sub}</p>}
                 </div>
                 {'badge' in item && item.badge && (
                   <span className="text-[6px] font-bold text-white bg-primary rounded px-1.5 py-0.5">{item.badge}</span>
                 )}
-                <svg className="w-2.5 h-2.5 text-zinc-300 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                <svg className="w-2.5 h-2.5 text-zinc-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
               </motion.div>
             ))}
           </div>
@@ -644,13 +873,6 @@ function MessageBubbleSvg() {
   )
 }
 
-function StarSvg() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  )
-}
 
 function BellRingSvg() {
   return (

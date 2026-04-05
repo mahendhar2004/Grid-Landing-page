@@ -19,9 +19,11 @@ function ScrollToTop() {
   return null
 }
 
+import { ThemeProvider } from './context/ThemeContext'
+
 export default function App() {
   return (
-    <>
+    <ThemeProvider>
       <ScrollToTop />
       <Routes>
         <Route element={<Layout />}>
@@ -36,6 +38,6 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
-    </>
+    </ThemeProvider>
   )
 }

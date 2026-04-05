@@ -3,18 +3,18 @@ import { Instagram, Twitter } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border pt-20 pb-10 bg-white">
+    <footer className="border-t border-border pt-20 pb-10 transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between gap-12 mb-16">
           {/* Brand */}
           <div className="max-w-xs">
             <div className="flex items-center gap-2.5 mb-4">
               
-              <span className="text-3xl font-extrabold tracking-tight text-secondary">
+              <span className="text-3xl font-black tracking-tighter text-secondary transition-colors italic">
                 Grid<span className="brand-dot" />
               </span>
             </div>
-            <p className="text-text-muted text-sm leading-relaxed">
+            <p className="text-text-muted text-sm leading-relaxed transition-colors">
               The smarter campus marketplace. Simplifying student life across India.
             </p>
           </div>
@@ -22,7 +22,7 @@ export default function Footer() {
           {/* Links */}
           <div className="flex gap-16 flex-wrap">
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-[2px] text-secondary mb-5">
+              <h4 className="text-[10px] font-black uppercase tracking-[2px] text-secondary mb-5 transition-colors">
                 Platform
               </h4>
               <div className="flex flex-col gap-3">
@@ -33,7 +33,7 @@ export default function Footer() {
               </div>
             </div>
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-[2px] text-secondary mb-5">
+              <h4 className="text-[10px] font-black uppercase tracking-[2px] text-secondary mb-5 transition-colors">
                 Legal
               </h4>
               <div className="flex flex-col gap-3">
@@ -44,7 +44,7 @@ export default function Footer() {
               </div>
             </div>
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-[2px] text-secondary mb-5">
+              <h4 className="text-[10px] font-black uppercase tracking-[2px] text-secondary mb-5 transition-colors">
                 Support
               </h4>
               <div className="flex flex-col gap-3">
@@ -60,7 +60,7 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-border gap-4">
-          <p className="text-text-muted text-sm">
+          <p className="text-text-muted text-xs font-black uppercase tracking-widest transition-colors">
             &copy; {new Date().getFullYear()} Grid. All rights reserved.
           </p>
           <div className="flex gap-5">

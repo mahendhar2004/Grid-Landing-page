@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import AnimatedSection from '../ui/AnimatedSection'
 import { features } from '../../data/features'
 
@@ -40,43 +40,26 @@ function FeatureCard({
   return (
     <motion.div
       ref={cardRef}
-      className="relative rounded-2xl h-full overflow-hidden bg-white"
+      className={`relative rounded-2xl h-full overflow-hidden transition-colors duration-500 border ${isHovered ? 'shadow-2xl shadow-primary/10' : 'shadow-sm'}`}
+      style={{ 
+        backgroundColor: 'var(--color-surface)',
+        borderColor: 'var(--color-border)'
+      }}
       onMouseMove={handleMouseMove}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
       animate={{
         y: isHovered ? -8 : 0,
         scale: isHovered ? 1.02 : 1,
-        boxShadow: isHovered
-          ? '0 0 0 1px rgba(0,0,0,0.09), 0 8px 24px rgba(0,0,0,0.09), 0 24px 56px rgba(0,0,0,0.07)'
-          : '0 0 0 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.04)',
       }}
       transition={{ type: 'spring', stiffness: 300, damping: 28 }}
     >
-      {/* ── Subtle white shine sweep on hover enter ── */}
-      <AnimatePresence>
-        {isHovered && (
-          <motion.div
-            key="shine"
-            className="absolute inset-0 pointer-events-none z-10"
-            initial={{ x: '-100%' }}
-            animate={{ x: '220%' }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-            style={{
-              background: 'linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.65) 50%, transparent 65%)',
-              width: '100%',
-            }}
-          />
-        )}
-      </AnimatePresence>
-
       {/* ── Subtle mouse-follow highlight ── */}
       <div
-        className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+        className="absolute inset-0 pointer-events-none transition-opacity duration-500"
         style={{
-          opacity: isHovered ? 1 : 0,
-          background: `radial-gradient(280px circle at ${mouse.x}px ${mouse.y}px, rgba(0,0,0,0.025), transparent 70%)`,
+          opacity: isHovered ? 0.3 : 0,
+          background: `radial-gradient(400px circle at ${mouse.x}px ${mouse.y}px, var(--color-primary-soft), transparent 80%)`,
         }}
       />
 
@@ -85,7 +68,11 @@ function FeatureCard({
 
         {/* Icon */}
         <motion.div
-          className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${c.iconBg} ${c.iconText}`}
+          className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-colors duration-500 ${c.iconBg} ${c.iconText}`}
+          style={{ 
+            backgroundColor: 'var(--color-primary-soft)',
+            color: 'var(--color-primary)' 
+          }}
           animate={{ scale: isHovered ? 1.15 : 1 }}
           transition={{ type: 'spring', stiffness: 380, damping: 24 }}
         >
@@ -93,22 +80,14 @@ function FeatureCard({
         </motion.div>
 
         {/* Title */}
-        <motion.h3
-          className="text-[16px] font-bold leading-snug mb-2.5"
-          animate={{ color: isHovered ? '#111827' : '#374151' }}
-          transition={{ duration: 0.2 }}
-        >
+        <h3 className="text-[16px] font-bold leading-snug mb-2.5 transition-colors duration-500 text-secondary">
           {feature.title}
-        </motion.h3>
+        </h3>
 
         {/* Description */}
-        <motion.p
-          className="text-[12.5px] leading-relaxed"
-          animate={{ color: isHovered ? '#6B7280' : '#9CA3AF' }}
-          transition={{ duration: 0.2 }}
-        >
+        <p className="text-[12.5px] leading-relaxed transition-colors duration-500 text-text-muted">
           {feature.description}
-        </motion.p>
+        </p>
       </div>
     </motion.div>
   )
@@ -121,13 +100,13 @@ export default function Features() {
   return (
     <section
       id="features"
-      className="relative py-24 lg:py-32 overflow-hidden bg-white"
+      className="relative py-24 lg:py-32 overflow-hidden transition-colors duration-500"
     >
       {/* Dot-grid texture */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none opacity-[0.4]"
         style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.055) 1px, transparent 0)',
+          backgroundImage: 'radial-gradient(circle at 1px 1px, var(--color-text-muted) 1px, transparent 0)',
           backgroundSize: '32px 32px',
         }}
       />

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@theme {
+:root {
   --color-primary: #007BFF;
   --color-primary-soft: #E0F0FF;
   --color-primary-dark: #0056CC;
@@ -9,6 +9,31 @@
   --color-border: #F1F5F9;
   --color-text: #09090B;
   --color-text-muted: #71717A;
+  --bg-page: #FFFFFF;
+}
+
+.dark {
+  --color-primary: #3B82F6;
+  --color-primary-soft: rgba(37, 99, 235, 0.1);
+  --color-primary-dark: #2563EB;
+  --color-secondary: #FAFAFA;
+  --color-surface: #18181B;
+  --color-border: #27272A;
+  --color-text: #FAFAFA;
+  --color-text-muted: #A1A1AA;
+  --bg-page: #09090B;
+}
+
+@theme {
+  --color-primary: var(--color-primary);
+  --color-primary-soft: var(--color-primary-soft);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-secondary: var(--color-secondary);
+  --color-surface: var(--color-surface);
+  --color-border: var(--color-border);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-bg-page: var(--bg-page);
   --font-family-sans: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -18,8 +43,21 @@ html {
 
 body {
   font-family: var(--font-family-sans);
+  background-color: var(--bg-page);
+  color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Premium Transition: Sophisticated cubic-bezier for a high-end feel */
+  transition: 
+    background-color 0.8s cubic-bezier(0.65, 0, 0.35, 1),
+    color 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Global Transition Sync: Ensures all surfaces and borders move gracefully together */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.8s;
+  transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 ::-webkit-scrollbar {
@@ -55,4 +93,20 @@ body {
 @keyframes glow-pulse {
   0%, 100% { transform: scale(1); opacity: 0.8; }
   50% { transform: scale(1.15); opacity: 1; }
+}
+
+::selection {
+  background: var(--color-primary);
+  color: white;
+}
+
+.glass-blur {
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+}
+
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }

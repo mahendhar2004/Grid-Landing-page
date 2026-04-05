@@ -1,5 +1,6 @@
-import { Shield, Lock, Wallet, CreditCard, Smartphone, Gift, CheckCircle2, ArrowRight, Zap, Sparkles } from 'lucide-react'
+import { Wallet, CreditCard, Smartphone, ArrowRight, Zap, Sparkles, ShieldCheck, Gift } from 'lucide-react'
 import { motion } from 'framer-motion'
+import AnimatedSection from '../ui/AnimatedSection'
 
 const fees = [
   { range: '₹0 – ₹100',       fee: '₹5'  },
@@ -11,345 +12,176 @@ const fees = [
 ]
 
 const payments = [
-  { icon: Wallet,     label: 'Grid Wallet', sub: 'Instant pay'         },
-  { icon: Smartphone, label: 'UPI',         sub: 'PhonePe, GPay & more' },
-  { icon: CreditCard, label: 'Debit Card',  sub: 'All major banks'     },
-  { icon: CreditCard, label: 'Credit Card', sub: 'Visa, Mastercard'    },
+  { icon: Wallet,     label: 'Grid Wallet' },
+  { icon: Smartphone, label: 'UPI' },
+  { icon: CreditCard, label: 'Cards' },
 ]
-
-const enterAnim = (i: number) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: '-60px' },
-  transition: { duration: 0.55, delay: i * 0.08, ease: [0.4, 0, 0.2, 1] as [number,number,number,number] },
-})
 
 export default function Pricing() {
   return (
-    <section id="pricing" className="py-24 lg:py-32 bg-white relative overflow-hidden">
-
-      {/* Dot-grid */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0)', backgroundSize: '28px 28px' }}
+    <section id="pricing" className="py-24 lg:py-32 relative overflow-hidden transition-colors duration-500">
+      {/* Precision grid texture */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.4]"
+        style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, var(--color-text-muted) 1px, transparent 0)', backgroundSize: '48px 48px' }}
       />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse, rgba(37,99,235,0.04) 0%, transparent 70%)' }}
+      
+      {/* Deep lighting effects */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] pointer-events-none transition-opacity"
+        style={{ background: 'radial-gradient(ellipse at 50% 0%, var(--color-primary-soft) 0%, transparent 70%)' }}
       />
 
-      <div className="relative max-w-6xl mx-auto px-6">
-
-        {/* ── Header ─────────────────────────────────────────────────── */}
-        <motion.div className="text-center mb-16" {...enterAnim(0)}>
-          <span className="inline-block text-primary font-bold text-sm tracking-wide uppercase mb-4">Pricing & Payments</span>
-          <h2 className="text-4xl sm:text-5xl font-extrabold text-secondary mb-5">
-            Simple pricing.<br className="sm:hidden" /> <span className="text-primary">No surprises.</span>
+      <div className="relative max-w-7xl mx-auto px-6">
+        
+        {/* ── Header: Minimal & High Impact ── */}
+        <AnimatedSection className="text-center mb-20">
+          <span className="inline-block text-primary font-bold text-xs tracking-[3px] uppercase mb-6">Economics of Trust</span>
+          <h2 className="text-5xl sm:text-7xl font-black text-secondary leading-[1] tracking-tighter mb-8 italic transition-colors">
+            Zero <span className="text-primary not-italic">Commission</span>.
           </h2>
-          <p className="text-text-muted text-lg max-w-xl mx-auto leading-relaxed">
-            A small one-time listing fee. Zero commission on sales. Free forever if you refer friends.
+          <p className="text-text-muted text-lg max-w-xl mx-auto leading-relaxed transition-colors">
+            Marketplace purity. Sell for free, keep every rupee. We only charge a small listing fee to keep the campus circle spam-free.
           </p>
-        </motion.div>
+        </AnimatedSection>
 
-        {/* ── Hero stat strip ─────────────────────────────────────────── */}
-        <motion.div
-          className="relative rounded-3xl overflow-hidden mb-6 border border-border/70 shadow-[0_4px_24px_rgba(0,0,0,0.07)]"
-          {...enterAnim(1)}
-          whileHover={{ boxShadow: '0 8px_40px rgba(0,0,0,0.10)' }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-slate-50/60 pointer-events-none" />
-
-          <div className="relative grid grid-cols-3 divide-x divide-border/70">
-
-            {/* Stat 1 — hero */}
-            <motion.div
-              className="relative flex flex-col items-center justify-center text-center py-12 px-8 overflow-hidden cursor-default"
-              whileHover={{ backgroundColor: 'rgba(37,99,235,0.03)' }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary/0 via-primary to-primary/0" />
-              <div className="absolute inset-0 pointer-events-none"
-                style={{ background: 'radial-gradient(ellipse at 50% 120%, rgba(37,99,235,0.06), transparent 65%)' }}
-              />
-              <motion.span
-                className="text-6xl sm:text-7xl font-black tracking-tight text-primary leading-none mb-2 block"
-                whileHover={{ scale: 1.06 }}
-                transition={{ type: 'spring', stiffness: 340, damping: 22 }}
+        <div className="grid lg:grid-cols-[1fr_400px] gap-8 items-start">
+          
+          {/* ── Left: The "Zero" Laboratory Card ── */}
+          <AnimatedSection direction="left">
+            <div className="relative group">
+              {/* Outer glow */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-violet-500/20 rounded-[40px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              
+              <div className="relative rounded-[36px] border border-border shadow-[0_32px_64px_rgba(0,0,0,0.04)] overflow-hidden transition-colors duration-500"
+                style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
               >
-                ₹5
-              </motion.span>
-              <span className="text-[13px] font-bold text-secondary mb-1">Starting fee</span>
-              <span className="text-[12px] text-text-muted max-w-[130px] leading-snug">Scales with your listing price, up to ₹50</span>
-            </motion.div>
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-violet-500 to-primary" />
+                
+                <div className="p-10 lg:p-14">
+                  <div className="flex flex-col sm:flex-row items-center gap-12 sm:gap-20">
+                    {/* Big Hero Number */}
+                    <div className="relative">
+                      <motion.div 
+                        className="text-[140px] sm:text-[180px] font-black leading-none tracking-tighter text-secondary select-none transition-colors"
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                      >
+                        0<span className="text-primary">%</span>
+                      </motion.div>
+                      <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-full h-8 bg-black/5 blur-xl rounded-full" />
+                    </div>
 
-            {/* Stat 2 */}
-            <motion.div
-              className="flex flex-col items-center justify-center text-center py-12 px-8 cursor-default"
-              whileHover={{ backgroundColor: 'rgba(0,0,0,0.015)' }}
-              transition={{ duration: 0.2 }}
-            >
-              <motion.span
-                className="text-6xl sm:text-7xl font-black tracking-tight text-secondary leading-none mb-2 block"
-                whileHover={{ scale: 1.06 }}
-                transition={{ type: 'spring', stiffness: 340, damping: 22 }}
-              >
-                0%
-              </motion.span>
-              <span className="text-[13px] font-bold text-secondary mb-1">Commission</span>
-              <span className="text-[12px] text-text-muted max-w-[130px] leading-snug">You keep 100% of what the buyer pays</span>
-            </motion.div>
+                    <div className="flex-1 text-center sm:text-left">
+                      <h3 className="text-3xl font-black text-secondary mb-4 leading-tight transition-colors">No Cuts. No Hidden Fees.</h3>
+                      <p className="text-text-muted text-base mb-8 leading-relaxed transition-colors">
+                        Unlike other marketplaces, Grid doesn't take a bite out of your hard-earned money. What the buyer pays is exactly what you get.
+                      </p>
+                      
+                      <div className="flex flex-wrap justify-center sm:justify-start gap-3">
+                        {['Zero Commissions', 'Instant Settlement', '100% Transparency'].map((tag) => (
+                          <span key={tag} className="px-4 py-2 rounded-xl border text-[11px] font-black text-secondary uppercase tracking-wider transition-colors"
+                            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
 
-            {/* Stat 3 */}
-            <motion.div
-              className="flex flex-col items-center justify-center text-center py-12 px-8 cursor-default"
-              whileHover={{ backgroundColor: 'rgba(37,99,235,0.025)' }}
-              transition={{ duration: 0.2 }}
-            >
-              <motion.span
-                className="text-6xl sm:text-7xl font-black tracking-tight text-secondary leading-none mb-2 block"
-                whileHover={{ scale: 1.06 }}
-                transition={{ type: 'spring', stiffness: 340, damping: 22 }}
-              >
-                Free
-              </motion.span>
-              <span className="text-[13px] font-bold text-secondary mb-1">With referrals</span>
-              <span className="text-[12px] text-text-muted max-w-[130px] leading-snug">Earn credits, list as many times as you want</span>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* ── Two columns ─────────────────────────────────────────────── */}
-        <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-6 mb-6">
-
-          {/* Left — Fee table */}
-          <motion.div
-            className="rounded-3xl border border-border/70 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] overflow-hidden"
-            {...enterAnim(2)}
-            whileHover={{
-              y: -5,
-              boxShadow: '0 12px 48px rgba(0,0,0,0.10)',
-              borderColor: 'rgba(37,99,235,0.2)',
-            }}
-            transition={{ type: 'spring', stiffness: 280, damping: 28 }}
-          >
-            {/* Card header */}
-            <div className="flex items-center gap-3 px-8 pt-8 pb-6 border-b border-border/50">
-              <motion.div
-                className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center"
-                whileHover={{ scale: 1.15, backgroundColor: 'rgba(37,99,235,0.18)' }}
-                transition={{ type: 'spring', stiffness: 380, damping: 22 }}
-              >
-                <Zap size={16} className="text-primary" />
-              </motion.div>
-              <div>
-                <p className="text-[14px] font-bold text-secondary leading-tight">Listing fee by price</p>
-                <p className="text-[11.5px] text-text-muted">One-time. Not per sale.</p>
+                  {/* Payment Methods Strip */}
+                  <div className="mt-16 pt-10 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-8">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                        <ShieldCheck size={20} />
+                      </div>
+                      <p className="text-sm font-bold text-secondary transition-colors">Secured by Razorpay Enterprise</p>
+                    </div>
+                    
+                    <div className="flex items-center gap-6 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
+                      {payments.map((p) => {
+                        const Icon = p.icon
+                        return (
+                          <div key={p.label} className="flex flex-col items-center gap-1">
+                            <Icon size={18} className="text-secondary transition-colors" />
+                            <span className="text-[9px] font-black uppercase tracking-widest text-text-muted transition-colors">{p.label}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+          </AnimatedSection>
 
-            {/* Fee rows */}
-            <div className="px-8 py-4">
-              {fees.map((row, i) => (
-                <motion.div
-                  key={row.range}
-                  className="relative flex items-center justify-between py-3.5 border-b border-border/40 last:border-0 cursor-default overflow-hidden rounded-lg"
-                  initial={{ opacity: 0, x: -16 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: 0.3 + i * 0.07, ease: [0.4, 0, 0.2, 1] }}
-                  whileHover={{ x: 4 }}
-                >
-                  {/* Row hover background */}
-                  <motion.div
-                    className="absolute inset-0 rounded-lg -mx-2 pointer-events-none"
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                    style={{ background: 'rgba(37,99,235,0.04)' }}
-                    transition={{ duration: 0.15 }}
-                  />
-                  {/* Left indicator */}
-                  <motion.div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-full bg-primary"
-                    initial={{ height: 0, opacity: 0 }}
-                    whileHover={{ height: 20, opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                  <div className="relative flex items-center gap-3 pl-2">
-                    <span className="text-[13.5px] text-text-muted font-medium transition-colors duration-150 group-hover:text-secondary">
-                      {row.range}
-                    </span>
-                  </div>
-                  <motion.span
-                    className="relative text-[14px] font-bold tabular-nums"
-                    whileHover={{ color: '#2563eb' }}
-                    transition={{ duration: 0.15 }}
-                    style={{ color: '#1e293b' }}
-                  >
-                    {row.fee}
-                  </motion.span>
-                </motion.div>
-              ))}
-
-              {/* Free row */}
-              <motion.div
-                className="relative flex items-center justify-between py-3.5 cursor-default overflow-hidden rounded-lg"
-                initial={{ opacity: 0, x: -16 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.3 + fees.length * 0.07, ease: [0.4, 0, 0.2, 1] }}
-                whileHover={{ x: 4 }}
-              >
-                <motion.div
-                  className="absolute inset-0 rounded-lg -mx-2 pointer-events-none"
-                  initial={{ opacity: 0 }}
-                  whileHover={{ opacity: 1 }}
-                  style={{ background: 'rgba(37,99,235,0.06)' }}
-                  transition={{ duration: 0.15 }}
-                />
-                <div className="relative flex items-center gap-3 pl-2">
-                  <Sparkles size={13} className="text-primary" />
-                  <span className="text-[13.5px] font-semibold text-primary">With referral credit</span>
+          {/* ── Right: Precision Fee Instrument ── */}
+          <AnimatedSection direction="right" delay={0.1}>
+            <div className="relative rounded-[36px] border border-border backdrop-blur-md p-10 lg:p-12 shadow-[0_8px_32px_rgba(0,0,0,0.02)] transition-colors duration-500"
+              style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+            >
+              <div className="flex items-center gap-3 mb-10">
+                <div className="w-8 h-8 rounded-lg bg-secondary text-primary flex items-center justify-center transition-colors">
+                  <Zap size={16} fill="currentColor" />
                 </div>
-                <span className="relative text-[14px] font-bold text-primary">Free</span>
-              </motion.div>
-            </div>
-
-            {/* Card footer */}
-            <div className="mx-8 mb-8 flex flex-col gap-2.5 pt-2">
-              {[
-                'One-time fee to go live — not a percentage',
-                'Pay via Wallet, UPI, or Card instantly',
-                'Zero commission on the final sale price',
-              ].map(text => (
-                <div key={text} className="flex items-start gap-2">
-                  <CheckCircle2 size={13} className="text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-[12px] text-text-muted leading-snug">{text}</span>
+                <div>
+                  <h4 className="text-lg font-black text-secondary uppercase tracking-tight transition-colors">Listing Fee</h4>
+                  <p className="text-[10px] font-extrabold text-text-muted tracking-[1px] uppercase transition-colors">Scalable Structure</p>
                 </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Right — Payment methods + security */}
-          <motion.div
-            className="rounded-3xl border border-border/70 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col"
-            {...enterAnim(3)}
-            whileHover={{
-              y: -5,
-              boxShadow: '0 12px 48px rgba(0,0,0,0.10)',
-              borderColor: 'rgba(37,99,235,0.2)',
-            }}
-            transition={{ type: 'spring', stiffness: 280, damping: 28 }}
-          >
-            {/* Card header */}
-            <div className="flex items-center gap-3 px-8 pt-8 pb-6 border-b border-border/50">
-              <motion.div
-                className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center"
-                whileHover={{ scale: 1.15, backgroundColor: 'rgba(37,99,235,0.18)' }}
-                transition={{ type: 'spring', stiffness: 380, damping: 22 }}
-              >
-                <CreditCard size={16} className="text-primary" />
-              </motion.div>
-              <div>
-                <p className="text-[14px] font-bold text-secondary leading-tight">Pay your way</p>
-                <p className="text-[11.5px] text-text-muted">All major payment methods accepted</p>
               </div>
-            </div>
 
-            {/* Payment tiles */}
-            <div className="px-8 py-6 grid grid-cols-2 gap-3 flex-1">
-              {payments.map((p, i) => (
-                <motion.div
-                  key={p.label}
-                  className="flex items-center gap-3 rounded-2xl border border-border/60 px-4 py-3.5 cursor-default"
-                  initial={{ opacity: 0, scale: 0.93 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.35, delay: 0.38 + i * 0.07, type: 'spring', stiffness: 340, damping: 24 }}
-                  whileHover={{
-                    y: -4,
-                    scale: 1.03,
-                    borderColor: 'rgba(37,99,235,0.3)',
-                    backgroundColor: 'rgba(37,99,235,0.025)',
-                    boxShadow: '0 6px 20px rgba(37,99,235,0.10)',
-                  }}
-                >
-                  <motion.div
-                    className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center flex-shrink-0"
-                    whileHover={{ backgroundColor: 'rgba(37,99,235,0.12)', scale: 1.1 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <p.icon size={16} className="text-text-muted group-hover:text-primary transition-colors" />
-                  </motion.div>
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-bold text-secondary leading-tight">{p.label}</p>
-                    <p className="text-[11px] text-text-muted leading-snug">{p.sub}</p>
+              <div className="space-y-4 mb-10">
+                {fees.map((row) => (
+                  <div key={row.range} className="flex items-center justify-between group">
+                    <span className="text-sm font-bold text-text-muted group-hover:text-secondary transition-colors">{row.range}</span>
+                    <div className="flex-1 border-b border-dotted border-border mx-4" />
+                    <span className="text-base font-black text-secondary transition-colors">{row.fee}</span>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+                ))}
+                
+                {/* Referrals highlight */}
+                <div className="pt-4 mt-6 border-t border-border">
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-primary text-white shadow-lg shadow-primary/20">
+                    <div className="flex items-center gap-2">
+                      <Sparkles size={14} className="animate-pulse" />
+                      <span className="text-xs font-black uppercase tracking-wider">Referral Credit</span>
+                    </div>
+                    <span className="text-sm font-black">₹0</span>
+                  </div>
+                </div>
+              </div>
 
-            {/* Security strip */}
-            <div className="mx-8 mb-8 rounded-2xl border border-border/60 overflow-hidden divide-y divide-border/60">
-              <motion.div
-                className="flex items-center gap-3 px-5 py-4 bg-blue-50/60 cursor-default"
-                whileHover={{ backgroundColor: 'rgba(219,234,254,0.8)', x: 3 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Shield size={15} className="text-blue-600 flex-shrink-0" />
-                <div>
-                  <p className="text-[12.5px] font-bold text-blue-700 leading-tight">Razorpay Secured</p>
-                  <p className="text-[11px] text-blue-500">PCI-DSS Level 1 certified</p>
-                </div>
-              </motion.div>
-              <motion.div
-                className="flex items-center gap-3 px-5 py-4 bg-emerald-50/60 cursor-default"
-                whileHover={{ backgroundColor: 'rgba(209,250,229,0.8)', x: 3 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Lock size={15} className="text-emerald-600 flex-shrink-0" />
-                <div>
-                  <p className="text-[12.5px] font-bold text-emerald-700 leading-tight">Bank-grade Encryption</p>
-                  <p className="text-[11px] text-emerald-500">256-bit TLS / SSL on all transactions</p>
-                </div>
-              </motion.div>
+              <p className="text-[11px] text-text-muted leading-relaxed italic transition-colors">
+                * Fees are one-time per listing and help us maintain high quality standards across the campus circle.
+              </p>
             </div>
-          </motion.div>
+          </AnimatedSection>
+
         </div>
 
-        {/* ── Referral strip ──────────────────────────────────────────── */}
-        <motion.div
-          className="relative rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/[0.04] via-primary/[0.025] to-transparent px-8 py-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 overflow-hidden cursor-default"
-          {...enterAnim(4)}
-          whileHover={{
-            y: -4,
-            borderColor: 'rgba(37,99,235,0.35)',
-            boxShadow: '0 10px 40px rgba(37,99,235,0.10)',
-          }}
-          transition={{ type: 'spring', stiffness: 280, damping: 28 }}
-        >
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse at 0% 50%, rgba(37,99,235,0.06), transparent 60%)' }}
-          />
-          <motion.div
-            className="relative w-11 h-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0"
-            whileHover={{ scale: 1.15, rotate: -8, backgroundColor: 'rgba(37,99,235,0.16)' }}
-            transition={{ type: 'spring', stiffness: 380, damping: 20 }}
+        {/* ── Bottom Strip: Referrals CTA ── */}
+        <AnimatedSection className="mt-12">
+          <div className="rounded-[32px] border border-border p-6 flex flex-col sm:flex-row items-center justify-between gap-6 hover:shadow-xl transition-all duration-500"
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
-            <Gift size={20} className="text-primary" />
-          </motion.div>
-          <div className="relative flex-1 min-w-0">
-            <p className="text-[14.5px] font-bold text-secondary mb-1">List for free with referrals</p>
-            <p className="text-[13px] text-text-muted leading-snug">
-              Invite a friend who signs up on Grid → you earn a free listing credit. Use credits to list items at zero cost, with no expiry.
-            </p>
+            <div className="flex items-center gap-6">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <Gift size={24} />
+              </div>
+              <div>
+                <p className="text-lg font-black text-secondary tracking-tight transition-colors">Don't want to pay? Refer a friend.</p>
+                <p className="text-sm text-text-muted font-medium transition-colors">Earn unlimited free listing credits by bringing peers to Grid.</p>
+              </div>
+            </div>
+            <motion.a 
+              href="/#download"
+              className="px-8 py-4 bg-primary text-white rounded-2xl font-black text-sm tracking-[2px] uppercase flex items-center gap-2 hover:gap-4 transition-all shadow-xl shadow-primary/20"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Get Credits <ArrowRight size={18} />
+            </motion.a>
           </div>
-          <motion.a
-            href="/#download"
-            className="relative flex items-center gap-1.5 text-[13px] font-semibold text-primary whitespace-nowrap"
-            whileHover={{ gap: '10px' }}
-            transition={{ duration: 0.2 }}
-          >
-            Start referring <ArrowRight size={14} />
-          </motion.a>
-        </motion.div>
+        </AnimatedSection>
 
       </div>
     </section>

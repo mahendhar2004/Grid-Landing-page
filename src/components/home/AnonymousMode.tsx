@@ -1,198 +1,183 @@
-import { EyeOff, UserX, ShieldCheck, MessageCircle, Unlock, Heart } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { EyeOff, UserRound, ShieldCheck, Lock, Sparkles, UserX } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
 import AnimatedSection from '../ui/AnimatedSection'
 
-const points = [
-  {
-    icon: UserX,
-    label: 'Identity hidden',
-    desc: 'Your name appears as "Anonymous Student" to all buyers — no trace back to you',
-  },
-  {
-    icon: EyeOff,
-    label: 'Photo masked',
-    desc: 'Profile picture is replaced — zero visual identity leak on your listing',
-  },
-  {
-    icon: ShieldCheck,
-    label: 'Still campus-verified',
-    desc: 'Buyers know you\'re a real, verified student — they just don\'t know who',
-  },
-  {
-    icon: MessageCircle,
-    label: 'Chat stays private',
-    desc: 'Negotiate the full deal in-chat without ever revealing yourself',
-  },
-  {
-    icon: Unlock,
-    label: 'Reveal on your terms',
-    desc: 'Unmask yourself only if and when you\'re comfortable — entirely your choice',
-  },
-]
-
-const enter = (i: number) => ({
-  initial: { opacity: 0, x: -20 },
-  whileInView: { opacity: 1, x: 0 },
-  viewport: { once: true as const },
-  transition: { duration: 0.5, delay: 0.2 + i * 0.08, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
-})
-
 export default function AnonymousMode() {
+  const [isAnonymous, setIsAnonymous] = useState(true)
+
   return (
-    <section id="anonymous" className="py-16 lg:py-24">
+    <section id="anonymous" className="py-24 lg:py-32 relative overflow-hidden transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-6">
-        <AnimatedSection direction="scale">
-          <div
-            className="relative rounded-[36px] overflow-hidden border border-white/[0.07]"
-            style={{ background: 'linear-gradient(135deg, #0a0814 0%, #09090b 50%, #080c18 100%)' }}
+        <AnimatedSection direction="up" className="text-center mb-16 lg:mb-24">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 mb-6 transition-colors">
+            <Lock size={12} />
+            <span className="text-[10px] font-black uppercase tracking-widest leading-none">Privacy at Core</span>
+          </div>
+          <h2 className="text-4xl sm:text-6xl font-black text-secondary tracking-tight leading-[1.1] mb-6 transition-colors">
+            Your Identity.<br /><span className="text-primary">Your Terms.</span>
+          </h2>
+          <p className="text-text-muted text-lg max-w-xl mx-auto transition-colors">
+            Grid's signature Anonymous Mode lets you list items without revealing who you are. One toggle, total privacy.
+          </p>
+        </AnimatedSection>
+
+        <div className="relative max-w-5xl mx-auto">
+          {/* Glass Container */}
+          <div className="relative rounded-[48px] border p-8 lg:p-16 overflow-hidden transition-colors duration-500 shadow-xl"
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
-            {/* Glow orbs */}
-            <motion.div
-              className="absolute -top-24 -right-24 w-80 h-80 rounded-full pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle, rgba(139,92,246,0.18), transparent 70%)',
-                filter: 'blur(80px)',
-              }}
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-            />
-            <motion.div
-              className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle, rgba(37,99,235,0.12), transparent 70%)',
-                filter: 'blur(70px)',
-              }}
-              animate={{ scale: [1, 1.12, 1] }}
-              transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
-            />
-            <div
-              className="absolute inset-0 opacity-[0.03] pointer-events-none"
-              style={{
-                backgroundImage:
-                  'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.9) 1px, transparent 0)',
-                backgroundSize: '28px 28px',
-              }}
-            />
-
-            <div className="relative grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-white/[0.06]">
-
-              {/* ── Left: copy + feature list ── */}
-              <div className="p-10 lg:p-14 flex flex-col justify-center">
-                <span className="inline-block text-violet-400 font-bold text-xs tracking-[3px] uppercase mb-5">
-                  Anonymous Mode
-                </span>
-                <h2 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight mb-4">
-                  Sell Freely.<br />
-                  <span className="text-violet-400">Stay Hidden.</span>
-                </h2>
-                <p className="text-white/40 text-base max-w-md mb-10 leading-relaxed">
-                  One toggle. Full privacy. Sell anything without revealing who you are — your identity is completely yours to control.
-                </p>
-
-                <div className="space-y-3">
-                  {points.map((p, i) => (
-                    <motion.div
-                      key={p.label}
-                      {...enter(i)}
-                      className="flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-5 py-4"
+            {/* Minimal Background accents */}
+            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
+            
+            <div className="relative grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+              
+              {/* ── Left: The Logic ── */}
+              <div className="order-2 lg:order-1">
+                <div className="space-y-10 group">
+                  <div className="flex gap-5 items-start">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-all duration-500"
+                      style={{ backgroundColor: 'var(--color-primary-soft)', color: 'var(--color-primary)' }}
                     >
-                      <div className="w-8 h-8 rounded-xl bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <p.icon size={15} className="text-violet-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-white/75 leading-tight mb-0.5">{p.label}</p>
-                        <p className="text-xs text-white/35 leading-snug">{p.desc}</p>
-                      </div>
-                    </motion.div>
-                  ))}
+                      <UserX size={20} />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-secondary mb-2 transition-colors">Masked Avatar</h4>
+                      <p className="text-text-muted text-sm leading-relaxed transition-colors">Your real DP and name are instantly replaced with a sleek, anonymous ghost identity across the entire campus.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-5 items-start">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-all duration-500"
+                      style={{ backgroundColor: 'var(--color-primary-soft)', color: 'var(--color-primary)' }}
+                    >
+                      <ShieldCheck size={20} />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-secondary mb-2 transition-colors">Campus Trust</h4>
+                      <p className="text-text-muted text-sm leading-relaxed transition-colors">Even while hidden, you keep your student status. Buyers trust you're a real student, without knowing your branch or year.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-5 items-start">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-all duration-500"
+                      style={{ backgroundColor: 'var(--color-primary-soft)', color: 'var(--color-primary)' }}
+                    >
+                      <Sparkles size={20} />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-secondary mb-2 transition-colors">Instant Reveal</h4>
+                      <p className="text-text-muted text-sm leading-relaxed transition-colors">Closing the deal? Reveal your identity only when you're comfortable. Total control from listing to final pickup.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* ── Right: mock listing card ── */}
-              <div className="p-10 lg:p-14 flex flex-col justify-center items-center gap-6">
-
-                <motion.div
-                  className="w-full max-w-sm rounded-3xl border border-white/[0.1] bg-white/[0.04] overflow-hidden"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              {/* ── Right: The Interactive Toggle Experience ── */}
+              <div className="order-1 lg:order-2 flex flex-col items-center">
+                <div className="relative w-full max-w-[320px] aspect-[4/5] rounded-[40px] border p-6 flex flex-col items-center justify-center overflow-hidden transition-all duration-500 shadow-2xl"
+                  style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
                 >
-                  {/* Image area */}
-                  <div className="w-full h-44 bg-white/[0.04] relative flex items-center justify-center">
-                    <span className="text-5xl select-none">💻</span>
-                    {/* Anonymous badge */}
-                    <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-violet-500/20 border border-violet-500/30 rounded-full px-3 py-1">
-                      <EyeOff size={10} className="text-violet-400" />
-                      <span className="text-violet-400 text-[10px] font-bold">Anonymous</span>
-                    </div>
-                  </div>
+                  
+                  {/* Floating Elements Animation */}
+                  <AnimatePresence mode="wait">
+                    {isAnonymous ? (
+                      <motion.div
+                        key="anon"
+                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 1.1, y: -10 }}
+                        className="flex flex-col items-center"
+                      >
+                        <div className="w-24 h-24 rounded-full flex items-center justify-center mb-6 relative transition-colors"
+                          style={{ backgroundColor: 'var(--color-primary-soft)', border: '4px solid var(--color-border)' }}
+                        >
+                          <motion.div 
+                            className="absolute inset-0 rounded-full border-2 border-primary/40"
+                            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          />
+                          <UserX size={40} className="text-primary" />
+                        </div>
+                        <h5 className="text-xl font-black text-secondary leading-none mb-2 tracking-tight transition-colors">Anonymous Student</h5>
+                        <p className="text-text-muted text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 px-3 py-1 rounded-full border transition-colors"
+                          style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+                        >
+                          <EyeOff size={10} /> IDENTITY MASKED
+                        </p>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="visible"
+                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 1.1, y: -10 }}
+                        className="flex flex-col items-center"
+                      >
+                        <div className="w-24 h-24 rounded-full border-4 flex items-center justify-center mb-6 overflow-hidden shadow-inner transition-colors"
+                          style={{ borderColor: 'var(--color-border)' }}
+                        >
+                          <img 
+                            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=256&h=256&auto=format&fit=crop" 
+                            alt="User" 
+                            className="w-full h-full object-cover" 
+                          />
+                        </div>
+                        <h5 className="text-xl font-black text-secondary leading-none mb-2 tracking-tight transition-colors">Aryan Sharma</h5>
+                        <p className="text-primary text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 px-3 py-1 rounded-full border transition-colors"
+                          style={{ backgroundColor: 'var(--color-primary-soft)', borderColor: 'var(--color-primary)' }}
+                        >
+                           B.Tech · 3rd Year
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                  {/* Card body */}
-                  <div className="p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="text-white/80 font-bold text-base leading-tight">MacBook Pro M1</p>
-                        <p className="text-white/35 text-xs mt-0.5">2021 · 16GB · 512GB SSD</p>
-                      </div>
-                      <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold px-2.5 py-1 rounded-full">
-                        Excellent
+                  {/* The Premium Toggle */}
+                  <div className="absolute bottom-8 w-[80%]">
+                    <button 
+                      onClick={() => setIsAnonymous(!isAnonymous)}
+                      className={`w-full group h-12 rounded-2xl relative flex items-center px-1.5 transition-all duration-500 shadow-inner ${
+                        isAnonymous ? 'bg-primary shadow-primary/50' : 'bg-muted'
+                      }`}
+                    >
+                      <motion.div
+                        layout
+                        className="w-[45%] h-[80%] bg-white rounded-xl shadow-lg flex items-center justify-center gap-2"
+                        animate={{ x: isAnonymous ? '118%' : '0%' }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                      >
+                        {isAnonymous ? (
+                          <>
+                            <UserX size={14} className="text-violet-600" />
+                            <span className="text-[10px] font-black text-violet-600 tracking-tight">HIDDEN</span>
+                          </>
+                        ) : (
+                          <>
+                            <UserRound size={14} className="text-slate-400" />
+                            <span className="text-[10px] font-black text-slate-400 tracking-tight">SHOWN</span>
+                          </>
+                        )}
+                      </motion.div>
+                      <span className={`flex-1 text-[11px] font-bold transition-all duration-500 ${isAnonymous ? 'text-white/40 ml-4' : 'text-text-muted mr-4 text-right'}`}>
+                        {isAnonymous ? 'Tap to Reveal' : 'Go Stealth'}
                       </span>
-                    </div>
-
-                    <p className="text-white font-extrabold text-2xl mb-4">₹72,000</p>
-
-                    {/* Seller row */}
-                    <div className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.03] px-4 py-3 mb-4">
-                      {/* Pulsing ghost avatar */}
-                      <div className="relative w-8 h-8 flex-shrink-0">
-                        <motion.div
-                          className="absolute inset-0 rounded-full bg-violet-500/30"
-                          animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
-                          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                        />
-                        <div className="relative w-8 h-8 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center">
-                          <UserX size={14} className="text-violet-400" />
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-white/60 text-xs font-bold leading-tight">Anonymous Student</p>
-                        <div className="flex items-center gap-1 mt-0.5">
-                          <ShieldCheck size={9} className="text-emerald-400" />
-                          <p className="text-emerald-400 text-[10px]">Campus Verified</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action buttons */}
-                    <div className="flex gap-2.5">
-                      <button className="flex-1 bg-primary/90 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5">
-                        <MessageCircle size={12} />
-                        Message Seller
-                      </button>
-                      <button className="w-10 h-10 rounded-xl border border-white/10 bg-white/[0.04] flex items-center justify-center flex-shrink-0">
-                        <Heart size={14} className="text-white/40" />
-                      </button>
-                    </div>
+                    </button>
                   </div>
-                </motion.div>
+                </div>
 
-                {/* Info chip */}
-                <motion.div
-                  className="flex items-center gap-2.5 bg-white/[0.05] border border-violet-500/20 rounded-2xl px-5 py-3"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.5 }}
+                {/* Subtle detail text */}
+                <motion.p 
+                  className="mt-6 text-[11px] text-text-muted font-medium transition-colors"
+                  animate={{ opacity: isAnonymous ? 1 : 0.5 }}
                 >
-                  <div className="w-1.5 h-1.5 rounded-full bg-violet-400 flex-shrink-0" />
-                  <p className="text-white/40 text-xs">Real identity never shared — with buyers or with Grid</p>
-                </motion.div>
-
+                  {isAnonymous ? "Masked identity is active for this listing." : "Listing as Aryan Sharma (Trusted Student)."}
+                </motion.p>
               </div>
+
             </div>
           </div>
-        </AnimatedSection>
+        </div>
       </div>
     </section>
   )

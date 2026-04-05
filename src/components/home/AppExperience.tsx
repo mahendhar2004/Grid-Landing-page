@@ -1,126 +1,137 @@
-import { Zap, Sparkles, Layers, Search, MessageCircle, GraduationCap, MapPin, BadgeCheck, Building2, Wand2, Vibrate, ImageIcon } from 'lucide-react'
+import { Zap, Sparkles, ShieldCheck, Gauge, MousePointer2 } from 'lucide-react'
 import AnimatedSection from '../ui/AnimatedSection'
 
-const cards = [
+const experiencePillars = [
   {
     icon: Zap,
-    title: 'Blazing Fast',
-    description: 'A feed that loads instantly, search that responds as you type, and messages that arrive in real-time.',
-    accent: {
-      icon: 'bg-blue-500/15 text-blue-400',
-      row: 'border-blue-500/15 bg-blue-500/[0.06]',
-      dot: 'bg-blue-500/20 text-blue-400',
-      value: 'text-blue-300 bg-blue-500/10 border-blue-500/20',
-    },
-    rows: [
-      { icon: Layers,        label: 'Feed loads in',      value: '< 1s'      },
-      { icon: Search,        label: 'Search responds in', value: '< 300ms'   },
-      { icon: MessageCircle, label: 'Message delivery',   value: 'Real-time' },
-    ],
-    glow: { pos: '-top-20 -left-20', color: 'rgba(0,123,255,0.2)' },
-    bg: 'linear-gradient(145deg, #080c18 0%, #0a0e20 100%)',
+    title: 'Performance',
+    subtitle: 'Blazing Fast Feed',
+    description: 'Engineered for speed. A feed that loads instantly, search that responds as you type, and real-time synchronization across all your campus devices.',
+    metric: '< 100ms',
+    metricLabel: 'Response Time',
+    color: 'blue'
   },
   {
-    icon: GraduationCap,
-    title: 'Campus-Only Access',
-    description: 'Every listing, every chat, every deal — exclusively within your verified college community. No outsiders.',
-    accent: {
-      icon: 'bg-teal-500/15 text-teal-400',
-      row: 'border-teal-500/15 bg-teal-500/[0.06]',
-      dot: 'bg-teal-500/20 text-teal-400',
-      value: 'text-teal-300 bg-teal-500/10 border-teal-500/20',
-    },
-    rows: [
-      { icon: MapPin,       label: 'Marketplace scope',  value: 'Your campus'  },
-      { icon: BadgeCheck,   label: 'Buyer verification', value: 'Student only' },
-      { icon: Building2,    label: 'Colleges covered',   value: '885+'         },
-    ],
-    glow: { pos: '-top-20 left-1/2 -translate-x-1/2', color: 'rgba(20,184,166,0.15)' },
-    bg: 'linear-gradient(145deg, #060e0d 0%, #080b0a 100%)',
+    icon: ShieldCheck,
+    title: 'Trust',
+    subtitle: 'Campus Circles Only',
+    description: 'Every listing, chat, and deal is gated within your exclusive college community. No outsiders, no spam — just your trusted circle.',
+    metric: '100%',
+    metricLabel: 'Student Only',
+    color: 'emerald'
   },
   {
     icon: Sparkles,
-    title: 'Beautifully Designed',
-    description: 'Every screen, every animation, every tap is crafted to feel effortless. Not just functional — a joy.',
-    accent: {
-      icon: 'bg-violet-500/15 text-violet-400',
-      row: 'border-violet-500/15 bg-violet-500/[0.06]',
-      dot: 'bg-violet-500/20 text-violet-400',
-      value: 'text-violet-300 bg-violet-500/10 border-violet-500/20',
-    },
-    rows: [
-      { icon: Wand2,   label: 'Animations',      value: 'Native smooth' },
-      { icon: Vibrate, label: 'Haptic feedback',  value: 'Every tap'    },
-      { icon: ImageIcon, label: 'Multi-image listings', value: 'Up to 5'   },
-    ],
-    glow: { pos: '-top-20 -right-20', color: 'rgba(139,92,246,0.2)' },
-    bg: 'linear-gradient(145deg, #0d0814 0%, #090810 100%)',
-  },
+    title: 'Craftsmanship',
+    subtitle: 'Native Smoothness',
+    description: 'Every screen and animation is crafted to feel effortless. Native-grade fluidity with haptic feedback that makes every deal a joy.',
+    metric: '60 FPS',
+    metricLabel: 'Fluid Motion',
+    color: 'violet'
+  }
 ]
+
+const colorStyles: Record<string, any> = {
+  blue: {
+    bg: 'bg-blue-50',
+    icon: 'text-blue-600',
+    border: 'border-blue-100',
+    metricBg: 'bg-blue-600',
+    glow: 'from-blue-200/20'
+  },
+  emerald: {
+    bg: 'bg-emerald-50',
+    icon: 'text-emerald-600',
+    border: 'border-emerald-100',
+    metricBg: 'bg-emerald-600',
+    glow: 'from-emerald-200/20'
+  },
+  violet: {
+    bg: 'bg-violet-50',
+    icon: 'text-violet-600',
+    border: 'border-violet-100',
+    metricBg: 'bg-violet-600',
+    glow: 'from-violet-200/20'
+  }
+}
 
 export default function AppExperience() {
   return (
-    <section className="py-24 lg:py-32">
+    <section id="experience" className="py-24 lg:py-32 relative overflow-hidden transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-6">
-
-        <AnimatedSection className="text-center mb-16">
-          <span className="inline-block text-primary font-bold text-sm tracking-wide uppercase mb-4">The Grid Experience</span>
-          <h2 className="text-4xl sm:text-5xl font-extrabold text-secondary mb-5">
-            Built for <span className="text-primary">Students</span>, By Design.
+        
+        <AnimatedSection direction="up" className="text-center mb-16 lg:mb-24">
+          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border transition-colors duration-700 ${'bg-surface/50 border-border text-text-muted'}`}>
+            <Gauge size={12} />
+            <span className="text-[10px] font-black uppercase tracking-widest leading-none">Engineered for Excellence</span>
+          </div>
+          <h2 className="text-4xl sm:text-6xl font-black text-secondary tracking-tight leading-[1.1] mb-6 transition-colors">
+            Built for Students.<br /><span className="text-primary">Optimized for Life.</span>
           </h2>
-          <p className="text-text-muted text-lg max-w-2xl mx-auto">
-            Fast. Campus-focused. Beautifully crafted. Every detail engineered around how students actually live.
+          <p className="text-text-muted text-lg max-w-xl mx-auto leading-relaxed transition-colors">
+            We stripped away the complexity of traditional marketplaces to build an experience that's fast, focused, and undeniably premium.
           </p>
         </AnimatedSection>
 
-        <div className="grid lg:grid-cols-3 gap-5">
-          {cards.map((card, i) => (
-            <AnimatedSection key={card.title} delay={i * 0.07}>
-              <div
-                className="relative rounded-3xl overflow-hidden border border-white/[0.08] h-full flex flex-col p-8"
-                style={{ background: card.bg }}
-              >
-                {/* Glow */}
-                <div
-                  className={`absolute ${card.glow.pos} w-56 h-56 rounded-full pointer-events-none`}
-                  style={{ background: `radial-gradient(circle, ${card.glow.color}, transparent 70%)`, filter: 'blur(60px)' }}
-                />
+        <div className="grid lg:grid-cols-3 gap-8 relative">
+          {experiencePillars.map((p, i) => {
+            const s = colorStyles[p.color]
+            return (
+              <AnimatedSection key={p.title} delay={i * 0.1} direction="up" className="h-full">
+                <div 
+                  className="group relative h-full rounded-[40px] border p-8 lg:p-10 transition-all duration-500 hover:shadow-2xl flex flex-col overflow-hidden"
+                  style={{
+                    backgroundColor: 'var(--color-surface)',
+                    borderColor: 'var(--color-border)'
+                  }}
+                >
+                  
+                  {/* Subtle Glow Ascent */}
+                  <div className={`absolute inset-0 bg-gradient-to-b ${s.glow} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
 
-                <div className="relative flex flex-col h-full">
-                  {/* Icon */}
-                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-6 ${card.accent.icon}`}>
-                    <card.icon size={20} />
-                  </div>
-
-                  {/* Title + description */}
-                  <h3 className="text-xl font-extrabold text-white mb-2.5">{card.title}</h3>
-                  <p className="text-white/40 text-sm leading-relaxed mb-8">{card.description}</p>
-
-                  {/* Rows — identical structure across all cards */}
-                  <div className="mt-auto space-y-2.5">
-                    {card.rows.map((row) => (
-                      <div
-                        key={row.label}
-                        className={`flex items-center justify-between rounded-2xl border px-4 py-3 ${card.accent.row}`}
+                  <div className="relative z-10 flex flex-col h-full">
+                    {/* Header: Icon + Title */}
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-500"
+                        style={{ backgroundColor: 'var(--color-primary-soft)', color: 'var(--color-primary)' }}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${card.accent.dot}`}>
-                            <row.icon size={12} />
-                          </div>
-                          <span className="text-white/50 text-xs font-medium">{row.label}</span>
-                        </div>
-                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border ${card.accent.value}`}>
-                          {row.value}
-                        </span>
+                        <p.icon size={22} />
                       </div>
-                    ))}
+                      <div>
+                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-0.5 text-primary`}>{p.title}</p>
+                        <h3 className="text-xl font-bold text-secondary leading-none transition-colors">{p.subtitle}</h3>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-text-muted text-sm leading-relaxed mb-10 flex-1 transition-colors">
+                      {p.description}
+                    </p>
+
+                    {/* Highly Premium Stat/Metric View */}
+                    <div className="mt-auto pt-8 border-t border-border/50">
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1 transition-colors">{p.metricLabel}</p>
+                          <div className="flex items-center gap-1.5">
+                            <div className={`w-1.5 h-1.5 rounded-full bg-primary animate-pulse`} />
+                            <span className="text-2xl font-black text-secondary tabular-nums tracking-tighter transition-colors">{p.metric}</span>
+                          </div>
+                        </div>
+                        <div className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-text-muted group-hover:text-primary group-hover:border-primary/20 transition-all duration-500">
+                          <MousePointer2 size={16} />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </AnimatedSection>
-          ))}
+              </AnimatedSection>
+            )
+          })}
         </div>
 
+        {/* Global Accent Background Orb (Subtle) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/[0.03] rounded-full blur-[120px] -z-10 transition-opacity" />
       </div>
     </section>
   )

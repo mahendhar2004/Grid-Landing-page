@@ -7,7 +7,7 @@ const steps = [
     number: '01',
     icon: UserCheck,
     title: 'Sign Up Instantly',
-    description: "Create your account with Google in seconds. Select your college, set your graduation year, and you're verified.",
+    description: "Create your account with Google in seconds. Select your college, set your graduation year, and you're all set.",
     tag: 'Free & instant',
   },
   {
@@ -49,13 +49,13 @@ export default function HowItWorks() {
   }, [userHovered])
 
   return (
-    <section id="how-it-works" className="py-24 lg:py-32 bg-white relative overflow-hidden">
+    <section id="how-it-works" className="py-24 lg:py-32 relative overflow-hidden transition-colors duration-500">
 
       {/* Dot-grid texture */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none opacity-[0.4]"
         style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0)',
+          backgroundImage: 'radial-gradient(circle at 1px 1px, var(--color-text-muted) 1px, transparent 0)',
           backgroundSize: '28px 28px',
         }}
       />
@@ -73,10 +73,10 @@ export default function HowItWorks() {
           <span className="inline-block text-primary font-bold text-sm tracking-wide uppercase mb-4">
             Getting Started
           </span>
-          <h2 className="text-4xl sm:text-5xl font-extrabold text-secondary mb-5">
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-secondary mb-5 transition-colors">
             How <span className="text-primary">Grid</span> Works
           </h2>
-          <p className="text-text-muted text-lg max-w-2xl mx-auto">
+          <p className="text-text-muted text-lg max-w-2xl mx-auto transition-colors">
             Four simple steps from signup to sealed deal. It's that easy.
           </p>
         </motion.div>
@@ -91,11 +91,11 @@ export default function HowItWorks() {
                   onClick={() => { setActiveStep(i); setUserHovered(true) }}
                   className="relative w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-bold z-10 transition-colors duration-300 cursor-pointer"
                   animate={{
-                    backgroundColor: activeStep === i ? 'var(--color-primary, #2563eb)' : '#ffffff',
-                    color: activeStep === i ? '#ffffff' : '#9ca3af',
+                    backgroundColor: activeStep === i ? 'var(--color-primary)' : 'var(--color-surface)',
+                    color: activeStep === i ? '#ffffff' : 'var(--color-text-muted)',
                     boxShadow: activeStep === i
-                      ? '0 0 0 4px rgba(37,99,235,0.15)'
-                      : '0 0 0 1px rgba(0,0,0,0.10)',
+                      ? '0 0 0 4px var(--color-primary-soft)'
+                      : '0 0 0 1px var(--color-border)',
                   }}
                   transition={{ duration: 0.3 }}
                 >
@@ -104,7 +104,7 @@ export default function HowItWorks() {
 
                 {/* Connector line */}
                 {i < steps.length - 1 && (
-                  <div className="w-32 h-[2px] bg-gray-100 relative overflow-hidden mx-1">
+                  <div className="w-32 h-[2px] bg-border relative overflow-hidden mx-1">
                     <motion.div
                       className="absolute inset-y-0 left-0 bg-primary origin-left"
                       animate={{ scaleX: activeStep > i ? 1 : 0 }}
@@ -132,22 +132,36 @@ export default function HowItWorks() {
                 className="cursor-default"
               >
                 <motion.div
-                  className="relative bg-white rounded-2xl p-6 h-full overflow-hidden"
+                  className="relative rounded-2xl p-6 h-full overflow-hidden transition-colors duration-500 border"
+                  style={{
+                    backgroundColor: 'var(--color-surface)',
+                    borderColor: 'var(--color-border)'
+                  }}
                   animate={{
                     y: isActive ? -6 : 0,
                     boxShadow: isActive
-                      ? '0 0 0 1.5px rgba(37,99,235,0.2), 0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05)'
-                      : '0 0 0 1px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04)',
+                      ? '0 0 0 1.5px var(--color-primary-soft), 0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05)'
+                      : '0 0 0 1px var(--color-border), 0 2px 8px rgba(0,0,0,0.04)',
                   }}
                   transition={{ type: 'spring', stiffness: 300, damping: 28 }}
                 >
-                  {/* Ghost step number */}
-                  <div
-                    className="absolute -bottom-2 -right-1 text-[88px] font-black leading-none select-none pointer-events-none transition-colors duration-300"
-                    style={{ color: isActive ? 'rgba(37,99,235,0.06)' : 'rgba(0,0,0,0.04)' }}
+                  {/* Maximum Intensity Ghost step number — Deep Cut Positioning */}
+                  <motion.div
+                    key={`${step.number}-${isActive}`}
+                    className="absolute -bottom-4 -right-2 text-[104px] font-black leading-none select-none pointer-events-none"
+                    initial={{ opacity: isActive ? 0.02 : 0.04 }}
+                    animate={{ opacity: isActive ? 0.7 : 0.04 }}
+                    transition={{ 
+                      duration: 2.2, 
+                      ease: [0.65, 0, 0.35, 1], // Deep cubic-bezier for a slow-build, heavy finish
+                    }}
+                    style={{ 
+                      color: 'var(--color-primary)',
+                      transformOrigin: 'bottom right'
+                    }}
                   >
                     {step.number}
-                  </div>
+                  </motion.div>
 
                   {/* Active top accent line */}
                   <motion.div
@@ -162,35 +176,31 @@ export default function HowItWorks() {
                     <motion.div
                       className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-colors duration-300"
                       animate={{
-                        backgroundColor: isActive ? 'rgba(37,99,235,0.10)' : 'rgba(0,0,0,0.04)',
+                        backgroundColor: isActive ? 'var(--color-primary-soft)' : 'var(--color-border)',
                         scale: isActive ? 1.08 : 1,
                       }}
                       transition={{ type: 'spring', stiffness: 380, damping: 22 }}
-                      style={{ color: isActive ? '#2563eb' : '#9ca3af' }}
+                      style={{ color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)' }}
                     >
                       <step.icon size={22} />
                     </motion.div>
 
                     {/* Title */}
-                    <motion.h3
-                      className="text-[15px] font-bold mb-2 leading-snug"
-                      animate={{ color: isActive ? '#111827' : '#374151' }}
-                      transition={{ duration: 0.2 }}
-                    >
+                    <h3 className={`text-[15px] font-bold mb-2 leading-snug transition-colors duration-500 ${isActive ? 'text-primary' : 'text-secondary'}`}>
                       {step.title}
-                    </motion.h3>
+                    </h3>
 
                     {/* Description */}
-                    <p className="text-[12.5px] text-text-muted leading-relaxed mb-4">
+                    <p className="text-[12.5px] text-text-muted leading-relaxed mb-4 transition-colors duration-500">
                       {step.description}
                     </p>
 
                     {/* Tag */}
                     <motion.span
-                      className="inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full transition-colors duration-300"
+                      className="inline-block text-[11px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full transition-colors duration-300"
                       animate={{
-                        backgroundColor: isActive ? 'rgba(37,99,235,0.09)' : 'rgba(0,0,0,0.04)',
-                        color: isActive ? '#2563eb' : '#9ca3af',
+                        backgroundColor: isActive ? 'var(--color-primary-soft)' : 'var(--color-border)',
+                        color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
                       }}
                       transition={{ duration: 0.25 }}
                     >
@@ -212,7 +222,7 @@ export default function HowItWorks() {
               className="h-1.5 rounded-full"
               animate={{
                 width: activeStep === i ? 24 : 8,
-                backgroundColor: activeStep === i ? '#2563eb' : '#d1d5db',
+                backgroundColor: activeStep === i ? 'var(--color-primary)' : 'var(--color-border)',
               }}
               transition={{ duration: 0.3 }}
             />

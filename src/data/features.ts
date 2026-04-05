@@ -7,14 +7,14 @@ export const features = [
   {
     icon: School,
     title: 'College-Scoped',
-    description: 'Items are visible only within your campus. Browse, buy, and sell exclusively with verified students from your own college.',
+    description: 'Items are visible only within your campus. Browse, buy, and sell exclusively with actual students from your own college.',
     color: 'blue' as const,
   },
   {
-    icon: Layers,
-    title: '112+ Categories',
-    description: 'From laptops and textbooks to gym gear, induction cooktops, and mini-fridges — everything a student could need across 8 specialized groups.',
-    color: 'orange' as const,
+    icon: HandCoins, // Using HandCoins for Zero Commission
+    title: 'Zero Commission',
+    description: "Keep 100% of your earnings. We don't take a cut from your sales — campus commerce, simplified and student-friendly.",
+    color: 'emerald' as const,
   },
   {
     icon: MessageCircle,
@@ -23,40 +23,22 @@ export const features = [
     color: 'green' as const,
   },
   {
-    icon: HandCoins,
+    icon: Layers, 
     title: 'Make an Offer',
     description: 'Negotiate directly in-chat. Send an offer, counter-offer, or accept a deal — the full buying flow without ever leaving the app.',
     color: 'cyan' as const,
   },
   {
-    icon: SlidersHorizontal,
-    title: 'Smart Filters',
-    description: 'Find exactly what you need. Filter by category, price range, and condition. Sort by newest, price, or popularity.',
-    color: 'purple' as const,
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Secure Payments',
-    description: 'Pay listing fees securely through Razorpay or use your Grid Wallet. Multiple payment options for a seamless experience.',
-    color: 'teal' as const,
-  },
-  {
-    icon: Heart,
-    title: 'Wishlist — "The Stash"',
-    description: 'Save items you love and come back to them later. Build your personal stash and never miss a great deal on campus.',
-    color: 'pink' as const,
-  },
-  {
-    icon: Archive,
-    title: 'Chat Archive',
-    description: 'Tidy up your inbox without losing history. Archive any conversation and bring it back instantly — your messages are always safe.',
-    color: 'rose' as const,
-  },
-  {
     icon: EyeOff,
     title: 'Anonymous Listings',
-    description: 'Want to sell discreetly? List items without revealing your identity. Your privacy, your choice.',
+    description: 'Want to sell discreetly? List items without revealing your identity. Perfect for personal items or when you want to keep it low-key.',
     color: 'slate' as const,
+  },
+  {
+    icon: Layers,
+    title: '112+ Categories',
+    description: 'From laptops and textbooks to gym gear, induction cooktops, and mini-fridges — everything a student could need across 8 specialized groups.',
+    color: 'orange' as const,
   },
   {
     icon: Sparkles,
@@ -65,10 +47,34 @@ export const features = [
     color: 'violet' as const,
   },
   {
+    icon: Heart,
+    title: 'Wishlist — "The Stash"',
+    description: 'Save items you love and come back to them later. Build your personal stash and never miss a great deal on campus.',
+    color: 'pink' as const,
+  },
+  {
+    icon: SlidersHorizontal,
+    title: 'Smart Filters',
+    description: 'Find exactly what you need. Filter by category, price range, and condition. Sort by newest, price, or popularity.',
+    color: 'purple' as const,
+  },
+  {
+    icon: Archive,
+    title: 'Chat Archive',
+    description: 'Tidy up your inbox without losing history. Archive any conversation and bring it back instantly — your messages are always safe.',
+    color: 'rose' as const,
+  },
+  {
     icon: Gift,
     title: 'Referral Rewards',
     description: 'Invite your batchmates and earn free listing credits. The more friends you bring, the more you save.',
     color: 'amber' as const,
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Grid Wallet',
+    description: 'Manage your earnings and pay for deals instantly with the built-in Grid Wallet. A seamless, secure financial hub for campus deals.',
+    color: 'indigo' as const,
   },
 ]
 

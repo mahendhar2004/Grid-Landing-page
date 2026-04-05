@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Star, ShieldCheck, ArrowRight, Heart, Sparkles } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
+import AnimatedSection from '../components/ui/AnimatedSection'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -55,13 +58,13 @@ export default function ReviewPage() {
     e.preventDefault()
     setError(null)
     if (form.honeypot) return
-    if (isRateLimited()) { setError('Please wait a moment before submitting another review.'); return }
+    if (isRateLimited()) { setError('Please wait a moment before submitting again.'); return }
     if (!form.name.trim() || !form.email.trim() || !form.feedback.trim()) {
       setError('Please fill in all required fields.')
       return
     }
-    if (!isValidEmail(form.email.trim())) { setError('Please enter a valid email address.'); return }
-    if (form.rating < 1 || form.rating > 5 || !Number.isInteger(form.rating)) {
+    if (!isValidEmail(form.email.trim())) { setError('Invalid email address.'); return }
+    if (form.rating < 1 || form.rating > 5) {
       setError('Please select a star rating.')
       return
     }
@@ -91,203 +94,219 @@ export default function ReviewPage() {
     setError(null)
   }
 
-  // ── Success ──────────────────────────────────────────────────────────────────
-
+  // ── Success View ──
   if (submitted) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center px-6 py-20">
-        <div className="max-w-sm w-full text-center">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center mx-auto mb-6 shadow-[0_20px_40px_rgba(0,123,255,0.3)]">
-            <svg className="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+      <div className="min-h-screen flex items-center justify-center px-6 py-20 transition-colors duration-1000 relative"
+        style={{ backgroundColor: 'var(--color-bg-page)' }}
+      >
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full text-center relative z-10 p-12 rounded-[40px] border shadow-2xl transition-all duration-1000"
+          style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+        >
+          <div className="w-20 h-20 rounded-[28px] flex items-center justify-center mx-auto mb-8 shadow-xl transition-colors"
+            style={{ backgroundColor: 'var(--color-primary-soft)', color: 'var(--color-primary)' }}
+          >
+            <Heart size={32} />
           </div>
-          <h2 className="text-2xl font-extrabold text-secondary tracking-tight mb-3">Thanks for the review!</h2>
-          <p className="text-text-muted text-sm leading-relaxed mb-8">
-            Your feedback has been submitted. Our team will review it and may feature it on our homepage.
+          <h2 className="text-3xl font-bold text-secondary tracking-tight mb-4 transition-colors">Shared with love</h2>
+          <p className="text-text-muted text-base leading-relaxed mb-10 transition-colors">
+            Thank you for sharing your experience. Your feedback helps the entire campus community thrive on Grid.
           </p>
           <button
             onClick={resetForm}
-            className="text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
+            className="flex items-center gap-2 mx-auto text-sm font-bold text-primary hover:text-primary-dark transition-all"
           >
-            Submit another review →
+            Submit another review <ArrowRight size={16} />
           </button>
-        </div>
+        </motion.div>
       </div>
     )
   }
 
-  // ── Form ─────────────────────────────────────────────────────────────────────
-
   return (
-    <div className="min-h-screen bg-[#fafafa]">
-      <div className="max-w-6xl mx-auto px-6 py-16 lg:py-24 lg:grid lg:grid-cols-[1fr_1.4fr] lg:gap-20 lg:items-start">
+    <div className="min-h-screen transition-colors duration-1000 relative"
+      style={{ backgroundColor: 'var(--color-bg-page)' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 py-20 lg:py-32 relative z-10 lg:grid lg:grid-cols-[1fr_1.3fr] lg:gap-24 lg:items-start"
+        style={{ color: 'var(--color-text)' }}
+      >
 
-        {/* ── Left panel ── */}
-        <div className="mb-14 lg:mb-0 lg:sticky lg:top-28">
-          <span className="inline-block text-[10px] font-bold uppercase tracking-[3px] text-primary mb-5">Leave a Review</span>
-          <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-secondary leading-[1.06] mb-5">
+        {/* ── Left Content ── */}
+        <AnimatedSection direction="left" className="mb-20 lg:mb-0 lg:sticky lg:top-28">
+          <Link to="/" className="group inline-flex items-center gap-2 text-sm font-bold text-primary mb-10 hover:translate-x-[-4px] transition-all">
+            <ArrowRight size={16} className="rotate-180" /> Back to Home
+          </Link>
+          
+          <span className="inline-block text-primary font-bold text-sm tracking-wide uppercase mb-6">Feedback</span>
+          
+          <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-secondary leading-[1.05] mb-8 transition-colors">
             Share your<br />
-            <span className="text-primary">experience.</span>
+            <span className="text-primary italic">Word.</span>
           </h1>
-          <p className="text-text-muted text-base leading-relaxed mb-10 max-w-sm">
-            Your honest feedback helps other students discover Grid and helps us keep improving.
+          
+          <p className="text-text-muted text-lg leading-relaxed mb-12 max-w-sm transition-colors">
+            Tell us about your experience with Grid. Your feedback helps other students decide and helps us improve the campus marketplace.
           </p>
 
-          {/* Info cards */}
-          <div className="space-y-3">
-            {[
-              { icon: '⭐', title: 'Your voice matters', desc: 'Selected reviews are featured on our homepage' },
-              { icon: '🔒', title: 'Honest & private', desc: 'Your email is never shared publicly' },
-              { icon: '🎓', title: 'For students', desc: 'Help your campus community make better decisions' },
-            ].map((card) => (
-              <div key={card.title} className="flex items-start gap-4 p-4 bg-white rounded-2xl border border-border/60 shadow-sm">
-                <span className="text-xl mt-0.5 flex-shrink-0">{card.icon}</span>
-                <div>
-                  <p className="text-sm font-semibold text-secondary">{card.title}</p>
-                  <p className="text-xs text-text-muted mt-0.5 leading-relaxed">{card.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick links */}
-          <div className="mt-8 pt-8 border-t border-border/50">
-            <p className="text-[10px] font-bold uppercase tracking-[2px] text-text-muted/60 mb-4">Quick Links</p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { label: 'FAQs', to: '/faqs' },
-                { label: 'Contact Us', to: '/contact' },
-                { label: 'Report a Bug', to: '/bug-report' },
-              ].map(link => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-white border border-border/60 px-3 py-1.5 rounded-full hover:text-primary hover:border-primary/30 transition-colors"
-                >
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Right panel — form ── */}
-        <div className="bg-white rounded-3xl border border-border/60 shadow-[0_4px_40px_rgba(0,0,0,0.06)] overflow-hidden">
-
-          {/* Form header stripe */}
-          <div className="h-1.5 bg-gradient-to-r from-primary via-primary/70 to-primary/30" />
-
-          <form onSubmit={handleSubmit} className="p-8 lg:p-10 space-y-7">
-
-            {/* Honeypot */}
-            <div style={{ display: 'none' }} aria-hidden="true">
-              <input name="honeypot" type="text" value={form.honeypot} onChange={handleChange} tabIndex={-1} autoComplete="off" />
-            </div>
-
-            {/* Name + Email */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Field label="Your Name" required>
-                <TextInput id="name" name="name" value={form.name} onChange={handleChange} placeholder="Ravi Kumar" maxLength={100} autoComplete="name" />
-              </Field>
-              <Field label="Email Address" required>
-                <TextInput id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="ravi@college.edu" maxLength={254} autoComplete="email" />
-              </Field>
-            </div>
-
-            {/* College */}
-            <Field label="College / University">
-              <TextInput id="college" name="college" value={form.college} onChange={handleChange} placeholder="e.g. IIT Bombay (optional)" maxLength={100} />
-            </Field>
-
-            {/* Star Rating */}
-            <Field label="Your Rating" required>
-              <div className="flex items-center gap-2 pt-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setForm((p) => ({ ...p, rating: star }))}
-                    onMouseEnter={() => setHoveredRating(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
-                    className="text-3xl transition-transform hover:scale-110 focus:outline-none"
-                    aria-label={`${star} star`}
-                  >
-                    <span className={
-                      star <= (hoveredRating || form.rating)
-                        ? 'text-amber-400'
-                        : 'text-gray-200'
-                    }>★</span>
-                  </button>
-                ))}
-                {form.rating > 0 && (
-                  <span className="text-sm text-text-muted ml-1">
-                    {['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'][form.rating]}
-                  </span>
-                )}
-              </div>
-            </Field>
-
-            {/* Feedback */}
-            <Field label="Your Feedback" required hint={`${form.feedback.length}/2000`}>
-              <textarea
-                id="feedback" name="feedback"
-                value={form.feedback} onChange={handleChange}
-                rows={5} maxLength={2000}
-                placeholder="Tell us what you love about Grid, or how we can improve…"
-                className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors placeholder:text-text-muted/50 bg-[#fafafa]"
-                required
-              />
-            </Field>
-
-            {/* Error */}
-            {error && (
-              <div className="flex items-start gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
-                <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
-                </svg>
-                <p className="text-sm text-red-700 font-medium">{error}</p>
-              </div>
-            )}
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-secondary text-white font-bold py-4 px-6 rounded-2xl hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:-translate-y-0.5 hover:shadow-lg text-[15px] tracking-tight"
+          <div className="space-y-4 max-w-md">
+            <div className="flex items-center gap-5 p-6 rounded-[32px] border transition-all duration-500"
+              style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2.5">
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  Submitting…
-                </span>
-              ) : 'Submit Review'}
-            </button>
+              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 flex items-center justify-center text-amber-500">
+                <Star size={20} fill="currentColor" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-secondary transition-colors">Community Impact</p>
+                <p className="text-xs text-text-muted opacity-70 transition-colors">Selected reviews are featured on our homepage</p>
+              </div>
+            </div>
 
-            <p className="text-xs text-text-muted text-center leading-relaxed">
-              Submitted reviews are read by our team. We may feature your review on the homepage with your name.
-            </p>
-          </form>
-        </div>
+            <div className="flex items-center gap-5 p-6 rounded-[32px] border transition-all duration-500"
+              style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+            >
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <ShieldCheck size={20} />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-secondary transition-colors">Verified Privacy</p>
+                <p className="text-xs text-text-muted opacity-70 transition-colors">Your email remains private and secure</p>
+              </div>
+            </div>
+          </div>
+        </AnimatedSection>
+
+        {/* ── Right Content — Form ── */}
+        <AnimatedSection direction="right">
+          <div className="relative rounded-[48px] border shadow-2xl transition-all duration-1000 overflow-hidden"
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          >
+            <div className="p-10 lg:p-14 relative z-10 transition-colors duration-1000">
+              <h3 className="text-2xl font-bold text-secondary mb-10 transition-colors flex items-center gap-3">
+                <Sparkles size={24} className="text-primary" />
+                Submit Review
+              </h3>
+
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Honeypot */}
+                <div style={{ display: 'none' }} aria-hidden="true">
+                  <input name="honeypot" type="text" value={form.honeypot} onChange={handleChange} tabIndex={-1} autoComplete="off" />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <Field label="Your Name" required>
+                    <TextInput id="name" name="name" value={form.name} onChange={handleChange} placeholder="What's your name?" maxLength={100} autoComplete="name" />
+                  </Field>
+                  <Field label="Email Address" required>
+                    <TextInput id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="name@college.edu" maxLength={254} autoComplete="email" />
+                  </Field>
+                </div>
+
+                <Field label="College / University">
+                  <TextInput id="college" name="college" value={form.college} onChange={handleChange} placeholder="e.g. IIT Delhi" maxLength={100} />
+                </Field>
+
+                <Field label="Your Rating" required>
+                  <div className="flex items-center gap-3 pt-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setForm((p) => ({ ...p, rating: star }))}
+                        onMouseEnter={() => setHoveredRating(star)}
+                        onMouseLeave={() => setHoveredRating(0)}
+                        className="group relative transition-all active:scale-90"
+                      >
+                        <Star
+                          size={32}
+                          className={`transition-all duration-300 ${
+                            star <= (hoveredRating || form.rating)
+                              ? 'text-amber-400 fill-amber-400 scale-110 drop-shadow-[0_0_8px_rgba(251,191,36,0.4)]'
+                              : 'text-border group-hover:text-amber-400/50'
+                          }`}
+                        />
+                        {star === (hoveredRating || form.rating) && (
+                          <motion.div 
+                            layoutId="star-glow"
+                            className="absolute inset-0 bg-amber-400/20 blur-xl rounded-full"
+                          />
+                        )}
+                      </button>
+                    ))}
+                    {form.rating > 0 && (
+                      <motion.span 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="text-sm font-bold text-amber-500 ml-4 italic"
+                      >
+                        {['', 'Not great', 'Fair', 'Good', 'Excellent', 'Absolute love!'][form.rating]}
+                      </motion.span>
+                    )}
+                  </div>
+                </Field>
+
+                <Field label="Your Feedback" required hint={`${form.feedback.length}/2000`}>
+                  <textarea
+                    id="feedback" name="feedback"
+                    value={form.feedback} onChange={handleChange}
+                    rows={5} maxLength={2000}
+                    placeholder="What did you love? Any suggestions for improvement?"
+                    className="w-full px-6 py-6 border rounded-3xl text-sm font-semibold leading-relaxed resize-none focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-text-muted/40"
+                    style={{ backgroundColor: 'var(--color-bg-page)', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
+                    required
+                  />
+                </Field>
+
+                {error && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-3 px-6 py-4 bg-red-500/10 border border-red-500/20 rounded-2xl"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    <p className="text-sm text-red-500 font-semibold">{error}</p>
+                  </motion.div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-primary text-white font-bold py-5 px-6 rounded-2xl hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98] disabled:opacity-50 transition-all text-[15px] flex items-center justify-center gap-3 shadow-lg"
+                >
+                  <AnimatePresence mode="wait">
+                    {loading ? (
+                      <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
+                        Sending...
+                      </motion.span>
+                    ) : (
+                      <motion.span key="normal" initial={{ opacity: 1 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
+                        Submit Review <ArrowRight size={18} />
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </button>
+              </form>
+            </div>
+          </div>
+        </AnimatedSection>
+
       </div>
     </div>
   )
 }
 
-// ── Small field components ────────────────────────────────────────────────────
+// ── Small Field Components ──
 
 function Field({ label, required, hint, children }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-semibold text-secondary">
-          {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+    <div className="space-y-3">
+      <div className="flex items-center justify-between px-1">
+        <label className="text-sm font-bold text-secondary transition-colors">
+          {label}{required && <span className="text-primary ml-1">*</span>}
         </label>
-        {hint && <span className="text-[11px] text-text-muted">{hint}</span>}
+        {hint && <span className="text-[11px] text-text-muted opacity-50">{hint}</span>}
       </div>
       {children}
     </div>
@@ -303,7 +322,8 @@ function TextInput({ id, name, value, onChange, placeholder, maxLength, type = '
     <input
       id={id} name={name} type={type} value={value} onChange={onChange}
       placeholder={placeholder} maxLength={maxLength} autoComplete={autoComplete}
-      className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors placeholder:text-text-muted/50 bg-[#fafafa]"
+      className="w-full px-6 py-4 border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-text-muted/40"
+      style={{ backgroundColor: 'var(--color-bg-page)', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
     />
   )
 }

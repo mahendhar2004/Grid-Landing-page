@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Instagram, Mail, Clock, MessageSquare, ArrowRight } from 'lucide-react'
+import { Instagram, Mail, Clock, ArrowRight, ChevronDown } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
+import AnimatedSection from '../components/ui/AnimatedSection'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -52,7 +53,7 @@ export default function ContactPage() {
     const { name, value } = e.target
     const maxLengths: Record<string, number> = { name: 100, email: 254, message: 3000 }
     const max = maxLengths[name]
-    setForm(prev => ({ ...prev, [name]: max ? value.slice(0, max) : value }))
+    setForm((prev: FormState) => ({ ...prev, [name]: max ? value.slice(0, max) : value }))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -86,219 +87,211 @@ export default function ContactPage() {
     }
   }
 
-  // ── Success ───────────────────────────────────────────────────────────────────
+  // ── Success State ─────────────────────────────────────────────────────────────
 
   if (submitted) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center px-6 py-20">
-        <div className="max-w-sm w-full text-center">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center mx-auto mb-6 shadow-[0_20px_40px_rgba(0,123,255,0.3)]">
-            <Mail size={36} className="text-white" />
+      <div className="min-h-screen flex items-center justify-center px-6 py-20 transition-colors duration-1000 relative"
+        style={{ backgroundColor: 'var(--color-bg-page)' }}
+      >
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full text-center relative z-10 p-12 rounded-[40px] border shadow-2xl transition-all duration-1000"
+          style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+        >
+          <div className="w-20 h-20 rounded-[28px] flex items-center justify-center mx-auto mb-8 shadow-xl transition-colors"
+            style={{ backgroundColor: 'var(--color-primary-soft)', color: 'var(--color-primary)' }}
+          >
+            <Mail size={32} />
           </div>
-          <h2 className="text-2xl font-extrabold text-secondary tracking-tight mb-3">Message sent!</h2>
-          <p className="text-text-muted text-sm leading-relaxed mb-8">
-            We've received your message and will get back to you at <span className="font-semibold text-secondary">{form.email}</span> within 24 hours.
+          <h2 className="text-3xl font-bold text-secondary tracking-tight mb-4 transition-colors">Message received!</h2>
+          <p className="text-text-muted text-base leading-relaxed mb-10 transition-colors">
+            We've got your message and we'll get back to you at <span className="text-primary font-semibold">{form.email}</span> within 24 hours.
           </p>
           <button
             onClick={() => { setSubmitted(false); setError(null); setForm({ name: '', email: '', subject: 'general', message: '', honeypot: '' }) }}
-            className="text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
+            className="flex items-center gap-2 mx-auto text-sm font-bold text-primary hover:text-primary-dark transition-all"
           >
-            Send another message →
+            Send another message <ArrowRight size={16} />
           </button>
-        </div>
+        </motion.div>
       </div>
     )
   }
 
-  // ── Page ──────────────────────────────────────────────────────────────────────
+  // ── Page View ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
-      <div className="max-w-6xl mx-auto px-6 py-16 lg:py-24 lg:grid lg:grid-cols-[1fr_1.4fr] lg:gap-20 lg:items-start">
+    <div className="min-h-screen transition-colors duration-1000 relative"
+      style={{ backgroundColor: 'var(--color-bg-page)' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 py-20 lg:py-32 relative z-10 lg:grid lg:grid-cols-[1fr_1.3fr] lg:gap-24 lg:items-start"
+        style={{ color: 'var(--color-text)' }}
+      >
 
-        {/* ── Left panel ── */}
-        <div className="mb-14 lg:mb-0 lg:sticky lg:top-28">
-          <span className="inline-block text-[10px] font-bold uppercase tracking-[3px] text-primary mb-5">Contact Us</span>
-          <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-secondary leading-[1.06] mb-5">
-            Let's<br />
-            <span className="text-primary">talk.</span>
+        {/* ── Left Content ── */}
+        <AnimatedSection direction="left" className="mb-20 lg:mb-0 lg:sticky lg:top-28">
+          <span className="inline-block text-primary font-bold text-sm tracking-wide uppercase mb-6">Contact Us</span>
+          
+          <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-secondary leading-[1.05] mb-8 transition-colors">
+            Let's keep in<br />
+            <span className="text-primary">touch.</span>
           </h1>
-          <p className="text-text-muted text-base leading-relaxed mb-10 max-w-sm">
-            Have a question, idea, or just want to say hello? We read every message and reply within 24 hours.
+          
+          <p className="text-text-muted text-lg leading-relaxed mb-12 max-w-sm transition-colors">
+            Have a question, an idea, or just want to say hi? We're here to help and we read every message.
           </p>
 
-          {/* Contact channels */}
-          <div className="space-y-3">
-            <a
-              href="mailto:contact.galvam@gmail.com"
-              className="flex items-start gap-4 p-4 bg-white rounded-2xl border border-border/60 shadow-sm hover:border-primary/40 hover:shadow-md transition-all group"
+          <div className="space-y-4 max-w-md">
+            {/* Contact Channels */}
+            <a href="mailto:contact.galvam@gmail.com" 
+              className="group flex items-center gap-5 p-6 rounded-[32px] border transition-all duration-500 hover:shadow-xl"
+              style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
             >
-              <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/12 transition-colors">
-                <Mail size={18} className="text-primary" />
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <Mail size={20} />
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-secondary">Email</p>
-                <p className="text-xs text-text-muted mt-0.5 truncate">contact.galvam@gmail.com</p>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-secondary transition-colors">Email Us</p>
+                <p className="text-xs text-text-muted opacity-70 transition-colors">contact.galvam@gmail.com</p>
               </div>
-              <ArrowRight size={15} className="text-text-muted/40 group-hover:text-primary mt-0.5 ml-auto flex-shrink-0 transition-colors" />
+              <ArrowRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </a>
 
-            <a
-              href="https://www.instagram.com/grid_galvam"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-start gap-4 p-4 bg-white rounded-2xl border border-border/60 shadow-sm hover:border-pink-300/60 hover:shadow-md transition-all group"
+            <a href="https://www.instagram.com/grid_galvam" target="_blank" rel="noopener noreferrer"
+              className="group flex items-center gap-5 p-6 rounded-[32px] border transition-all duration-500 hover:shadow-xl"
+              style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
             >
-              <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center flex-shrink-0 group-hover:bg-pink-100 transition-colors">
-                <Instagram size={18} className="text-pink-500" />
+              <div className="w-12 h-12 rounded-2xl bg-pink-500/10 flex items-center justify-center text-pink-500 group-hover:scale-110 transition-transform">
+                <Instagram size={20} />
               </div>
-              <div>
-                <p className="text-sm font-semibold text-secondary">Instagram</p>
-                <p className="text-xs text-text-muted mt-0.5">@grid_galvam</p>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-secondary transition-colors">Instagram</p>
+                <p className="text-xs text-text-muted opacity-70 transition-colors">@grid_galvam</p>
               </div>
-              <ArrowRight size={15} className="text-text-muted/40 group-hover:text-pink-400 mt-0.5 ml-auto flex-shrink-0 transition-colors" />
+              <ArrowRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </a>
 
-            <div className="flex items-start gap-4 p-4 bg-white rounded-2xl border border-border/60 shadow-sm">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                <Clock size={18} className="text-emerald-500" />
+            <div className="flex items-center gap-5 p-6 rounded-[32px] border transition-all duration-500"
+              style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+            >
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                <Clock size={20} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-secondary">Response Time</p>
-                <p className="text-xs text-text-muted mt-0.5">Usually within 24 hours</p>
+                <p className="text-sm font-bold text-secondary transition-colors">Response Time</p>
+                <p className="text-xs text-text-muted opacity-70 transition-colors">Usually within 24 hours</p>
               </div>
             </div>
           </div>
+        </AnimatedSection>
 
-          {/* Quick links */}
-          <div className="mt-8 pt-8 border-t border-border/50">
-            <p className="text-[10px] font-bold uppercase tracking-[2px] text-text-muted/60 mb-4">Quick Links</p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { label: 'FAQs', to: '/faqs' },
-                { label: 'Report a Bug', to: '/bug-report' },
-                { label: 'Leave a Review', to: '/reviews' },
-              ].map(link => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-white border border-border/60 px-3 py-1.5 rounded-full hover:text-primary hover:border-primary/30 transition-colors"
-                >
-                  <MessageSquare size={10} />
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* ── Right Content ── */}
+        <AnimatedSection direction="right">
+          <div className="relative rounded-[48px] border shadow-2xl transition-all duration-1000 overflow-hidden"
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          >
+            <div className="p-10 lg:p-14 relative z-10 transition-colors duration-1000">
+              <h3 className="text-2xl font-bold text-secondary mb-10 transition-colors">Send us a message</h3>
 
-        {/* ── Right panel — form ── */}
-        <div className="bg-white rounded-3xl border border-border/60 shadow-[0_4px_40px_rgba(0,0,0,0.06)] overflow-hidden">
-
-          {/* Header stripe */}
-          <div className="h-1.5 bg-gradient-to-r from-primary via-primary/70 to-primary/30" />
-
-          <form onSubmit={handleSubmit} className="p-8 lg:p-10 space-y-7">
-
-            {/* Honeypot */}
-            <div style={{ display: 'none' }} aria-hidden="true">
-              <input name="honeypot" type="text" value={form.honeypot} onChange={handleChange} tabIndex={-1} autoComplete="off" />
-            </div>
-
-            {/* Name + Email */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Field label="Your Name" required>
-                <TextInput id="name" name="name" value={form.name} onChange={handleChange} placeholder="Ravi Kumar" maxLength={100} autoComplete="name" />
-              </Field>
-              <Field label="Email Address" required>
-                <TextInput id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="ravi@college.edu" maxLength={254} autoComplete="email" />
-              </Field>
-            </div>
-
-            {/* Subject */}
-            <Field label="Subject" required>
-              <div className="relative">
-                <select
-                  name="subject"
-                  value={form.subject}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-[#fafafa] text-secondary appearance-none cursor-pointer"
-                >
-                  {SUBJECTS.map(s => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
-                  <svg className="w-4 h-4 text-text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Honeypot */}
+                <div style={{ display: 'none' }} aria-hidden="true">
+                  <input name="honeypot" type="text" value={form.honeypot} onChange={handleChange} tabIndex={-1} autoComplete="off" />
                 </div>
-              </div>
-            </Field>
 
-            {/* Message */}
-            <Field label="Message" required hint={`${form.message.length}/3000`}>
-              <textarea
-                id="message"
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                rows={6}
-                maxLength={3000}
-                placeholder="Tell us what's on your mind…"
-                className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors placeholder:text-text-muted/50 bg-[#fafafa]"
-                required
-              />
-            </Field>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <Field label="Your Name" required>
+                    <TextInput id="name" name="name" value={form.name} onChange={handleChange} placeholder="What's your name?" maxLength={100} autoComplete="name" />
+                  </Field>
+                  <Field label="Email Address" required>
+                    <TextInput id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="name@example.com" maxLength={254} autoComplete="email" />
+                  </Field>
+                </div>
 
-            {/* Error */}
-            {error && (
-              <div className="flex items-start gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
-                <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
-                </svg>
-                <p className="text-sm text-red-700 font-medium">{error}</p>
-              </div>
-            )}
+                <Field label="Subject" required>
+                  <div className="relative">
+                    <select
+                      name="subject"
+                      value={form.subject}
+                      onChange={handleChange}
+                      className="w-full px-6 py-4 border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all appearance-none cursor-pointer"
+                      style={{ backgroundColor: 'var(--color-bg-page)', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
+                    >
+                      {SUBJECTS.map(s => (
+                        <option key={s.value} value={s.value}>{s.label}</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-6 flex items-center">
+                      <ChevronDown size={18} className="text-text-muted/40" />
+                    </div>
+                  </div>
+                </Field>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-secondary text-white font-bold py-4 px-6 rounded-2xl hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:-translate-y-0.5 hover:shadow-lg text-[15px] tracking-tight"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2.5">
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  Sending…
-                </span>
-              ) : 'Send Message'}
-            </button>
+                <Field label="Your Message" required hint={`${form.message.length}/3000`}>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={form.message}
+                    onChange={handleChange}
+                    rows={6}
+                    maxLength={3000}
+                    placeholder="Tell us what's on your mind..."
+                    className="w-full px-6 py-6 border rounded-3xl text-sm font-semibold leading-relaxed resize-none focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-text-muted/40"
+                    style={{ backgroundColor: 'var(--color-bg-page)', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
+                    required
+                  />
+                </Field>
 
-            <p className="text-xs text-text-muted text-center leading-relaxed">
-              We read every message and reply within 24 hours.
-            </p>
-          </form>
-        </div>
+                {error && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-3 px-6 py-4 bg-red-500/10 border border-red-500/20 rounded-2xl"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    <p className="text-sm text-red-500 font-semibold">{error}</p>
+                  </motion.div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-primary text-white font-bold py-5 px-6 rounded-2xl hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98] disabled:opacity-50 transition-all text-[15px] flex items-center justify-center gap-3 shadow-lg"
+                >
+                  <AnimatePresence mode="wait">
+                    {loading ? (
+                      <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
+                        Sending...
+                      </motion.span>
+                    ) : (
+                      <motion.span key="normal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
+                        Send Message <ArrowRight size={18} />
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </button>
+              </form>
+            </div>
+          </div>
+        </AnimatedSection>
 
       </div>
     </div>
   )
 }
 
-// ── Small field components ─────────────────────────────────────────────────────
+// ── Atomic Field Components ───────────────────────────────────────────────────
 
-function Field({ label, required, hint, children }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) {
+function Field({ label, hint, children }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-semibold text-secondary">
-          {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+    <div className="space-y-3">
+      <div className="flex items-center justify-between px-1">
+        <label className="text-sm font-bold text-secondary transition-colors">
+          {label}
         </label>
-        {hint && <span className="text-[11px] text-text-muted">{hint}</span>}
+        {hint && <span className="text-[11px] text-text-muted opacity-50">{hint}</span>}
       </div>
       {children}
     </div>
@@ -314,7 +307,8 @@ function TextInput({ id, name, value, onChange, placeholder, maxLength, type = '
     <input
       id={id} name={name} type={type} value={value} onChange={onChange}
       placeholder={placeholder} maxLength={maxLength} autoComplete={autoComplete}
-      className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors placeholder:text-text-muted/50 bg-[#fafafa]"
+      className="w-full px-6 py-4 border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-text-muted/40"
+      style={{ backgroundColor: 'var(--color-bg-page)', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
     />
   )
 }

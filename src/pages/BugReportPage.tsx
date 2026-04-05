@@ -1,8 +1,11 @@
 import { useState, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
+import { Clock, ArrowRight, ChevronDown, Upload, X, Shield, Zap } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
+import AnimatedSection from '../components/ui/AnimatedSection'
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// ── Constants ──────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
   { value: 'crash',           label: 'App Crash',        icon: '💥' },
@@ -15,10 +18,10 @@ const CATEGORIES = [
 ]
 
 const SEVERITIES = [
-  { value: 'low',      label: 'Low',      desc: 'Minor inconvenience',          color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
-  { value: 'medium',   label: 'Medium',   desc: 'Affects usage',                color: 'text-amber-600 bg-amber-50 border-amber-200' },
-  { value: 'high',     label: 'High',     desc: 'Major functionality broken',   color: 'text-orange-600 bg-orange-50 border-orange-200' },
-  { value: 'critical', label: 'Critical', desc: 'App unusable / data loss',     color: 'text-red-600 bg-red-50 border-red-200' },
+  { value: 'low',      label: 'Low',      desc: 'Minor issue' },
+  { value: 'medium',   label: 'Medium',   desc: 'Affects usage' },
+  { value: 'high',     label: 'High',     desc: 'Broken feature' },
+  { value: 'critical', label: 'Critical', desc: 'App unusable' },
 ]
 
 const VALID_CATEGORIES = new Set(CATEGORIES.map((c) => c.value))
@@ -30,7 +33,7 @@ const MAX_FILES      = 3
 const RATE_LIMIT_MS  = 2 * 60 * 1000
 const RATE_LIMIT_KEY = 'grid_bugreport_last'
 
-// ── Security helpers ──────────────────────────────────────────────────────────
+// ── Security & Utils ───────────────────────────────────────────────────────────
 
 function sanitize(v: string) {
   return v.replace(/<[^>]*>/g, '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')
@@ -51,7 +54,7 @@ function markSubmission() {
 
 function validateFile(f: File): string | null {
   const ext = '.' + (f.name.split('.').pop() ?? '').toLowerCase()
-  if (!ALLOWED_MIME.has(f.type) || !ALLOWED_EXT.has(ext)) return `"${f.name}" — only JPG, PNG, WebP or GIF allowed`
+  if (!ALLOWED_MIME.has(f.type) || !ALLOWED_EXT.has(ext)) return `"${f.name}" — invalid format`
   if (f.size > MAX_FILE_MB * 1024 * 1024) return `"${f.name}" exceeds ${MAX_FILE_MB}MB`
   return null
 }
@@ -61,12 +64,12 @@ function storagePath(f: File) {
   return `landing-page/${crypto.randomUUID()}.${ext}`
 }
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// ── Types ──────────────────────────────────────────────────────────────────────
 
 type ImageFile = { file: File; preview: string; uploading: boolean; error: string | null }
 type FormState = { name: string; email: string; title: string; description: string; category: string; severity: string; honeypot: string }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Component ──────────────────────────────────────────────────────────────────
 
 export default function BugReportPage() {
   const [form, setForm] = useState<FormState>({
@@ -80,7 +83,7 @@ export default function BugReportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     const maxLengths: Record<string, number> = { name: 100, email: 254, title: 200, description: 5000 }
     const max = maxLengths[name]
@@ -90,7 +93,7 @@ export default function BugReportPage() {
   const addFiles = useCallback((files: FileList | File[]) => {
     const arr = Array.from(files)
     const remaining = MAX_FILES - images.length
-    if (remaining <= 0) { setError(`Maximum ${MAX_FILES} screenshots allowed.`); return }
+    if (remaining <= 0) { setError(`Maximum ${MAX_FILES} images allowed.`); return }
     for (const f of arr.slice(0, remaining)) {
       const err = validateFile(f)
       if (err) { setError(err); return }
@@ -123,16 +126,15 @@ export default function BugReportPage() {
     e.preventDefault()
     setError(null)
     if (form.honeypot) return
-    if (isRateLimited()) { setError('Please wait a moment before submitting another report.'); return }
-    if (!form.name.trim() || !form.email.trim() || !form.title.trim() || !form.description.trim()) { setError('Please fill in all required fields.'); return }
-    if (!isValidEmail(form.email.trim())) { setError('Please enter a valid email address.'); return }
+    if (isRateLimited()) { setError('Please wait before reporting again.'); return }
+    if (!form.name.trim() || !form.email.trim() || !form.title.trim() || !form.description.trim()) { setError('Please fill in all fields.'); return }
+    if (!isValidEmail(form.email.trim())) { setError('Invalid email.'); return }
     if (!VALID_CATEGORIES.has(form.category) || !VALID_SEVERITIES.has(form.severity)) { setError('Invalid selection.'); return }
 
     setLoading(true)
     try {
       const screenshotUrls = images.length ? await uploadImages() : []
       const { error: sbErr } = await supabase.from('bug_reports').insert({
-        reporter_id: null,
         title: sanitize(form.title),
         description: sanitize(form.description),
         category: form.category,
@@ -154,7 +156,7 @@ export default function BugReportPage() {
     }
   }
 
-  function resetForm() {
+  const resetForm = () => {
     images.forEach((img) => URL.revokeObjectURL(img.preview))
     setImages([])
     setForm({ name: '', email: '', title: '', description: '', category: 'other', severity: 'medium', honeypot: '' })
@@ -162,282 +164,271 @@ export default function BugReportPage() {
     setError(null)
   }
 
-  // ── Success ──────────────────────────────────────────────────────────────────
-
+  // ── Success View ──
   if (submitted) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center px-6 py-20">
-        <div className="max-w-sm w-full text-center">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mx-auto mb-6 shadow-[0_20px_40px_rgba(16,185,129,0.3)]">
-            <svg className="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+      <div className="min-h-screen flex items-center justify-center px-6 py-20 transition-colors duration-1000 relative"
+        style={{ backgroundColor: 'var(--color-bg-page)' }}
+      >
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full text-center relative z-10 p-12 rounded-[40px] border shadow-2xl transition-all duration-1000"
+          style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+        >
+          <div className="w-20 h-20 rounded-[28px] flex items-center justify-center mx-auto mb-8 shadow-xl transition-colors"
+            style={{ backgroundColor: 'var(--color-primary-soft)', color: 'var(--color-primary)' }}
+          >
+            <Shield size={32} />
           </div>
-          <h2 className="text-2xl font-extrabold text-secondary tracking-tight mb-3">Report received.</h2>
-          <p className="text-text-muted text-sm leading-relaxed mb-8">
-            We've logged your report and will follow up at <span className="font-semibold text-secondary">{form.email}</span> if we need more information. Thank you for helping us improve.
+          <h2 className="text-3xl font-bold text-secondary tracking-tight mb-4 transition-colors">Report Received</h2>
+          <p className="text-text-muted text-base leading-relaxed mb-10 transition-colors">
+            Thank you for helping us improve. We'll investigate this report and follow up at <span className="text-primary font-semibold">{form.email}</span>.
           </p>
           <button
             onClick={resetForm}
-            className="text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
+            className="flex items-center gap-2 mx-auto text-sm font-bold text-primary hover:text-primary-dark transition-all"
           >
-            Submit another report →
+            Submit another report <ArrowRight size={16} />
           </button>
-        </div>
+        </motion.div>
       </div>
     )
   }
 
-  // ── Form ─────────────────────────────────────────────────────────────────────
-
   return (
-    <div className="min-h-screen bg-[#fafafa]">
-      <div className="max-w-6xl mx-auto px-6 py-16 lg:py-24 lg:grid lg:grid-cols-[1fr_1.4fr] lg:gap-20 lg:items-start">
+    <div className="min-h-screen transition-colors duration-1000 relative"
+      style={{ backgroundColor: 'var(--color-bg-page)' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 py-20 lg:py-32 relative z-10 lg:grid lg:grid-cols-[1fr_1.3fr] lg:gap-24 lg:items-start"
+        style={{ color: 'var(--color-text)' }}
+      >
 
-        {/* ── Left panel ── */}
-        <div className="mb-14 lg:mb-0 lg:sticky lg:top-28">
-          <span className="inline-block text-[10px] font-bold uppercase tracking-[3px] text-primary mb-5">Bug Report</span>
-          <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-secondary leading-[1.06] mb-5">
-            Found something<br />
-            <span className="text-primary">broken?</span>
+        {/* ── Left Content ── */}
+        <AnimatedSection direction="left" className="mb-20 lg:mb-0 lg:sticky lg:top-28">
+          <Link to="/" className="group inline-flex items-center gap-2 text-sm font-bold text-primary mb-10 hover:translate-x-[-4px] transition-all">
+            <ArrowRight size={16} className="rotate-180" /> Back to Home
+          </Link>
+          
+          <span className="inline-block text-primary font-bold text-sm tracking-wide uppercase mb-6">Support</span>
+          
+          <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-secondary leading-[1.05] mb-8 transition-colors">
+            Report a<br />
+            <span className="text-primary italic">Bug.</span>
           </h1>
-          <p className="text-text-muted text-base leading-relaxed mb-10 max-w-sm">
-            Every report reaches our team directly. We read each one and fix what matters most.
+          
+          <p className="text-text-muted text-lg leading-relaxed mb-12 max-w-sm transition-colors">
+            Found something broken? Let us know and we'll fix it. Your reports help make Grid better for everyone.
           </p>
 
-          {/* Info cards */}
-          <div className="space-y-3">
-            {[
-              { icon: '⚡', title: 'Fast response', desc: 'Critical bugs are triaged within 24 hours' },
-              { icon: '🔒', title: 'Secure & private', desc: 'Your data is only used to resolve the issue' },
-              { icon: '✉️', title: 'We follow up', desc: "We'll email you when your bug is fixed" },
-            ].map((card) => (
-              <div key={card.title} className="flex items-start gap-4 p-4 bg-white rounded-2xl border border-border/60 shadow-sm">
-                <span className="text-xl mt-0.5 flex-shrink-0">{card.icon}</span>
-                <div>
-                  <p className="text-sm font-semibold text-secondary">{card.title}</p>
-                  <p className="text-xs text-text-muted mt-0.5 leading-relaxed">{card.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick links */}
-          <div className="mt-8 pt-8 border-t border-border/50">
-            <p className="text-[10px] font-bold uppercase tracking-[2px] text-text-muted/60 mb-4">Quick Links</p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { label: 'FAQs', to: '/faqs' },
-                { label: 'Contact Us', to: '/contact' },
-                { label: 'Leave a Review', to: '/reviews' },
-              ].map(link => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-white border border-border/60 px-3 py-1.5 rounded-full hover:text-primary hover:border-primary/30 transition-colors"
-                >
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Right panel — form ── */}
-        <div className="bg-white rounded-3xl border border-border/60 shadow-[0_4px_40px_rgba(0,0,0,0.06)] overflow-hidden">
-
-          {/* Form header stripe */}
-          <div className="h-1.5 bg-gradient-to-r from-primary via-primary/70 to-primary/30" />
-
-          <div className="p-8 lg:p-10 space-y-7">
-
-            {/* Honeypot */}
-            <div style={{ display: 'none' }} aria-hidden="true">
-              <input name="honeypot" type="text" value={form.honeypot} onChange={handleChange} tabIndex={-1} autoComplete="off" />
-            </div>
-
-            {/* Name + Email */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Field label="Your Name" required>
-                <TextInput id="name" name="name" value={form.name} onChange={handleChange} placeholder="Ravi Kumar" maxLength={100} autoComplete="name" />
-              </Field>
-              <Field label="Email Address" required>
-                <TextInput id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="ravi@college.edu" maxLength={254} autoComplete="email" />
-              </Field>
-            </div>
-
-            {/* Category */}
-            <Field label="Category" required>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {CATEGORIES.map((c) => (
-                  <button
-                    key={c.value}
-                    type="button"
-                    onClick={() => setForm((p) => ({ ...p, category: c.value }))}
-                    className={`flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border text-center transition-all ${
-                      form.category === c.value
-                        ? 'border-primary bg-primary/5 text-secondary shadow-sm'
-                        : 'border-border/60 text-text-muted hover:border-primary/40 hover:bg-muted/30'
-                    }`}
-                  >
-                    <span className="text-lg leading-none">{c.icon}</span>
-                    <span className="text-[11px] font-semibold leading-tight">{c.label}</span>
-                  </button>
-                ))}
-              </div>
-            </Field>
-
-            {/* Severity */}
-            <Field label="Severity" required>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {SEVERITIES.map((s) => (
-                  <button
-                    key={s.value}
-                    type="button"
-                    onClick={() => setForm((p) => ({ ...p, severity: s.value }))}
-                    className={`px-3 py-3 rounded-xl border text-left transition-all ${
-                      form.severity === s.value
-                        ? `${s.color} border-current shadow-sm`
-                        : 'border-border/60 text-text-muted hover:border-primary/40'
-                    }`}
-                  >
-                    <p className={`text-xs font-bold ${form.severity === s.value ? '' : 'text-secondary'}`}>{s.label}</p>
-                    <p className="text-[10px] mt-0.5 leading-tight opacity-70">{s.desc}</p>
-                  </button>
-                ))}
-              </div>
-            </Field>
-
-            {/* Title */}
-            <Field label="Bug Title" required hint={`${form.title.length}/200`}>
-              <TextInput
-                id="title" name="title" value={form.title} onChange={handleChange}
-                placeholder="e.g. App crashes when opening wallet"
-                maxLength={200}
-              />
-            </Field>
-
-            {/* Description */}
-            <Field label="Description" required hint={`${form.description.length}/5000`}>
-              <textarea
-                id="description" name="description"
-                value={form.description} onChange={handleChange}
-                rows={5} maxLength={5000}
-                placeholder="Describe what happened, what you expected, and the steps to reproduce it…"
-                className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors placeholder:text-text-muted/50 bg-[#fafafa]"
-                required
-              />
-            </Field>
-
-            {/* Screenshots */}
-            <Field label="Screenshots" hint={`${images.length}/${MAX_FILES} · max ${MAX_FILE_MB}MB · JPG, PNG, WebP`}>
-              {images.length < MAX_FILES && (
-                <div
-                  onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
-                  onDragLeave={() => setDragging(false)}
-                  onDrop={(e) => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files) }}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
-                    dragging ? 'border-primary bg-primary/5 scale-[1.01]' : 'border-border/60 hover:border-primary/50 hover:bg-primary/[0.02]'
-                  }`}
-                >
-                  <input
-                    ref={fileInputRef} type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    multiple className="hidden"
-                    onChange={(e) => e.target.files && addFiles(e.target.files)}
-                  />
-                  <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium text-secondary">
-                    {dragging ? 'Drop here' : 'Drag & drop or click to upload'}
-                  </p>
-                  <p className="text-xs text-text-muted mt-1">{MAX_FILES - images.length} slot{MAX_FILES - images.length !== 1 ? 's' : ''} remaining</p>
-                </div>
-              )}
-
-              {images.length > 0 && (
-                <div className="flex gap-3 flex-wrap mt-3">
-                  {images.map((img, i) => (
-                    <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-border/60 group shadow-sm">
-                      <img src={img.preview} alt="" className="w-full h-full object-cover" />
-                      {img.uploading && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                          </svg>
-                        </div>
-                      )}
-                      {img.error && (
-                        <div className="absolute inset-0 bg-red-500/80 flex items-center justify-center">
-                          <span className="text-white text-[9px] font-bold">Failed</span>
-                        </div>
-                      )}
-                      {!img.uploading && (
-                        <button
-                          type="button" onClick={() => removeImage(i)}
-                          className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full text-white text-[11px] font-bold hidden group-hover:flex items-center justify-center hover:bg-red-600 transition-colors leading-none"
-                        >×</button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Field>
-
-            {/* Error */}
-            {error && (
-              <div className="flex items-start gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
-                <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
-                </svg>
-                <p className="text-sm text-red-700 font-medium">{error}</p>
-              </div>
-            )}
-
-            {/* Submit */}
-            <button
-              type="button"
-              onClick={handleSubmit as any}
-              disabled={loading}
-              className="w-full bg-secondary text-white font-bold py-4 px-6 rounded-2xl hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:-translate-y-0.5 hover:shadow-lg text-[15px] tracking-tight"
+          <div className="space-y-4 max-w-md">
+            <div className="flex items-center gap-5 p-6 rounded-[32px] border transition-all duration-500"
+              style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2.5">
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  {images.length > 0 ? 'Uploading & Submitting…' : 'Submitting…'}
-                </span>
-              ) : 'Submit Bug Report'}
-            </button>
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <Zap size={20} />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-secondary transition-colors">Swift Response</p>
+                <p className="text-xs text-text-muted opacity-70 transition-colors">Critical reports triaged within 24h</p>
+              </div>
+            </div>
 
-            <p className="text-xs text-text-muted text-center leading-relaxed">
-              Submitted reports are reviewed by our team. We'll reach out at your email if we need more details.
-            </p>
+            <div className="flex items-center gap-5 p-6 rounded-[32px] border transition-all duration-500"
+              style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+            >
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                <Clock size={20} />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-secondary transition-colors">Always Improving</p>
+                <p className="text-xs text-text-muted opacity-70 transition-colors">Continuous updates and fixes</p>
+              </div>
+            </div>
           </div>
-        </div>
+        </AnimatedSection>
+
+        {/* ── Right Content — Form ── */}
+        <AnimatedSection direction="right">
+          <div className="relative rounded-[48px] border shadow-2xl transition-all duration-1000 overflow-hidden"
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          >
+            <div className="p-10 lg:p-14 relative z-10 transition-colors duration-1000">
+              <h3 className="text-2xl font-bold text-secondary mb-10 transition-colors">Submit Report</h3>
+
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Honeypot */}
+                <div style={{ display: 'none' }} aria-hidden="true">
+                  <input name="honeypot" type="text" value={form.honeypot} onChange={handleChange} tabIndex={-1} autoComplete="off" />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <Field label="Your Name" required>
+                    <TextInput id="name" name="name" value={form.name} onChange={handleChange} placeholder="What's your name?" maxLength={100} autoComplete="name" />
+                  </Field>
+                  <Field label="Email Address" required>
+                    <TextInput id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="name@example.com" maxLength={254} autoComplete="email" />
+                  </Field>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <Field label="Category" required>
+                    <div className="relative">
+                      <select
+                        name="category"
+                        value={form.category}
+                        onChange={handleChange as any}
+                        className="w-full px-6 py-4 border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all appearance-none cursor-pointer"
+                        style={{ backgroundColor: 'var(--color-bg-page)', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
+                      >
+                        {CATEGORIES.map(c => (
+                          <option key={c.value} value={c.value}>{c.icon} {c.label}</option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-6 flex items-center">
+                        <ChevronDown size={18} className="text-text-muted/40" />
+                      </div>
+                    </div>
+                  </Field>
+
+                  <Field label="Severity" required>
+                    <div className="relative">
+                      <select
+                        name="severity"
+                        value={form.severity}
+                        onChange={handleChange as any}
+                        className="w-full px-6 py-4 border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all appearance-none cursor-pointer"
+                        style={{ backgroundColor: 'var(--color-bg-page)', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
+                      >
+                        {SEVERITIES.map(s => (
+                          <option key={s.value} value={s.value}>{s.label} — {s.desc}</option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-6 flex items-center">
+                        <ChevronDown size={18} className="text-text-muted/40" />
+                      </div>
+                    </div>
+                  </Field>
+                </div>
+
+                <Field label="Bug Title" required hint={`${form.title.length}/200`}>
+                  <TextInput id="title" name="title" value={form.title} onChange={handleChange} placeholder="Short summary of the issue..." maxLength={200} />
+                </Field>
+
+                <Field label="Description" required hint={`${form.description.length}/5000`}>
+                  <textarea
+                    id="description" name="description"
+                    value={form.description} onChange={handleChange}
+                    rows={5} maxLength={5000}
+                    placeholder="Describe what happened and how to reproduce it..."
+                    className="w-full px-6 py-6 border rounded-3xl text-sm font-semibold leading-relaxed resize-none focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-text-muted/40"
+                    style={{ backgroundColor: 'var(--color-bg-page)', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
+                    required
+                  />
+                </Field>
+
+                <Field label="Screenshots" hint={`${images.length}/${MAX_FILES} · max ${MAX_FILE_MB}MB`}>
+                  <div className="space-y-4">
+                    {images.length < MAX_FILES && (
+                      <div
+                        onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+                        onDragLeave={() => setDragging(false)}
+                        onDrop={(e) => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files) }}
+                        onClick={() => fileInputRef.current?.click()}
+                        className={`relative border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all duration-300 ${
+                          dragging ? 'border-primary bg-primary/5 scale-[1.01]' : 'border-border/60 hover:border-primary/50'
+                        }`}
+                        style={{ backgroundColor: 'var(--color-bg-page)' }}
+                      >
+                        <input
+                          ref={fileInputRef} type="file"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
+                          multiple className="hidden"
+                          onChange={(e) => e.target.files && addFiles(e.target.files)}
+                        />
+                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">
+                          <Upload size={22} />
+                        </div>
+                        <p className="text-sm font-bold text-secondary">
+                          {dragging ? 'Drop here' : 'Click or drag screenshots here'}
+                        </p>
+                        <p className="text-xs text-text-muted mt-2">Up to {MAX_FILES} images</p>
+                      </div>
+                    )}
+
+                    {images.length > 0 && (
+                      <div className="flex gap-4 flex-wrap">
+                        {images.map((img, i) => (
+                          <div key={i} className="relative w-24 h-24 rounded-2xl overflow-hidden border border-border group"
+                            style={{ borderColor: 'var(--color-border)' }}
+                          >
+                            <img src={img.preview} alt="" className="w-full h-full object-cover" />
+                            {img.uploading && (
+                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              </div>
+                            )}
+                            <button
+                              type="button" onClick={() => removeImage(i)}
+                              className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 backdrop-blur-md rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Field>
+
+                {error && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-3 px-6 py-4 bg-red-500/10 border border-red-500/20 rounded-2xl"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    <p className="text-sm text-red-500 font-semibold">{error}</p>
+                  </motion.div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-primary text-white font-bold py-5 px-6 rounded-2xl hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98] disabled:opacity-50 transition-all text-[15px] flex items-center justify-center gap-3 shadow-lg"
+                >
+                  <AnimatePresence mode="wait">
+                    {loading ? (
+                      <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
+                        Submitting...
+                      </motion.span>
+                    ) : (
+                      <motion.span key="normal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
+                        Submit Report <ArrowRight size={18} />
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </button>
+              </form>
+            </div>
+          </div>
+        </AnimatedSection>
+
       </div>
     </div>
   )
 }
 
-// ── Small field components ────────────────────────────────────────────────────
+// ── Small Field Components ──
 
 function Field({ label, required, hint, children }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-semibold text-secondary">
-          {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+    <div className="space-y-3">
+      <div className="flex items-center justify-between px-1">
+        <label className="text-sm font-bold text-secondary transition-colors">
+          {label}{required && <span className="text-primary ml-1">*</span>}
         </label>
-        {hint && <span className="text-[11px] text-text-muted">{hint}</span>}
+        {hint && <span className="text-[11px] text-text-muted opacity-50">{hint}</span>}
       </div>
       {children}
     </div>
@@ -453,8 +444,8 @@ function TextInput({ id, name, value, onChange, placeholder, maxLength, type = '
     <input
       id={id} name={name} type={type} value={value} onChange={onChange}
       placeholder={placeholder} maxLength={maxLength} autoComplete={autoComplete}
-      className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors placeholder:text-text-muted/50 bg-[#fafafa]"
-      required
+      className="w-full px-6 py-4 border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-text-muted/40"
+      style={{ backgroundColor: 'var(--color-bg-page)', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
     />
   )
 }
