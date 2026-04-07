@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.galvam.grid",
+      "sha256_cert_fingerprints": [
+        "50:20:0E:4E:EB:73:4E:12:03:CF:0D:92:42:1A:E0:FF:B3:14:68:52:CF:A7:68:40:D3:DF:38:AE:4B:8F:D0:B7"
+      ]
+    }
+  }
+]

@@ -13,8 +13,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('grid-theme') as Theme;
-      if (saved) return saved;
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const resolved: Theme = saved
+        ? saved
+        : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      // Apply immediately (blocking script may already have done this, but ensure consistency)
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(resolved);
+      document.documentElement.style.colorScheme = resolved;
+      return resolved;
     }
     return 'light';
   });

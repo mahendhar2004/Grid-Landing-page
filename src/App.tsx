@@ -10,6 +10,7 @@ import BugReportPage from './pages/BugReportPage'
 import ReviewPage from './pages/ReviewPage'
 import ContactPage from './pages/ContactPage'
 import NotFoundPage from './pages/NotFoundPage'
+import DeepLinkRedirectPage from './pages/DeepLinkRedirectPage'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -35,6 +36,10 @@ export default function App() {
           <Route path="/bug-report" element={<BugReportPage />} />
           <Route path="/reviews" element={<ReviewPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          {/* Deep link redirect routes — app links shared from the mobile app */}
+          <Route path="/product/:productId" element={<DeepLinkRedirectPage />} />
+          <Route path="/seller/:sellerId" element={<DeepLinkRedirectPage />} />
+          <Route path="/referral" element={<DeepLinkRedirectPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

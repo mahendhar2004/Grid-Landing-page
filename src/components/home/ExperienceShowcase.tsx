@@ -1,48 +1,58 @@
 import { useState, useRef, useEffect } from 'react'
-import { motion, useScroll, useSpring } from 'framer-motion'
-import { EyeOff, ShieldCheck, Moon, Lock, UserX, CheckCheck, Droplets, ArrowRight, Calendar, Sun } from 'lucide-react'
+import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion'
+import { EyeOff, ShieldCheck, Moon, Lock, UserX, CheckCheck, Droplets, ArrowRight, Calendar, Sun, MessageCircle, Tag, ArrowLeftRight, CheckCircle2, MapPin, Home, Clock, Send } from 'lucide-react'
 import AnimatedSection from '../ui/AnimatedSection'
 
 const showcaseSlides = [
   {
     id: 'anonymous',
-    tag: 'Stealth Mode',
+    tag: 'Anonymous Mode',
     number: '01',
-    title: ['Your Identity.', 'Your Terms.'],
-    description: "Grid's signature Anonymous Mode lets you list items without revealing who you are. One toggle, total privacy across the entire campus.",
+    title: ['Sell without', 'showing your face.'],
+    description: "Don't want your hostel neighbours knowing you're selling your calculator? Go anonymous. List, chat, and close deals — your identity stays hidden until you choose to reveal it.",
     icon: EyeOff,
     color: 'from-violet-600/20 to-purple-600/20',
     primary: 'var(--color-primary)'
   },
   {
     id: 'availability',
-    tag: 'Campus Planning',
+    tag: 'Pickup Scheduling',
     number: '02',
-    title: ['Plan Your.', 'Resale Today.'],
-    description: "Set exactly when your gear is ready to go. Whether it's today or the end of the semester, buyers can see your timeline and plan accordingly.",
+    title: ['Tell buyers', 'when you\'re free.'],
+    description: "Selling your textbook but exams aren't over yet? Set your item as available from a specific date. Buyers see it, plan around it — no awkward 'I\'ll get back to you' messages.",
     icon: Calendar,
     color: 'from-amber-600/20 to-orange-600/20',
     primary: '#f59e0b'
   },
   {
     id: 'security',
-    tag: 'Campus Trust',
+    tag: 'Privacy Controls',
     number: '03',
-    title: ['Absolute Control.', 'Zero Stress.'],
-    description: "Privacy isn't a feature; it's the foundation. Manage your visibility, online status, and interaction rules with our granular privacy engine.",
+    title: ['You control', 'who reaches you.'],
+    description: "Hide your online status, control who can message you, and manage exactly how visible you are. Sell on your terms — without feeling exposed or pressured.",
     icon: ShieldCheck,
     color: 'from-emerald-600/20 to-teal-600/20',
     primary: '#10b981'
   },
   {
     id: 'themes',
-    tag: 'Visual Soul',
+    tag: 'Dark & Light Mode',
     number: '04',
-    title: ['Perfect Focus.', 'Night & Day.'],
-    description: "Switch perfectly between our elite themes. Whether you're studying outdoors or browsing in your room late at night, Grid looks stunning.",
+    title: ['Built for late nights', 'and bright days.'],
+    description: "Browsing listings at 2AM before your lab submission? Or outside between lectures? Grid's Dark and Light modes adapt to your environment — sharp, clear, and easy on the eyes.",
     icon: Moon,
     color: 'from-blue-600/20 to-indigo-600/20',
     primary: '#3b82f6'
+  },
+  {
+    id: 'chat',
+    tag: 'Smart Chat',
+    number: '05',
+    title: ['Bargain, agree,', 'and close — in chat.'],
+    description: "Send an offer. Seller counters. You accept. Share the pickup spot — all without leaving the conversation. Grid's built-in deal flow means no chaotic back-and-forth on WhatsApp.",
+    icon: MessageCircle,
+    color: 'from-primary/20 to-blue-600/20',
+    primary: 'var(--color-primary)'
   }
 ]
 
@@ -61,10 +71,10 @@ export default function ExperienceShowcase() {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 mb-20 lg:mb-32">
         <AnimatedSection direction="left">
-          <span className="inline-block text-primary font-bold text-sm tracking-widest uppercase mb-4 italic">The Elite Experience</span>
+          <span className="inline-block text-primary font-bold text-sm tracking-widest uppercase mb-4 italic">Built for campus life</span>
           <h2 className="text-5xl sm:text-7xl font-black text-secondary tracking-tighter leading-[0.9] italic">
-            Engineered for the<br />
-            <span className="text-primary not-italic">Campus Professional.</span>
+            Features that actually<br />
+            <span className="text-primary not-italic">make sense for students.</span>
           </h2>
         </AnimatedSection>
       </div>
@@ -122,14 +132,21 @@ export default function ExperienceShowcase() {
                       )}
                       {slide.id === 'security' && (
                         <>
-                          <FeatureTag icon={ShieldCheck} label="Privacy Score" />
-                          <FeatureTag icon={CheckCheck} label="Safe Messaging" />
+                          <FeatureTag icon={EyeOff} label="Hide Online Status" />
+                          <FeatureTag icon={CheckCheck} label="Read Receipts" />
                         </>
                       )}
                       {slide.id === 'themes' && (
                         <>
                           <FeatureTag icon={Moon} label="Night Focus" />
                           <FeatureTag icon={Sun} label="Pure Tone" />
+                        </>
+                      )}
+                      {slide.id === 'chat' && (
+                        <>
+                          <FeatureTag icon={Tag} label="Make Offer" />
+                          <FeatureTag icon={ArrowLeftRight} label="Counter Offer" />
+                          <FeatureTag icon={MapPin} label="Pickup Details" />
                         </>
                       )}
                     </div>
@@ -154,6 +171,7 @@ export default function ExperienceShowcase() {
                         {slide.id === 'availability' && <AvailabilityVisual />}
                         {slide.id === 'security' && <SecurityVisual />}
                         {slide.id === 'themes' && <ThemeVisual />}
+                        {slide.id === 'chat' && <ChatVisual />}
                       </div>
 
                       {/* Material Overlay */}
@@ -244,17 +262,249 @@ function AnonymousVisual() {
 }
 
 function SecurityVisual() {
+  const [onlineVisible, setOnlineVisible] = useState(false)
+  const [messagingOpen, setMessagingOpen] = useState(true)
+  const [profileVisible, setProfileVisible] = useState(true)
+
+  const controls = [
+    {
+      label: 'Show as Online',
+      sub: 'Others can see when you\'re active',
+      enabled: onlineVisible,
+      toggle: () => setOnlineVisible(p => !p),
+    },
+    {
+      label: 'Read Receipts',
+      sub: 'Let others know when you\'ve read',
+      enabled: messagingOpen,
+      toggle: () => setMessagingOpen(p => !p),
+    },
+    {
+      label: 'Public Profile',
+      sub: 'Your listings are discoverable',
+      enabled: profileVisible,
+      toggle: () => setProfileVisible(p => !p),
+    },
+  ]
+
   return (
-    <div className="grid grid-cols-2 gap-3 w-full">
-      {[...Array(4)].map((_, i) => (
+    <div className="flex flex-col gap-3 w-full">
+      {controls.map((c) => (
         <div
-          key={i}
-          className="h-16 rounded-2xl border border-primary/20 bg-primary/5 flex flex-col items-center justify-center text-primary"
+          key={c.label}
+          className="flex items-center justify-between px-4 py-3 rounded-2xl border border-border/40 bg-surface/60 backdrop-blur-sm"
         >
-          <ShieldCheck size={20} />
-          <span className="text-[8px] font-black mt-2 uppercase tracking-tighter">Verified</span>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[11px] font-black text-secondary tracking-tight">{c.label}</span>
+            <span className="text-[9px] text-secondary/40 font-medium">{c.sub}</span>
+          </div>
+          {/* Toggle pill */}
+          <button
+            onClick={c.toggle}
+            className={`relative w-10 h-5 rounded-full transition-all duration-400 flex-shrink-0 ${
+              c.enabled ? 'bg-emerald-500' : 'bg-border/60'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
+                c.enabled ? 'left-[22px]' : 'left-0.5'
+              }`}
+            />
+          </button>
         </div>
       ))}
+    </div>
+  )
+}
+
+// ── Chat Visual ───────────────────────────────────────────────────────────────
+
+type ChatMsg =
+  | { type: 'text'; text: string; isMe: boolean; time: string }
+  | { type: 'offer'; price: number; isMe: boolean; time: string }
+  | { type: 'counter'; price: number; isMe: boolean; time: string }
+  | { type: 'accept'; price: number; isMe: boolean; time: string }
+  | { type: 'pickup'; address: string; timeSlot: string; isMe: boolean; time: string }
+
+const chatScript: ChatMsg[] = [
+  { type: 'text',    text: 'Hey! Is the MacBook still available?', isMe: false, time: '10:01 AM' },
+  { type: 'text',    text: 'Yes! Just listed it today.',           isMe: true,  time: '10:02 AM' },
+  { type: 'offer',   price: 38000,  isMe: false,  time: '10:03 AM' },
+  { type: 'counter', price: 41000,  isMe: true,   time: '10:04 AM' },
+  { type: 'accept',  price: 41000,  isMe: false,  time: '10:05 AM' },
+  { type: 'text',    text: 'Deal! When can I collect it?',         isMe: false, time: '10:06 AM' },
+  { type: 'pickup',  address: 'Library Wing, Level 2', timeSlot: 'Today, 4:00 PM', isMe: true, time: '10:07 AM' },
+]
+
+function ChatVisual() {
+  const [visibleCount, setVisibleCount] = useState(0)
+  const [cycle, setCycle] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setVisibleCount(0)
+    let i = 0
+    const timers: ReturnType<typeof setTimeout>[] = []
+
+    const reveal = () => {
+      i++
+      setVisibleCount(i)
+      if (i < chatScript.length) {
+        timers.push(setTimeout(reveal, 900))
+      } else {
+        timers.push(setTimeout(() => setCycle(c => c + 1), 2800))
+      }
+    }
+
+    timers.push(setTimeout(reveal, 600))
+    return () => timers.forEach(clearTimeout)
+  }, [cycle])
+
+  // auto-scroll to bottom
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [visibleCount])
+
+  return (
+    <div className="flex flex-col w-full h-full max-h-[340px] rounded-[32px] overflow-hidden border border-white/10 bg-[#0d0d0d] shadow-2xl">
+      {/* Chat header */}
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 bg-[#111] flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-primary flex items-center justify-center text-white text-[11px] font-bold">R</div>
+        <div>
+          <p className="text-[11px] font-bold text-white">Rahul K.</p>
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+            <span className="text-[8px] text-green-400 font-bold uppercase tracking-wider">Online</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 flex flex-col gap-2.5 scrollbar-hide">
+        <AnimatePresence>
+          {chatScript.slice(0, visibleCount).map((m, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className={`flex flex-col ${m.isMe ? 'items-end' : 'items-start'}`}
+            >
+              {m.type === 'text' ? (
+                <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-[10px] font-medium leading-snug ${
+                  m.isMe
+                    ? 'bg-primary text-white rounded-tr-none shadow-md shadow-primary/20'
+                    : 'bg-zinc-800 text-zinc-100 rounded-tl-none'
+                }`}>
+                  {m.text}
+                  <div className="flex justify-end items-center gap-1 mt-1 opacity-60">
+                    <span className="text-[6px]">{m.time}</span>
+                    {m.isMe && <CheckCheck size={8} className="text-white" />}
+                  </div>
+                </div>
+              ) : m.type === 'offer' ? (
+                <ChatDealCard
+                  gradient="from-indigo-500 to-indigo-700"
+                  label="OFFER"
+                  icon={<Tag size={10} className="text-white" />}
+                  time={m.time}
+                  isMe={m.isMe}
+                >
+                  <p className="text-[15px] font-black text-white">₹{(m as any).price.toLocaleString()}</p>
+                  <p className="text-[7px] text-white/60 mt-0.5">Buyer's opening offer</p>
+                </ChatDealCard>
+              ) : m.type === 'counter' ? (
+                <ChatDealCard
+                  gradient="from-amber-500 to-orange-600"
+                  label="COUNTER OFFER"
+                  icon={<ArrowLeftRight size={10} className="text-white" />}
+                  time={m.time}
+                  isMe={m.isMe}
+                >
+                  <p className="text-[15px] font-black text-white">₹{(m as any).price.toLocaleString()}</p>
+                  <p className="text-[7px] text-white/70 mt-0.5">Your counter proposal</p>
+                </ChatDealCard>
+              ) : m.type === 'accept' ? (
+                <ChatDealCard
+                  gradient="from-emerald-500 to-emerald-600"
+                  label="OFFER ACCEPTED"
+                  icon={<CheckCircle2 size={10} className="text-white" />}
+                  time={m.time}
+                  isMe={m.isMe}
+                >
+                  <p className="text-[13px] font-black text-white">Deal Confirmed</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Tag size={9} className="text-white/70" />
+                    <p className="text-[14px] font-bold text-white">₹{(m as any).price.toLocaleString()}</p>
+                  </div>
+                </ChatDealCard>
+              ) : m.type === 'pickup' ? (
+                <ChatDealCard
+                  gradient="from-violet-500 to-violet-700"
+                  label="PICKUP DETAILS"
+                  icon={<MapPin size={10} className="text-white" />}
+                  time={m.time}
+                  isMe={m.isMe}
+                >
+                  <div className="flex flex-col gap-1.5 mt-1.5 p-2 bg-black/20 rounded-xl">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-5 h-5 rounded-lg bg-white/10 flex items-center justify-center">
+                        <Home size={9} className="text-white" />
+                      </div>
+                      <span className="text-[9px] font-bold text-white">{(m as any).address}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-5 h-5 rounded-lg bg-white/10 flex items-center justify-center">
+                        <Clock size={9} className="text-white" />
+                      </div>
+                      <span className="text-[9px] font-bold text-white">{(m as any).timeSlot}</span>
+                    </div>
+                  </div>
+                </ChatDealCard>
+              ) : null}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Input bar */}
+      <div className="flex items-center gap-2 px-3 py-2.5 border-t border-white/5 bg-[#111] flex-shrink-0">
+        <div className="flex-1 bg-zinc-800/80 rounded-xl px-3 py-1.5">
+          <span className="text-[9px] text-zinc-500">Type a message…</span>
+        </div>
+        <button className="w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-md shadow-primary/30">
+          <Send size={11} strokeWidth={2.5} className="text-white" />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ChatDealCard({
+  gradient, label, icon, time, isMe, children
+}: {
+  gradient: string; label: string; icon: React.ReactNode;
+  time: string; isMe: boolean; children: React.ReactNode
+}) {
+  return (
+    <div className="max-w-[82%] w-full">
+      <div className={`w-full bg-gradient-to-br ${gradient} rounded-[16px] p-3 shadow-xl border border-white/10 relative overflow-hidden`}>
+        <div className="absolute -right-3 -top-3 w-12 h-12 bg-white/10 rounded-full blur-xl" />
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-pulse" />
+            <span className="text-[7px] font-black text-white/80 uppercase tracking-widest">{label}</span>
+          </div>
+          <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">{icon}</div>
+        </div>
+        {children}
+      </div>
+      <div className={`flex items-center gap-1 mt-1 px-1 opacity-50 ${isMe ? 'justify-end' : 'justify-start'}`}>
+        <span className="text-[6px] font-bold text-text-muted">{time}</span>
+        {isMe && <CheckCheck size={8} className="text-primary" />}
+      </div>
     </div>
   )
 }
