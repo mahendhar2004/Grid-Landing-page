@@ -159,7 +159,7 @@ export default function ContactPage() {
               <ArrowRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </a>
 
-            <a href="https://www.instagram.com/grid_galvam" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.instagram.com/gridmarketplace?igsh=eXZ1ZjFsOGxrZDR0" target="_blank" rel="noopener noreferrer"
               className="group flex items-center gap-5 p-6 rounded-[32px] border transition-all duration-500 hover:shadow-xl"
               style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
             >
@@ -168,7 +168,7 @@ export default function ContactPage() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-bold text-secondary transition-colors">Instagram</p>
-                <p className="text-xs text-text-muted opacity-70 transition-colors">@grid_galvam</p>
+                <p className="text-xs text-text-muted opacity-70 transition-colors">@gridmarketplace</p>
               </div>
               <ArrowRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </a>
