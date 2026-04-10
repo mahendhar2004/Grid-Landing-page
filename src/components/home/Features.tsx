@@ -26,7 +26,7 @@ export default function Features() {
   }, [])
 
   return (
-    <section id="features" className="py-24 lg:py-60 relative overflow-hidden bg-background transition-colors duration-1000">
+    <section id="features" className="pt-12 lg:pt-20 pb-24 lg:pb-60 relative overflow-hidden bg-background transition-colors duration-1000">
       
       {/* Background Ambience */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />

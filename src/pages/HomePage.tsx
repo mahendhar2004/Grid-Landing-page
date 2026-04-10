@@ -8,6 +8,7 @@ import Testimonials from '../components/home/Testimonials'
 import Referral from '../components/home/Referral'
 import AppExperience from '../components/home/AppExperience'
 import VisionMission from '../components/home/VisionMission'
+import FreeListingBonus from '../components/home/FreeListingBonus'
 import DownloadCTA from '../components/home/DownloadCTA'
 
 export default function HomePage() {
@@ -15,6 +16,9 @@ export default function HomePage() {
     <>
       {/* 1. HOOK — grab attention, set the stage */}
       <Hero />
+
+      {/* NEW BONUS — the immediate incentive */}
+      <FreeListingBonus />
 
       {/* 2. THE ECOSYSTEM — problems, solutions, and lifelong campus value */}
       <Lifecycle />

@@ -67,7 +67,7 @@ export default function ExperienceShowcase() {
   })
 
   return (
-    <section id="experience" className="py-24 lg:py-48 relative overflow-hidden bg-background transition-colors duration-1000">
+    <section id="experience" className="pt-24 lg:pt-48 pb-12 lg:pb-20 relative overflow-hidden bg-background transition-colors duration-1000">
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 mb-20 lg:mb-32">
         <AnimatedSection direction="left">

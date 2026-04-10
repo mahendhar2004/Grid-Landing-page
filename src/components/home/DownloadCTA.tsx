@@ -53,7 +53,7 @@ export default function DownloadCTA() {
               </h2>
 
               <p className="text-base sm:text-lg text-text-muted max-w-md mx-auto mb-12 leading-relaxed transition-colors">
-                Be the first in your batch to experience the smarter campus marketplace.
+                Be the first in your batch to experience the smarter campus marketplace and <strong>get your first listing for free</strong>.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">

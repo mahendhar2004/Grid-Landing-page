@@ -70,7 +70,7 @@ export default function Hero() {
             </AnimatedSection>
 
             <AnimatedSection delay={0.15}>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+              <div className="flex flex-row items-center gap-3 sm:gap-5 flex-wrap">
 
                 {/* ── PREMIUM Google Play CTA ── */}
                 <div className="relative">
@@ -83,13 +83,13 @@ export default function Hero() {
                     whileHover={{ scale: 1.04, y: -3 }}
                     whileTap={{ scale: 0.97 }}
                     transition={{ type: 'spring', stiffness: 340, damping: 24 }}
-                    className="shimmer-loop relative flex items-center gap-4 overflow-hidden rounded-[20px] px-6 py-4 shadow-[0_8px_40px_rgba(0,123,255,0.45),0_2px_12px_rgba(0,123,255,0.25),inset_0_1px_0_rgba(255,255,255,0.18)]"
+                    className="shimmer-loop relative flex items-center gap-3 sm:gap-4 overflow-hidden rounded-[16px] sm:rounded-[20px] px-4 sm:px-6 py-3 sm:py-4 shadow-[0_8px_40px_rgba(0,123,255,0.45),0_2px_12px_rgba(0,123,255,0.25),inset_0_1px_0_rgba(255,255,255,0.18)]"
                     style={{
                       background: 'linear-gradient(135deg, #1a7fff 0%, #007BFF 40%, #0056cc 100%)',
                     }}
                   >
                     {/* Frosted glass icon well */}
-                    <span className="relative flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center border border-white/30 shadow-inner"
+                    <span className="relative flex-shrink-0 w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/30 shadow-inner"
                       style={{ background: 'rgba(0,0,0,0.28)', backdropFilter: 'blur(8px)' }}>
                       {/* Exact Play Store icon */}
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
@@ -99,8 +99,8 @@ export default function Hero() {
 
                     {/* Text block */}
                     <span className="flex flex-col items-start leading-none gap-0.5">
-                      <span className="text-white/65 text-[9px] font-bold uppercase tracking-[2.5px]">Get it on</span>
-                      <span className="text-white text-[17px] font-black tracking-tight">Google Play</span>
+                      <span className="text-white/65 text-[8px] sm:text-[9px] font-bold uppercase tracking-[2px] sm:tracking-[2.5px]">Get it on</span>
+                      <span className="text-white text-[14px] sm:text-[17px] font-black tracking-tight transition-all">Google Play</span>
                       {/* Star rating row */}
                       <span className="flex items-center gap-1 mt-1">
                         {[...Array(5)].map((_, i) => (
@@ -121,14 +121,14 @@ export default function Hero() {
                 <motion.div
                   whileHover={{ scale: 1.03, y: -2 }}
                   transition={{ type: 'spring', stiffness: 340, damping: 24 }}
-                  className="relative flex items-center gap-4 px-6 py-4 rounded-[20px] border border-border/50 cursor-default overflow-hidden"
+                  className="relative flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 rounded-[16px] sm:rounded-[20px] border border-border/50 cursor-default overflow-hidden"
                   style={{ background: 'rgba(var(--color-surface-rgb, 250,250,250), 0.4)', backdropFilter: 'blur(16px)' }}
                 >
                   {/* Subtle inner glow */}
                   <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
                   {/* Apple logo icon well */}
-                  <span className="flex-shrink-0 w-11 h-11 rounded-2xl border border-border/60 flex items-center justify-center"
+                  <span className="flex-shrink-0 w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl border border-border/60 flex items-center justify-center"
                     style={{ background: 'rgba(var(--color-surface-rgb, 250,250,250), 0.6)' }}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-secondary">
                       <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
@@ -136,8 +136,8 @@ export default function Hero() {
                   </span>
 
                   <span className="flex flex-col items-start leading-none gap-0.5">
-                    <span className="text-text-muted text-[9px] font-bold uppercase tracking-[2.5px]">Coming soon</span>
-                    <span className="text-secondary text-[17px] font-black tracking-tight">App Store</span>
+                    <span className="text-text-muted text-[8px] sm:text-[9px] font-bold uppercase tracking-[2px] sm:tracking-[2.5px]">Coming soon</span>
+                    <span className="text-secondary text-[14px] sm:text-[17px] font-black tracking-tight transition-all">App Store</span>
                     <span className="text-text-muted text-[9px] font-medium mt-1">iOS release on the way</span>
                   </span>
                 </motion.div>

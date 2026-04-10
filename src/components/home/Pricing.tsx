@@ -138,14 +138,37 @@ export default function Pricing() {
                   </div>
                 ))}
                 
-                {/* Referrals highlight */}
-                <div className="pt-4 mt-6 border-t border-border">
+                {/* Referrals & Signups highlight */}
+                <div className="pt-4 mt-6 border-t border-border space-y-3">
                   <div className="flex items-center justify-between p-4 rounded-2xl bg-primary text-white shadow-lg shadow-primary/20">
                     <div className="flex items-center gap-2">
                       <Sparkles size={14} className="animate-pulse" />
+                      <span className="text-xs font-black uppercase tracking-wider">Signup Bonus</span>
+                    </div>
+                    <span className="text-sm font-black">1 Free Credit</span>
+                  </div>
+                  
+                  <div className="relative group/referral overflow-hidden flex items-center justify-between p-4 rounded-2xl border transition-all duration-500 shadow-xl"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                      borderColor: '#FFD700',
+                    }}
+                  >
+                    {/* Animated gold shimmer */}
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg]"
+                      animate={{ x: ['100%', '-100%'] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                    />
+                    
+                    <div className="relative flex items-center gap-2 text-black">
+                      <Gift size={14} className="animate-bounce" />
                       <span className="text-xs font-black uppercase tracking-wider">Referral Credit</span>
                     </div>
-                    <span className="text-sm font-black">₹0</span>
+                    <span className="relative text-sm font-black text-black">₹0 Fee</span>
+                    
+                    {/* Outer golden aura */}
+                    <div className="absolute -inset-1 bg-yellow-400/20 blur-lg rounded-2xl animate-pulse pointer-events-none" />
                   </div>
                 </div>
               </div>
