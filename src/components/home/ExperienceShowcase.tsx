@@ -261,7 +261,7 @@ function AnonymousVisual() {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               key="girl"
-              src="/src/assets/girl_avatar.png" 
+              src="/images/girl_avatar.png" 
               className="w-full h-full object-cover" 
             />
           )}
