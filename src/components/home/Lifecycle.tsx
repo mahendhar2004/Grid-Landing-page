@@ -1,9 +1,10 @@
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 import { useRef } from 'react'
 import {
-  Banknote, Clock, Thermometer,
-  Coffee, GraduationCap,
-  ArrowRightLeft, BadgePercent, ZapOff
+  Banknote, Store, TrendingUp,
+  Monitor, GraduationCap,
+  Zap, BadgePercent, Shuffle,
+  Flag, Briefcase, Home, Sparkles
 } from 'lucide-react'
 import AnimatedSection from '../ui/AnimatedSection'
 
@@ -12,7 +13,7 @@ const problemSolutions = [
     category: "The Setup Squeeze",
     problem: "Starting a new semester shouldn't break the bank. Local shops charge 3x for basic coolers, cycles, and induction stoves knowing you're desperate.",
     solution: "Skip the market. Buy premium hostel amenities (coolers, beds, gear) directly from seniors at 'no-brainer' prices. Save thousands instantly.",
-    problemIcon: ZapOff,
+    problemIcon: Store,
     solutionIcon: BadgePercent,
     accent: "#ef4444",
     solutionAccent: "#10b981",
@@ -23,8 +24,8 @@ const problemSolutions = [
     category: "The Logistics Void",
     problem: "Navigating campus social groups to sell your used cycle or novels is a nightmare. Lowballers, ghosting, and awkward public meetups eat your time.",
     solution: "Close deals in minutes. List with a tap, chat securely, and schedule pick-ups using your campus credits. Zero commission, zero stress.",
-    problemIcon: Clock,
-    solutionIcon: ArrowRightLeft,
+    problemIcon: Shuffle,
+    solutionIcon: Zap,
     accent: "#f59e0b",
     solutionAccent: "#3b82f6",
     gradient: "from-amber-500/10 via-transparent to-transparent",
@@ -38,6 +39,7 @@ const useCases = [
     title: "Liquidate for the Next Chapter.",
     description: "Don't leave your room value behind. Sell your cooler, bed, fan, and years of collected novels to the incoming juniors. Walk out with a clean room and a heavy wallet.",
     icon: Banknote,
+    nodeIcon: Flag,
     color: "amber",
     tag: "The Big Payout"
   },
@@ -45,7 +47,8 @@ const useCases = [
     year: "Year 3 • The Tech Upgrade",
     title: "Flip Your Productivity.",
     description: "Done with that heavy-duty mechanical keyboard or specialized coding monitor? Flip it on Grid to fund your internship travel or new professional laptop.",
-    icon: Coffee,
+    icon: Monitor,
+    nodeIcon: Briefcase,
     color: "blue",
     tag: "Professional Edge"
   },
@@ -53,7 +56,8 @@ const useCases = [
     year: "Year 2 • Survival & Comfort",
     title: "Upgrade Without the Cost.",
     description: "Hostel life is a marathon. Trade up your first-year cycle for a geared one, or swap your old chair for a better workstation. Buy cheap, sell for the same.",
-    icon: Thermometer,
+    icon: TrendingUp,
+    nodeIcon: Home,
     color: "rose",
     tag: "Life Optimization"
   },
@@ -62,6 +66,7 @@ const useCases = [
     title: "Join the Shared Economy.",
     description: "Start your journey by making every rupee count. Grab a pre-owned cycle and a stack of self-help books for the price of a single pizza. Value from day one.",
     icon: GraduationCap,
+    nodeIcon: Sparkles,
     color: "emerald",
     tag: "Foundational Value"
   }
@@ -240,9 +245,9 @@ function LifecycleNode({ item, index }: { item: typeof useCases[0], index: numbe
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 3, repeat: Infinity }}
-            className={`w-12 h-12 rounded-full border-4 border-background bg-surface-base shadow-2xl flex items-center justify-center transition-all duration-500 group-hover:border-primary group-hover:scale-125`}
+            className="w-12 h-12 rounded-full border-4 border-background bg-surface-base shadow-2xl flex items-center justify-center transition-all duration-500 group-hover:border-primary group-hover:scale-125"
           >
-            <item.icon size={20} className="text-primary" />
+            <div className="w-3 h-3 rounded-full bg-primary group-hover:scale-125 transition-transform duration-500" />
           </motion.div>
           {/* Visual Pulse */}
           <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full scale-0 group-hover:scale-150 transition-all duration-700 pointer-events-none" />
