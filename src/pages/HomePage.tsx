@@ -9,6 +9,7 @@ import Referral from '../components/home/Referral'
 import AppExperience from '../components/home/AppExperience'
 import VisionMission from '../components/home/VisionMission'
 import FreeListingBonus from '../components/home/FreeListingBonus'
+import DataPrivacy from '../components/home/DataPrivacy'
 import DownloadCTA from '../components/home/DownloadCTA'
 
 export default function HomePage() {
@@ -47,7 +48,10 @@ export default function HomePage() {
       {/* 10. CREDIBILITY — we're serious people building this */}
       <VisionMission />
 
-      {/* 11. ACTION — download RIGHT NOW */}
+      {/* 11. TRUST — data privacy commitment */}
+      <DataPrivacy />
+
+      {/* 12. ACTION — download RIGHT NOW */}
       <DownloadCTA />
     </>
   )
