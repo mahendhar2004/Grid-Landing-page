@@ -48,13 +48,15 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Premium Transition: Sophisticated cubic-bezier for a high-end feel */
-  transition: 
+  transition:
     background-color 0.8s cubic-bezier(0.65, 0, 0.35, 1),
     color 0.8s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /* Global Transition Sync: Ensures all surfaces and borders move gracefully together */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   transition-property: background-color, border-color, color, fill, stroke;
   transition-duration: 0.8s;
   transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
@@ -63,17 +65,24 @@ body {
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
 }
 
 @keyframes ticker-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .animate-ticker {
@@ -91,8 +100,17 @@ body {
 }
 
 @keyframes glow-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.15); opacity: 1; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
 }
 
 ::selection {
@@ -114,6 +132,7 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

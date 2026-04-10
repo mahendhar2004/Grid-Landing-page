@@ -19,21 +19,21 @@ export default function Referral() {
             style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
             {/* Animated background gradient blobs */}
-            <motion.div 
-              animate={{ 
+            <motion.div
+              animate={{
                 rotate: [0, 90, 180, 270, 360],
-                scale: [1, 1.1, 1] 
-               }}
+                scale: [1, 1.1, 1]
+              }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full blur-[100px] opacity-40 pointer-events-none mix-blend-multiply"
               style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.3) 0%, rgba(139,92,246,0.1) 70%)' }}
             />
-            
-            <motion.div 
-              animate={{ 
+
+            <motion.div
+              animate={{
                 rotate: [360, 270, 180, 90, 0],
-                scale: [1, 1.2, 1] 
-               }}
+                scale: [1, 1.2, 1]
+              }}
               transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
               className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full blur-[100px] opacity-30 pointer-events-none mix-blend-multiply"
               style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.2) 0%, rgba(59,130,246,0.1) 70%)' }}
@@ -41,10 +41,10 @@ export default function Referral() {
 
             {/* Inner Content */}
             <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16">
-              
+
               {/* Left Column (Text & Features) */}
               <div className="flex-1 max-w-xl">
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -54,8 +54,8 @@ export default function Referral() {
                   <Sparkles size={16} />
                   <span className="text-[13px] font-black tracking-widest uppercase">Grid Rewards</span>
                 </motion.div>
-                
-                <motion.h2 
+
+                <motion.h2
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -67,8 +67,8 @@ export default function Referral() {
                     Earn Rewards.
                   </span>
                 </motion.h2>
-                
-                <motion.p 
+
+                <motion.p
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -77,8 +77,8 @@ export default function Referral() {
                 >
                   Invite your friends to the campus marketplace. Build your local student grid and get free listing credits for every signup.
                 </motion.p>
-                
-                <motion.div 
+
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -91,15 +91,15 @@ export default function Referral() {
                     { icon: Zap, title: 'Instant Credits', desc: 'Applied automatically' },
                     { icon: Award, title: 'No Limits', desc: 'Refer as many as you want' },
                   ].map((perk, i) => (
-                    <motion.div 
-                      key={perk.title} 
+                    <motion.div
+                      key={perk.title}
                       className="flex gap-4 items-start group/perk p-3 -m-3 rounded-2xl transition-colors hover:bg-black/5"
                       initial={{ opacity: 0, x: -10 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: 0.4 + (i * 0.1) }}
                     >
-                      <div 
+                      <div
                         className="w-12 h-12 rounded-2xl shadow-sm border flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover/perk:scale-110 group-hover/perk:bg-primary/5 group-hover/perk:border-primary/20 group-hover/perk:shadow-md"
                         style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
                       >
@@ -115,7 +115,7 @@ export default function Referral() {
               </div>
 
               {/* Right Column (Interactive Card / CTA) */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.9, rotate: 2 }}
                 whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
                 viewport={{ once: true }}
@@ -125,9 +125,9 @@ export default function Referral() {
                 <div className="relative group/cta perspective-1000">
                   {/* Glowing background behind card */}
                   <div className="absolute -inset-1.5 bg-gradient-to-r from-primary via-indigo-400 to-purple-500 rounded-[2.5rem] blur opacity-30 group-hover/cta:opacity-50 transition duration-500 group-hover/cta:duration-200" />
-                  
+
                   {/* Card itself */}
-                  <div 
+                  <div
                     className="relative rounded-[2rem] p-8 sm:p-10 border shadow-2xl flex flex-col items-center text-center transform transition-all duration-500 group-hover/cta:-translate-y-2"
                     style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
                   >
@@ -142,18 +142,18 @@ export default function Referral() {
                         <Sparkles size={24} />
                       </motion.div>
                     </div>
-                    
+
                     <h3 className="text-[26px] font-black text-secondary mb-3 leading-tight transition-colors">Claim your free listing</h3>
                     <p className="text-text-muted text-[15px] mb-8 leading-relaxed transition-colors">Refer friends to Grid and watch the zero-cost listing credits roll in.</p>
-                    
-                    <motion.a 
+
+                    <motion.a
                       href="#download"
                       whileHover={{ scale: 1.03, boxShadow: "0 10px 30px -5px rgba(37,99,235, 0.4)" }}
                       whileTap={{ scale: 0.97 }}
                       className="w-full relative overflow-hidden bg-primary text-white py-4.5 rounded-xl font-bold text-[14px] uppercase tracking-[1.5px] flex items-center justify-center gap-2 group/btn transition-all shadow-lg"
                     >
                       {/* Shimmer animation light streak */}
-                      <motion.span 
+                      <motion.span
                         className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-[-20deg]"
                         initial={{ x: '-150%' }}
                         animate={{ x: '150%' }}
@@ -162,7 +162,7 @@ export default function Referral() {
                       Start Referring
                       <ArrowRight size={18} className="group-hover/btn:translate-x-1.5 transition-transform duration-300" />
                     </motion.a>
-                    
+
                     <div className="mt-6 flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse" />
                       <p className="text-[12px] text-text-muted font-semibold uppercase tracking-wider">Credits never expire</p>
@@ -170,7 +170,7 @@ export default function Referral() {
                   </div>
                 </div>
               </motion.div>
-              
+
             </div>
           </div>
         </AnimatedSection>

@@ -37,7 +37,7 @@ export const features = [
   {
     icon: Layers,
     title: '112+ Categories',
-    description: 'From laptops and textbooks to gym gear, induction cooktops, and mini-fridges — everything a student could need across 8 specialized groups.',
+    description: 'From laptops and air coolers to gym equipment, cycles, and mini-fridges — everything a student could need across 8 specialized groups.',
     color: 'orange' as const,
   },
   {

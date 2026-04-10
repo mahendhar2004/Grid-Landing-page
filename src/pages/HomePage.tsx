@@ -1,5 +1,5 @@
 import Hero from '../components/home/Hero'
-import UseCases from '../components/home/UseCases'
+import Lifecycle from '../components/home/Lifecycle'
 import HowItWorks from '../components/home/HowItWorks'
 import ExperienceShowcase from '../components/home/ExperienceShowcase'
 import Features from '../components/home/Features'
@@ -16,8 +16,8 @@ export default function HomePage() {
       {/* 1. HOOK — grab attention, set the stage */}
       <Hero />
 
-      {/* 2. RELATE — "this is literally my situation" */}
-      <UseCases />
+      {/* 2. THE ECOSYSTEM — problems, solutions, and lifelong campus value */}
+      <Lifecycle />
 
       {/* 3. HOW — remove friction, show it's dead simple */}
       <HowItWorks />
@@ -48,4 +48,3 @@ export default function HomePage() {
     </>
   )
 }
-

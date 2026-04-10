@@ -37,10 +37,10 @@ const feedProducts = [
 ]
 
 const navItems = [
-  { label: 'Home', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.42 4.95-4.95 1.42 1.42-4.95 4.95-1.42Z"/></svg>, active: true },
-  { label: 'Chat', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>, active: false, badge: 3 },
+  { label: 'Home', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m16.24 7.76-1.42 4.95-4.95 1.42 1.42-4.95 4.95-1.42Z" /></svg>, active: true },
+  { label: 'Chat', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>, active: false, badge: 3 },
   { label: 'Create', icon: null, active: false, primary: true },
-  { label: 'MyListings', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 12H3m18-6H3m18 12H3"/></svg>, active: false },
+  { label: 'MyListings', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 12H3m18-6H3m18 12H3" /></svg>, active: false },
   { label: 'Profile', icon: <User size={20} />, active: false },
 ]
 
@@ -231,17 +231,17 @@ export default function PhoneMockup3D() {
                 <div className="flex items-center gap-[5px]">
                   {/* Signal bars */}
                   <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
-                    <rect x="0"  y="6"   width="3" height="5"  rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"}/>
-                    <rect x="4"  y="3.5" width="3" height="7.5" rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"}/>
-                    <rect x="8"  y="1.5" width="3" height="9.5" rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"}/>
-                    <rect x="12" y="0"   width="3" height="11" rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"}/>
+                    <rect x="0" y="6" width="3" height="5" rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"} />
+                    <rect x="4" y="3.5" width="3" height="7.5" rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"} />
+                    <rect x="8" y="1.5" width="3" height="9.5" rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"} />
+                    <rect x="12" y="0" width="3" height="11" rx="0.8" fill={isDarkMode ? "#FFF" : "#1a1a1a"} />
                   </svg>
                   {/* WiFi — 3 arcs + dot */}
                   <svg width="14" height="11" viewBox="0 0 14 11" fill="none">
-                    <path d="M1 4.5C3.2 1.7 10.8 1.7 13 4.5" stroke={isDarkMode ? "#FFF" : "#1a1a1a"} strokeWidth="1.4" strokeLinecap="round"/>
-                    <path d="M2.8 6.8C4.4 4.8 9.6 4.8 11.2 6.8" stroke={isDarkMode ? "#FFF" : "#1a1a1a"} strokeWidth="1.4" strokeLinecap="round"/>
-                    <path d="M4.7 9C5.5 7.8 8.5 7.8 9.3 9" stroke={isDarkMode ? "#FFF" : "#1a1a1a"} strokeWidth="1.4" strokeLinecap="round"/>
-                    <circle cx="7" cy="10.2" r="0.9" fill={isDarkMode ? "#FFF" : "#1a1a1a"}/>
+                    <path d="M1 4.5C3.2 1.7 10.8 1.7 13 4.5" stroke={isDarkMode ? "#FFF" : "#1a1a1a"} strokeWidth="1.4" strokeLinecap="round" />
+                    <path d="M2.8 6.8C4.4 4.8 9.6 4.8 11.2 6.8" stroke={isDarkMode ? "#FFF" : "#1a1a1a"} strokeWidth="1.4" strokeLinecap="round" />
+                    <path d="M4.7 9C5.5 7.8 8.5 7.8 9.3 9" stroke={isDarkMode ? "#FFF" : "#1a1a1a"} strokeWidth="1.4" strokeLinecap="round" />
+                    <circle cx="7" cy="10.2" r="0.9" fill={isDarkMode ? "#FFF" : "#1a1a1a"} />
                   </svg>
                   {/* Battery */}
                   <div className="relative flex items-center">
@@ -286,30 +286,28 @@ export default function PhoneMockup3D() {
               <div className="absolute bottom-2 left-0 right-0 px-4 z-50 pointer-events-none">
                 <div className="flex justify-center relative">
                   {/* The Floating Pill */}
-                  <div className={`flex justify-around items-center w-[250px] h-[54px] rounded-full border shadow-2xl transition-all duration-500 overflow-hidden pointer-events-auto ${
-                    isDarkMode 
-                      ? 'bg-gradient-to-br from-zinc-800 to-black border-white/10 shadow-black/40' 
-                      : 'bg-gradient-to-br from-white to-slate-50 border-slate-200 shadow-slate-200/50'
-                  }`}>
+                  <div className={`flex justify-around items-center w-[250px] h-[54px] rounded-full border shadow-2xl transition-all duration-500 overflow-hidden pointer-events-auto ${isDarkMode
+                    ? 'bg-gradient-to-br from-zinc-800 to-black border-white/10 shadow-black/40'
+                    : 'bg-gradient-to-br from-white to-slate-50 border-slate-200 shadow-slate-200/50'
+                    }`}>
                     {navItems.map((item, idx) => {
                       const isActive = activeScreen === (idx === 0 ? 0 : idx === 1 ? 1 : idx === 4 ? 2 : -1)
-                      
+
                       // Spacer for the center FAB
                       if (item.primary) return <div key="fab-spacer" className="w-12" />
 
                       return (
                         <div key={item.label} className="flex flex-col items-center justify-center relative group p-2">
-                          <div className={`transition-all duration-300 ${
-                            isActive 
-                              ? (isDarkMode ? 'text-white' : 'text-primary scale-110') 
-                              : (isDarkMode ? 'text-white/40' : 'text-slate-300')
-                          }`}>
+                          <div className={`transition-all duration-300 ${isActive
+                            ? (isDarkMode ? 'text-white' : 'text-primary scale-110')
+                            : (isDarkMode ? 'text-white/40' : 'text-slate-300')
+                            }`}>
                             {item.icon}
                           </div>
-                          
+
                           {/* Active Dot Indicator */}
                           {isActive && (
-                            <motion.div 
+                            <motion.div
                               layoutId="navDot"
                               className={`absolute -bottom-1 w-1.5 h-1.5 rounded-full ${isDarkMode ? 'bg-white' : 'bg-primary'}`}
                               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
@@ -328,9 +326,8 @@ export default function PhoneMockup3D() {
 
                   {/* Center Floating Action Button (SELL/CREATE) */}
                   <div className="absolute bottom-[4px] left-1/2 -translate-x-1/2 pointer-events-auto">
-                    <div className={`w-[44px] h-[44px] rounded-full bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center shadow-xl border-[2.5px] transition-transform hover:scale-105 active:scale-95 ${
-                      isDarkMode ? 'border-zinc-800' : 'border-white'
-                    }`}>
+                    <div className={`w-[44px] h-[44px] rounded-full bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center shadow-xl border-[2.5px] transition-transform hover:scale-105 active:scale-95 ${isDarkMode ? 'border-zinc-800' : 'border-white'
+                      }`}>
                       <div className="relative">
                         <div className="w-[14px] h-[2px] bg-white rounded-full" />
                         <div className="w-[2px] h-[14px] bg-white rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
@@ -338,10 +335,10 @@ export default function PhoneMockup3D() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Visual Home Indicator below pill */}
                 <div className="flex justify-center mt-1.5">
-                   <div className={`w-12 h-1 rounded-full transition-colors ${isDarkMode ? 'bg-zinc-800' : 'bg-slate-200'}`} />
+                  <div className={`w-12 h-1 rounded-full transition-colors ${isDarkMode ? 'bg-zinc-800' : 'bg-slate-200'}`} />
                 </div>
               </div>
             )}
@@ -384,11 +381,11 @@ function HomeScreen({ isDarkMode }: { isDarkMode: boolean }) {
           <div className="flex items-center gap-2">
             {/* Search icon */}
             <div className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-100'}`}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.35-4.35" /></svg>
             </div>
             {/* Notification bell with badge */}
             <div className={`relative w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-100'}`}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="2.5" strokeLinecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="2.5" strokeLinecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg>
               <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
                 <span className="text-[5px] text-white font-bold">4</span>
               </div>
@@ -399,12 +396,12 @@ function HomeScreen({ isDarkMode }: { isDarkMode: boolean }) {
         {/* Filter chips row */}
         <div className="flex gap-1.5 mb-2">
           <div className={`flex items-center gap-1 border rounded-lg px-2 py-1 transition-colors ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-100'}`}>
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="2.5" strokeLinecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="2.5" strokeLinecap="round"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
             <span className={`text-[8px] font-semibold transition-colors ${isDarkMode ? 'text-zinc-400' : 'text-slate-600'}`}>Filters</span>
           </div>
           <div className={`flex items-center gap-1 border rounded-lg px-2 py-1 transition-colors ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-100'}`}>
             <span className={`text-[8px] font-semibold transition-colors ${isDarkMode ? 'text-zinc-400' : 'text-slate-600'}`}>Sort: Relevant</span>
-            <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="3" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#64748b"} strokeWidth="3" strokeLinecap="round"><path d="M6 9l6 6 6-6" /></svg>
           </div>
         </div>
 
@@ -441,7 +438,7 @@ function HomeScreen({ isDarkMode }: { isDarkMode: boolean }) {
 
               {/* Heart / save button - top right */}
               <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" /></svg>
               </div>
 
               {/* Price - bottom left */}
@@ -451,7 +448,7 @@ function HomeScreen({ isDarkMode }: { isDarkMode: boolean }) {
 
               {/* Chat button - bottom right */}
               <div className="absolute bottom-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-sm">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
               </div>
             </div>
 
@@ -460,7 +457,7 @@ function HomeScreen({ isDarkMode }: { isDarkMode: boolean }) {
               <p className={`text-[10px] font-bold truncate transition-colors ${isDarkMode ? 'text-zinc-100' : 'text-slate-900'}`}>{p.title}</p>
               <div className="flex items-center justify-between mt-0.5">
                 <div className="flex items-center gap-1">
-                  <svg width="7" height="7" viewBox="0 0 24 24" fill={isDarkMode ? "#71717a" : "#94a3b8"} stroke="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
+                  <svg width="7" height="7" viewBox="0 0 24 24" fill={isDarkMode ? "#71717a" : "#94a3b8"} stroke="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z" /></svg>
                   <span className={`text-[7px] transition-colors ${isDarkMode ? 'text-zinc-500' : 'text-slate-400'}`}>{p.location}</span>
                 </div>
                 <span className={`text-[7px] transition-colors ${isDarkMode ? 'text-zinc-500' : 'text-slate-400'}`}>{p.time}</span>
@@ -527,11 +524,10 @@ function ConversationScreen({ user, isDarkMode, onBack }: { user: any, isDarkMod
                 </div>
               </div>
             ) : (
-              <div className={`max-w-[85%] px-3 py-2 rounded-2xl relative ${
-                m.isMe
-                  ? 'bg-primary text-white rounded-tr-none shadow-md shadow-primary/10'
-                  : (isDarkMode ? 'bg-zinc-800 text-zinc-100 rounded-tl-none' : 'bg-slate-100 text-slate-800 rounded-tl-none')
-              }`}>
+              <div className={`max-w-[85%] px-3 py-2 rounded-2xl relative ${m.isMe
+                ? 'bg-primary text-white rounded-tr-none shadow-md shadow-primary/10'
+                : (isDarkMode ? 'bg-zinc-800 text-zinc-100 rounded-tl-none' : 'bg-slate-100 text-slate-800 rounded-tl-none')
+                }`}>
                 <p className="text-[10px] leading-[1.4] font-medium">{m.text}</p>
                 <div className={`flex items-center justify-end gap-1 mt-1 opacity-70`}>
                   <span className="text-[6px] font-bold tabular-nums">{m.time}</span>
@@ -644,7 +640,7 @@ function DealCard({ type, data, isMe }: { type: string, data: any, isMe: boolean
       {/* Decorative glass effect */}
       <div className="absolute -right-4 -top-4 w-16 h-16 bg-white/10 rounded-full blur-2xl pointer-events-none" />
       <div className="absolute -left-4 -bottom-4 w-12 h-12 bg-black/10 rounded-full blur-xl pointer-events-none" />
-      
+
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-white/30 animate-pulse" />
@@ -749,7 +745,7 @@ function ProfileScreen({ isDarkMode }: { isDarkMode: boolean }) {
       <div className="flex items-center justify-between mb-2">
         <p className={`text-[15px] font-extrabold tracking-tight transition-colors ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Profile</p>
         <div className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-200'}`}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#18181b"} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? "#a1a1aa" : "#18181b"} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>
         </div>
       </div>
 
@@ -769,12 +765,12 @@ function ProfileScreen({ isDarkMode }: { isDarkMode: boolean }) {
             <p className="text-[12px] font-extrabold text-white tracking-tight">Arjun H.</p>
             <p className="text-[9px] text-zinc-400 truncate">arjun.sharma@gmail.com</p>
             <div className="mt-1.5 inline-flex items-center gap-1 bg-white/[0.12] rounded-md px-2 py-0.5 border border-white/[0.08]">
-              <svg width="8" height="8" viewBox="0 0 24 24" fill="#a1a1aa" stroke="none"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9z"/></svg>
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="#a1a1aa" stroke="none"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9z" /></svg>
               <span className="text-[7px] font-bold text-white tracking-wide">IIT Hyderabad</span>
             </div>
           </div>
           <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fafafa" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fafafa" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
           </div>
         </div>
       </motion.div>
@@ -821,7 +817,7 @@ function ProfileScreen({ isDarkMode }: { isDarkMode: boolean }) {
                 {'badge' in item && item.badge && (
                   <span className="text-[6px] font-bold text-white bg-primary rounded px-1.5 py-0.5">{item.badge}</span>
                 )}
-                <svg className="w-2.5 h-2.5 text-zinc-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                <svg className="w-2.5 h-2.5 text-zinc-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
               </motion.div>
             ))}
           </div>

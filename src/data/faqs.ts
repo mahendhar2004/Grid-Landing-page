@@ -14,7 +14,7 @@ export const faqCategories: FAQCategory[] = [
     faqs: [
       {
         question: 'What is Grid?',
-        answer: 'Grid is a campus-exclusive marketplace designed for Indian college students. It allows you to buy and sell items like textbooks, electronics, furniture, and more — exclusively within your college community. Think of it as a trusted marketplace where every buyer and seller is a real student from your campus.',
+        answer: 'Grid is a campus-exclusive marketplace designed for Indian college students. It allows you to buy and sell items like air coolers, cycles, beds, and novels — exclusively within your college community. Think of it as a trusted marketplace where every buyer and seller is a real student from your campus.',
       },
       {
         question: 'How do I sign up?',

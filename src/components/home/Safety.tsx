@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import AnimatedSection from '../ui/AnimatedSection'
 
 const badges = [
-  { icon: Ban,    label: 'Ban System',     color: 'bg-red-50 text-red-600 border-red-100' },
-  { icon: UserX,  label: 'Block Users',    color: 'bg-orange-50 text-orange-600 border-orange-100' },
-  { icon: Flag,   label: 'Report Content', color: 'bg-blue-50 text-blue-600 border-blue-100' },
+  { icon: Ban, label: 'Ban System', color: 'bg-red-50 text-red-600 border-red-100' },
+  { icon: UserX, label: 'Block Users', color: 'bg-orange-50 text-orange-600 border-orange-100' },
+  { icon: Flag, label: 'Report Content', color: 'bg-blue-50 text-blue-600 border-blue-100' },
   { icon: ShieldAlert, label: 'Admin Moderation', color: 'bg-violet-50 text-violet-600 border-violet-100' },
 ]
 
@@ -14,26 +14,26 @@ const toggleConfig = [
   {
     key: 'anonymousMode' as const,
     label: 'Anonymous Mode',
-    on:  { icon: UserRound,      chip: 'Name hidden from campus', chipColor: 'bg-violet-50 text-violet-600 border-violet-100',   featureValue: 'Active',   featureColor: 'text-violet-600' },
-    off: { icon: UserRound,      chip: 'Public student profile',         chipColor: 'bg-slate-50 text-slate-400 border-slate-200',                featureValue: 'Public',    featureColor: 'text-slate-400' },
+    on: { icon: UserRound, chip: 'Name hidden from campus', chipColor: 'bg-violet-50 text-violet-600 border-violet-100', featureValue: 'Active', featureColor: 'text-violet-600' },
+    off: { icon: UserRound, chip: 'Public student profile', chipColor: 'bg-slate-50 text-slate-400 border-slate-200', featureValue: 'Public', featureColor: 'text-slate-400' },
   },
   {
     key: 'onlineStatus' as const,
     label: 'Online Status',
-    on:  { icon: Eye,            chip: 'Visible to campus', chipColor: 'bg-emerald-50 text-emerald-600 border-emerald-100', featureValue: 'Visible',  featureColor: 'text-emerald-600' },
-    off: { icon: EyeOff,         chip: 'Hidden from others', chipColor: 'bg-slate-50 text-slate-400 border-slate-200',                featureValue: 'Hidden',   featureColor: 'text-slate-400' },
+    on: { icon: Eye, chip: 'Visible to campus', chipColor: 'bg-emerald-50 text-emerald-600 border-emerald-100', featureValue: 'Visible', featureColor: 'text-emerald-600' },
+    off: { icon: EyeOff, chip: 'Hidden from others', chipColor: 'bg-slate-50 text-slate-400 border-slate-200', featureValue: 'Hidden', featureColor: 'text-slate-400' },
   },
   {
     key: 'readReceipts' as const,
     label: 'Read Receipts',
-    on:  { icon: CheckCheck,     chip: 'Others see "Seen"',  chipColor: 'bg-blue-50 text-blue-600 border-blue-100',         featureValue: 'Active', featureColor: 'text-blue-600' },
-    off: { icon: Check,          chip: 'Delivery only',       chipColor: 'bg-slate-50 text-slate-400 border-slate-200',                featureValue: 'Off',  featureColor: 'text-slate-400' },
+    on: { icon: CheckCheck, chip: 'Others see "Seen"', chipColor: 'bg-blue-50 text-blue-600 border-blue-100', featureValue: 'Active', featureColor: 'text-blue-600' },
+    off: { icon: Check, chip: 'Delivery only', chipColor: 'bg-slate-50 text-slate-400 border-slate-200', featureValue: 'Off', featureColor: 'text-slate-400' },
   },
   {
     key: 'blockRestrict' as const,
     label: 'Block & Restrict',
-    on:  { icon: UserX,          chip: 'Active moderation ready',     chipColor: 'bg-primary/5 text-primary border-primary/10',            featureValue: 'Strict',     featureColor: 'text-primary' },
-    off: { icon: ShieldCheck,    chip: 'Open community engagement',    chipColor: 'bg-slate-50 text-slate-400 border-slate-200',         featureValue: 'Standard',   featureColor: 'text-slate-400' },
+    on: { icon: UserX, chip: 'Active moderation ready', chipColor: 'bg-primary/5 text-primary border-primary/10', featureValue: 'Strict', featureColor: 'text-primary' },
+    off: { icon: ShieldCheck, chip: 'Open community engagement', chipColor: 'bg-slate-50 text-slate-400 border-slate-200', featureValue: 'Standard', featureColor: 'text-slate-400' },
   },
 ]
 
@@ -56,10 +56,10 @@ export default function Safety() {
       <div className="absolute inset-0 pointer-events-none opacity-[0.4]"
         style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, var(--color-text-muted) 1px, transparent 0)', backgroundSize: '40px 40px' }}
       />
-      
+
       <div className="max-w-7xl mx-auto px-6 relative">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          
+
           {/* ── Left Content: Messaging & Status Card ── */}
           <AnimatedSection direction="left">
             <div className="max-w-xl">
@@ -154,7 +154,7 @@ export default function Safety() {
                             />
                           </button>
                         </div>
-                        
+
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={active ? 'active' : 'inactive'}

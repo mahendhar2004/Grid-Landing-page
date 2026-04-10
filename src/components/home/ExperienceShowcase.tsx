@@ -5,13 +5,13 @@ import AnimatedSection from '../ui/AnimatedSection'
 
 const showcaseSlides = [
   {
-    id: 'anonymous',
-    tag: 'Anonymous Mode',
+    id: 'chat',
+    tag: 'Smart Chat',
     number: '01',
-    title: ['Sell without', 'showing your face.'],
-    description: "Don't want your hostel neighbours knowing you're selling your calculator? Go anonymous. List, chat, and close deals — your identity stays hidden until you choose to reveal it.",
-    icon: EyeOff,
-    color: 'from-violet-600/20 to-purple-600/20',
+    title: ['Bargain, agree,', 'and close — in chat.'],
+    description: "Send an offer. Seller counters. You accept. Share the pickup spot — all without leaving the conversation. Grid's built-in deal flow means no chaotic back-and-forth on WhatsApp.",
+    icon: MessageCircle,
+    color: 'from-primary/20 to-blue-600/20',
     primary: 'var(--color-primary)'
   },
   {
@@ -25,9 +25,19 @@ const showcaseSlides = [
     primary: '#f59e0b'
   },
   {
+    id: 'anonymous',
+    tag: 'Anonymous Mode',
+    number: '03',
+    title: ['Sell without', 'showing your face.'],
+    description: "Don't want your hostel neighbours knowing you're selling your calculator? Go anonymous. List, chat, and close deals — your identity stays hidden until you choose to reveal it.",
+    icon: EyeOff,
+    color: 'from-violet-600/20 to-purple-600/20',
+    primary: 'var(--color-primary)'
+  },
+  {
     id: 'security',
     tag: 'Privacy Controls',
-    number: '03',
+    number: '04',
     title: ['You control', 'who reaches you.'],
     description: "Hide your online status, control who can message you, and manage exactly how visible you are. Sell on your terms — without feeling exposed or pressured.",
     icon: ShieldCheck,
@@ -37,22 +47,12 @@ const showcaseSlides = [
   {
     id: 'themes',
     tag: 'Dark & Light Mode',
-    number: '04',
+    number: '05',
     title: ['Built for late nights', 'and bright days.'],
     description: "Browsing listings at 2AM before your lab submission? Or outside between lectures? Grid's Dark and Light modes adapt to your environment — sharp, clear, and easy on the eyes.",
     icon: Moon,
     color: 'from-blue-600/20 to-indigo-600/20',
     primary: '#3b82f6'
-  },
-  {
-    id: 'chat',
-    tag: 'Smart Chat',
-    number: '05',
-    title: ['Bargain, agree,', 'and close — in chat.'],
-    description: "Send an offer. Seller counters. You accept. Share the pickup spot — all without leaving the conversation. Grid's built-in deal flow means no chaotic back-and-forth on WhatsApp.",
-    icon: MessageCircle,
-    color: 'from-primary/20 to-blue-600/20',
-    primary: 'var(--color-primary)'
   }
 ]
 
@@ -163,10 +163,10 @@ export default function ExperienceShowcase() {
 
                   {/* Visual Side */}
                   <div className="order-1 lg:order-2 flex justify-center">
-                    <div className="relative w-full max-w-[440px] aspect-[4/3] rounded-[48px] border border-white/5 bg-surface shadow-inner overflow-hidden shadow-2xl">
+                    <div className="relative w-full max-w-[520px] lg:max-w-none lg:w-full min-h-[400px] lg:min-h-[550px] rounded-[48px] border border-white/5 bg-surface shadow-inner overflow-hidden shadow-2xl">
                       <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-20" />
 
-                      <div className="absolute inset-0 flex items-center justify-center p-8">
+                      <div className="absolute inset-0 flex items-center justify-center p-4 lg:p-10">
                         {slide.id === 'anonymous' && <AnonymousVisual />}
                         {slide.id === 'availability' && <AvailabilityVisual />}
                         {slide.id === 'security' && <SecurityVisual />}
@@ -244,18 +244,43 @@ function AvailabilityVisual() {
 function AnonymousVisual() {
   const [isAnon, setIsAnon] = useState(true)
   return (
-    <div className="flex flex-col items-center gap-8 w-full">
+    <div className="flex flex-col items-center gap-10 w-full">
       <div className="flex flex-col items-center">
-        <div className="w-20 h-20 rounded-full border-4 border-primary/20 flex items-center justify-center mb-4">
-          {isAnon ? <UserX size={40} className="text-primary" /> : <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=128&h=128" className="w-full h-full object-cover rounded-full" />}
+        <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full border-4 border-primary/20 flex items-center justify-center mb-6 overflow-hidden bg-muted shadow-2xl">
+          {isAnon ? (
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              key="anon"
+              className="w-full h-full flex items-center justify-center bg-zinc-900"
+            >
+              <UserX size={48} className="text-primary" />
+            </motion.div>
+          ) : (
+            <motion.img 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              key="girl"
+              src="/src/assets/girl_avatar.png" 
+              className="w-full h-full object-cover" 
+            />
+          )}
         </div>
-        <p className="text-lg font-black text-secondary italic tracking-tighter">{isAnon ? 'Identity Hidden' : 'Public student profile'}</p>
+        <div className="text-center">
+          <p className="text-[20px] font-black text-secondary tracking-tightest italic mb-1 uppercase">
+            {isAnon ? 'Identity Hidden' : 'Sanya Malhotra'}
+          </p>
+          <p className="text-[10px] text-primary font-bold tracking-widest uppercase italic bg-primary/10 px-3 py-1 rounded-full">
+            {isAnon ? 'GRID ENCRYPTION ACTIVE' : '3rd Year // IIT Bombay'}
+          </p>
+        </div>
       </div>
+
       <button
         onClick={() => setIsAnon(!isAnon)}
-        className="px-6 py-2.5 rounded-full bg-primary text-white font-black text-[9px] tracking-widest uppercase hover:shadow-xl hover:shadow-primary/20 transition-all"
+        className="px-10 py-4 rounded-full bg-primary text-white font-black uppercase tracking-[3px] text-[10px] italic shadow-2xl shadow-primary/40 active:scale-95 transition-all hover:brightness-110"
       >
-        Toggle Stealth
+        {isAnon ? 'Stealth Mode On' : 'Go Stealth'}
       </button>
     </div>
   )
@@ -301,14 +326,12 @@ function SecurityVisual() {
           {/* Toggle pill */}
           <button
             onClick={c.toggle}
-            className={`relative w-10 h-5 rounded-full transition-all duration-400 flex-shrink-0 ${
-              c.enabled ? 'bg-emerald-500' : 'bg-border/60'
-            }`}
+            className={`relative w-10 h-5 rounded-full transition-all duration-400 flex-shrink-0 ${c.enabled ? 'bg-emerald-500' : 'bg-border/60'
+              }`}
           >
             <span
-              className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${
-                c.enabled ? 'left-[22px]' : 'left-0.5'
-              }`}
+              className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${c.enabled ? 'left-[22px]' : 'left-0.5'
+                }`}
             />
           </button>
         </div>
@@ -327,13 +350,13 @@ type ChatMsg =
   | { type: 'pickup'; address: string; timeSlot: string; isMe: boolean; time: string }
 
 const chatScript: ChatMsg[] = [
-  { type: 'text',    text: 'Hey! Is the MacBook still available?', isMe: false, time: '10:01 AM' },
-  { type: 'text',    text: 'Yes! Just listed it today.',           isMe: true,  time: '10:02 AM' },
-  { type: 'offer',   price: 38000,  isMe: false,  time: '10:03 AM' },
-  { type: 'counter', price: 41000,  isMe: true,   time: '10:04 AM' },
-  { type: 'accept',  price: 41000,  isMe: false,  time: '10:05 AM' },
-  { type: 'text',    text: 'Deal! When can I collect it?',         isMe: false, time: '10:06 AM' },
-  { type: 'pickup',  address: 'Library Wing, Level 2', timeSlot: 'Today, 4:00 PM', isMe: true, time: '10:07 AM' },
+  { type: 'text', text: 'Hey! Is the MacBook still available?', isMe: false, time: '10:01 AM' },
+  { type: 'text', text: 'Yes! Just listed it today.', isMe: true, time: '10:02 AM' },
+  { type: 'offer', price: 38000, isMe: false, time: '10:03 AM' },
+  { type: 'counter', price: 41000, isMe: true, time: '10:04 AM' },
+  { type: 'accept', price: 41000, isMe: false, time: '10:05 AM' },
+  { type: 'text', text: 'Deal! When can I collect it?', isMe: false, time: '10:06 AM' },
+  { type: 'pickup', address: 'Library Wing, Level 2', timeSlot: 'Today, 4:00 PM', isMe: true, time: '10:07 AM' },
 ]
 
 function ChatVisual() {
@@ -368,21 +391,21 @@ function ChatVisual() {
   }, [visibleCount])
 
   return (
-    <div className="flex flex-col w-full h-full max-h-[340px] rounded-[32px] overflow-hidden border border-white/10 bg-[#0d0d0d] shadow-2xl">
+    <div className="flex flex-col w-full h-full max-h-[500px] lg:max-h-[600px] rounded-[40px] overflow-hidden border border-white/10 bg-[#0d0d0d] shadow-2xl transition-all duration-700">
       {/* Chat header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 bg-[#111] flex-shrink-0">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-primary flex items-center justify-center text-white text-[11px] font-bold">R</div>
+      <div className="flex items-center gap-4 px-6 py-4 border-b border-white/5 bg-[#111] flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-primary flex items-center justify-center text-white text-[13px] font-black shadow-lg">R</div>
         <div>
-          <p className="text-[11px] font-bold text-white">Rahul K.</p>
-          <div className="flex items-center gap-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-            <span className="text-[8px] text-green-400 font-bold uppercase tracking-wider">Online</span>
+          <p className="text-[13px] font-black text-white tracking-tight">Rahul K.</p>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+            <span className="text-[9px] text-green-400 font-black uppercase tracking-widest">Active Now</span>
           </div>
         </div>
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 flex flex-col gap-2.5 scrollbar-hide">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 lg:p-6 flex flex-col gap-4 scrollbar-hide">
         <AnimatePresence>
           {chatScript.slice(0, visibleCount).map((m, i) => (
             <motion.div
@@ -393,73 +416,72 @@ function ChatVisual() {
               className={`flex flex-col ${m.isMe ? 'items-end' : 'items-start'}`}
             >
               {m.type === 'text' ? (
-                <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-[10px] font-medium leading-snug ${
-                  m.isMe
+                <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-[12px] font-semibold leading-relaxed ${m.isMe
                     ? 'bg-primary text-white rounded-tr-none shadow-md shadow-primary/20'
                     : 'bg-zinc-800 text-zinc-100 rounded-tl-none'
-                }`}>
+                  }`}>
                   {m.text}
-                  <div className="flex justify-end items-center gap-1 mt-1 opacity-60">
-                    <span className="text-[6px]">{m.time}</span>
-                    {m.isMe && <CheckCheck size={8} className="text-white" />}
+                  <div className="flex justify-end items-center gap-1.5 mt-1.5 opacity-60">
+                    <span className="text-[7px] font-black">{m.time}</span>
+                    {m.isMe && <CheckCheck size={10} className="text-white" />}
                   </div>
                 </div>
               ) : m.type === 'offer' ? (
                 <ChatDealCard
                   gradient="from-indigo-500 to-indigo-700"
-                  label="OFFER"
-                  icon={<Tag size={10} className="text-white" />}
+                  label="OFFER RECEIVED"
+                  icon={<Tag size={12} className="text-white" />}
                   time={m.time}
                   isMe={m.isMe}
                 >
-                  <p className="text-[15px] font-black text-white">₹{(m as any).price.toLocaleString()}</p>
-                  <p className="text-[7px] text-white/60 mt-0.5">Buyer's opening offer</p>
+                  <p className="text-[18px] font-black text-white leading-none">₹{(m as any).price.toLocaleString()}</p>
+                  <p className="text-[8px] text-white/60 font-bold mt-1 uppercase tracking-wider">Buyer's Intention</p>
                 </ChatDealCard>
               ) : m.type === 'counter' ? (
                 <ChatDealCard
                   gradient="from-amber-500 to-orange-600"
                   label="COUNTER OFFER"
-                  icon={<ArrowLeftRight size={10} className="text-white" />}
+                  icon={<ArrowLeftRight size={12} className="text-white" />}
                   time={m.time}
                   isMe={m.isMe}
                 >
-                  <p className="text-[15px] font-black text-white">₹{(m as any).price.toLocaleString()}</p>
-                  <p className="text-[7px] text-white/70 mt-0.5">Your counter proposal</p>
+                  <p className="text-[18px] font-black text-white leading-none">₹{(m as any).price.toLocaleString()}</p>
+                  <p className="text-[8px] text-white/70 font-bold mt-1 uppercase tracking-wider">Your Proposal</p>
                 </ChatDealCard>
               ) : m.type === 'accept' ? (
                 <ChatDealCard
                   gradient="from-emerald-500 to-emerald-600"
                   label="OFFER ACCEPTED"
-                  icon={<CheckCircle2 size={10} className="text-white" />}
+                  icon={<CheckCircle2 size={12} className="text-white" />}
                   time={m.time}
                   isMe={m.isMe}
                 >
-                  <p className="text-[13px] font-black text-white">Deal Confirmed</p>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <Tag size={9} className="text-white/70" />
-                    <p className="text-[14px] font-bold text-white">₹{(m as any).price.toLocaleString()}</p>
+                  <p className="text-[15px] font-black text-white leading-none">Deal Confirmed</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Tag size={12} className="text-white/70" />
+                    <p className="text-[18px] font-black text-white">₹{(m as any).price.toLocaleString()}</p>
                   </div>
                 </ChatDealCard>
               ) : m.type === 'pickup' ? (
                 <ChatDealCard
                   gradient="from-violet-500 to-violet-700"
                   label="PICKUP DETAILS"
-                  icon={<MapPin size={10} className="text-white" />}
+                  icon={<MapPin size={12} className="text-white" />}
                   time={m.time}
                   isMe={m.isMe}
                 >
-                  <div className="flex flex-col gap-1.5 mt-1.5 p-2 bg-black/20 rounded-xl">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 rounded-lg bg-white/10 flex items-center justify-center">
-                        <Home size={9} className="text-white" />
+                  <div className="flex flex-col gap-2 mt-2.5 p-3 bg-black/20 rounded-2xl border border-white/5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center">
+                        <Home size={11} className="text-white" />
                       </div>
-                      <span className="text-[9px] font-bold text-white">{(m as any).address}</span>
+                      <span className="text-[11px] font-black text-white tracking-tight">{(m as any).address}</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 rounded-lg bg-white/10 flex items-center justify-center">
-                        <Clock size={9} className="text-white" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center">
+                        <Clock size={11} className="text-white" />
                       </div>
-                      <span className="text-[9px] font-bold text-white">{(m as any).timeSlot}</span>
+                      <span className="text-[11px] font-black text-white tracking-tight">{(m as any).timeSlot}</span>
                     </div>
                   </div>
                 </ChatDealCard>
@@ -470,12 +492,12 @@ function ChatVisual() {
       </div>
 
       {/* Input bar */}
-      <div className="flex items-center gap-2 px-3 py-2.5 border-t border-white/5 bg-[#111] flex-shrink-0">
-        <div className="flex-1 bg-zinc-800/80 rounded-xl px-3 py-1.5">
-          <span className="text-[9px] text-zinc-500">Type a message…</span>
+      <div className="flex items-center gap-3 px-4 py-4 border-t border-white/5 bg-[#111] flex-shrink-0">
+        <div className="flex-1 bg-zinc-800/80 rounded-2xl px-4 py-2 border border-white/5">
+          <span className="text-[11px] text-zinc-500 font-medium">Message Rahul...</span>
         </div>
-        <button className="w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-md shadow-primary/30">
-          <Send size={11} strokeWidth={2.5} className="text-white" />
+        <button className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30 active:scale-95 transition-transform">
+          <Send size={14} strokeWidth={3} className="text-white" />
         </button>
       </div>
     </div>
