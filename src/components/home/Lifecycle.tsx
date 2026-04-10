@@ -1,10 +1,8 @@
-import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { useRef } from 'react'
 import {
-  Banknote, Cpu, Zap, Bike, Box, Sparkles,
-  BookOpen, Clock, Wallet, HandCoins,
-  AlertCircle, ShieldCheck, Thermometer,
-  Coffee, Laptop, Gamepad2, GraduationCap,
+  Banknote, Clock, Thermometer,
+  Coffee, GraduationCap,
   ArrowRightLeft, BadgePercent, ZapOff
 } from 'lucide-react'
 import AnimatedSection from '../ui/AnimatedSection'
