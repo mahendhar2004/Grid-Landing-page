@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-const lastUpdated = 'March 19, 2026'
+const lastUpdated = 'April 13, 2026'
 
 export default function TermsPage() {
   return (
@@ -50,27 +50,33 @@ export default function TermsPage() {
           </Section>
 
           <Section title="4. Prohibited Items & Content">
-            <p className="mb-4">The following items and content are strictly prohibited on Grid:</p>
+            <p className="mb-4 font-bold text-red-500 uppercase tracking-wide">Zero Tolerance Policy</p>
+            <p className="mb-4 italic">Grid maintains a strict zero-tolerance policy for illegal, unethical, or harmful items. We are a student-focused marketplace and will immediately remove anything that compromises the safety or integrity of our community.</p>
+            <p className="mb-4">The following items are ABSOLUTELY PROHIBITED:</p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Illegal goods or substances (drugs, narcotics, alcohol for minors)</li>
-              <li>Weapons, ammunition, or explosives</li>
-              <li>Counterfeit, pirated, or stolen goods</li>
-              <li>Hazardous materials or chemicals</li>
-              <li>Academic fraud materials (exam papers, plagiarized content, assignment-writing services)</li>
-              <li>Prescription medications or medical devices</li>
-              <li>Sexually explicit or obscene content</li>
-              <li>Items that infringe on intellectual property rights</li>
-              <li>Any item that violates local, state, or national laws</li>
+              <li><strong>Human Beings & Body Parts:</strong> Selling human beings, human remains, organs, body parts, or fluids is strictly forbidden and will be reported to law enforcement.</li>
+              <li><strong>Live Animals:</strong> Selling live animals or wildlife products.</li>
+              <li><strong>Illegal Substances:</strong> Drugs, narcotics, stimulants, and prescription medications.</li>
+              <li><strong>Weapons:</strong> Firearms, ammunition, explosives, knives, or any item designed to cause harm.</li>
+              <li><strong>Tobacco & Alcohol:</strong> Cigarettes, vapes, nicotine products, and alcoholic beverages.</li>
+              <li><strong>Hazardous Materials:</strong> Corrosive chemicals, radioactive materials, or toxic waste.</li>
+              <li><strong>Academic Fraud:</strong> Solved exam papers, proxy services, or plagiarized materials.</li>
+              <li><strong>Illegal Documents:</strong> Government IDs, passports, bank details, or official certificates.</li>
+              <li><strong>Adult Content:</strong> Sexually explicit, obscene, or pornographic material and services.</li>
+              <li><strong>Counterfeit Goods:</strong> Fake brands, stolen items, or pirated software.</li>
+              <li>Any item that violates the laws of India.</li>
             </ul>
-            <p className="mt-4">Violations will result in immediate listing removal and may lead to account suspension or permanent ban.</p>
+            <p className="mt-4 font-semibold">Violations will result in an immediate permanent ban without warning and forfeiture of all account funds.</p>
           </Section>
 
           <Section title="5. Payments & Fees">
             <ul className="list-disc pl-6 space-y-2">
               <li>Listing fees are charged per product posted and are non-refundable once the listing is published.</li>
+              <li><strong>Violation Non-Refund Policy:</strong> If a product is removed by our moderation team due to any violation of these Terms, the money or listing credits used to post that product will NOT be refunded under any circumstances.</li>
               <li>Payment processing is handled by Razorpay, a PCI DSS compliant payment gateway. By making a payment, you also agree to Razorpay's terms of service.</li>
-              <li>The Grid Wallet allows you to add funds and use them for listing fees. Wallet top-ups are processed through Razorpay. Wallet funds are non-refundable — once added, they can only be used within the app and cannot be withdrawn or transferred.</li>
-              <li>Free listing credits earned through the referral program can be used in place of paid listing fees. Credits are non-transferable and have no cash value.</li>
+              <li>The Grid Wallet allows you to add funds and use them for listing fees. Wallet funds are strictly non-refundable once added.</li>
+              <li>If an account is banned for violating our community guidelines, any remaining wallet balance and unused credits are permanently forfeited and will not be refunded.</li>
+              <li>Free listing credits earned through the referral program have no cash value and cannot be withdrawn.</li>
               <li>Grid does not facilitate transactions between buyers and sellers. All purchase transactions occur directly between users.</li>
             </ul>
           </Section>
@@ -88,13 +94,14 @@ export default function TermsPage() {
           </Section>
 
           <Section title="7. Content Moderation & Enforcement">
+            <p className="mb-4 text-primary font-bold">GRID OPERATES A HIGHLY STRICT MODERATION SYSTEM.</p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Grid maintains a dedicated admin moderation team that reviews user reports and monitors platform activity.</li>
+              <li>Grid maintains a dedicated 24/7 admin moderation team that reviews user reports and aggressively monitors platform activity.</li>
               <li>When a report involves a conversation, our moderation team may review recent messages from that conversation — including text and image attachments — to evaluate the report. Only messages relevant to the reported incident are accessed.</li>
-              <li>We reserve the right to remove any listing, message, or content that violates these Terms or our community guidelines.</li>
-              <li>Enforcement actions include warnings, temporary bans (1 day to 30 days), and permanent account suspension.</li>
+              <li>We reserve the right to remove any listing, message, or content that violates these Terms or our community guidelines at our sole discretion.</li>
+              <li><strong>Strict Enforcement:</strong> Enforcement actions include verbal warnings, temporary bans (1 day to 30 days), and immediate permanent account suspension for severe violations.</li>
               <li>Users who receive multiple reports may face accelerated enforcement action.</li>
-              <li>Admin decisions regarding content removal and account actions are final.</li>
+              <li>Admin decisions regarding content removal and account actions are final. There is no appeals process for prohibited item violations.</li>
               <li>Users will be notified of moderation actions taken against their account, including the reason for the action.</li>
             </ul>
           </Section>

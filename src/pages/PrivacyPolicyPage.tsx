@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-const lastUpdated = 'March 19, 2026'
+const lastUpdated = 'April 13, 2026'
 
 export default function PrivacyPolicyPage() {
   return (
@@ -57,14 +57,15 @@ export default function PrivacyPolicyPage() {
               <li>Send push notifications and in-app alerts</li>
               <li>Verify user identity through Google OAuth and college affiliation</li>
               <li>Prevent fraud, spam, and abuse through our referral fraud detection</li>
-              <li>Moderate content and enforce community guidelines, including reviewing messages when a user or conversation is reported</li>
+              <li><strong>Aggressive Moderation:</strong> Moderate content and enforce community guidelines with a strict zero-tolerance approach, including reviewing messages when a user or conversation is reported to ensure student safety</li>
               <li>Deliver college-scoped product feeds (showing items only from your college)</li>
-              <li>Generate anonymized analytics to improve the platform</li>
+              <li>Generate anonymised analytics to improve the platform</li>
             </ul>
           </Section>
 
-          <Section title="2a. Message Review for Moderation">
-            <p>When a user report is submitted that involves a conversation, Grid's moderation team may review recent messages from that conversation — including text and any image attachments — solely for the purpose of evaluating the report and enforcing our Community Guidelines. Only the messages directly relevant to the report are accessed. This review is conducted by authorised Grid administrators and is subject to strict internal access controls. We do not routinely monitor or read private messages outside of the report review process.</p>
+          <Section title="2a. Strict Message Review for Moderation">
+            <p className="font-semibold text-primary mb-2">To maintain the highest level of safety for students, Grid employs a rigorous review process.</p>
+            <p>When a user report is submitted that involves a conversation, Grid's moderation team may review recent messages from that conversation — including text and any image attachments — solely for the purpose of evaluating the report and enforcing our Community Guidelines. Since Grid maintains a zero-tolerance policy for illegal or harmful material, this review is definitive and used to protect the community. This review is conducted by authorised Grid administrators and is subject to strict internal access controls. We do not routinely monitor or read private messages outside of the report review process.</p>
           </Section>
 
           <Section title="3. College-Scoped Data">
