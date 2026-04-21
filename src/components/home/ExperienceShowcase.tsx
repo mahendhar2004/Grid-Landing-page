@@ -309,7 +309,7 @@ function AnonymousVisual() {
 }
 
 function RequestsVisual() {
-  const [items, setItems] = useState([
+  const [items] = useState([
     { title: 'Mini Fridge', details: 'Looking for 40L+, good condition', icon: <Zap size={10} />, active: true },
     { title: 'Lab Coat', details: 'Size M, white, urgently needed', icon: <Zap size={10} />, active: false },
   ])

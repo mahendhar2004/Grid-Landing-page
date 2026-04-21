@@ -1,7 +1,7 @@
 import {
   School, Layers, MessageCircle, SlidersHorizontal,
   ShieldCheck, Heart, EyeOff, Gift, Archive, HandCoins, Calendar,
-  BellRing, Zap
+  Zap
 } from 'lucide-react'
 
 export const features = [

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Search, Zap, BellRing, Navigation, ArrowRight, UserPlus, Sparkles } from 'lucide-react'
+import { Search, Zap, BellRing, Navigation, ArrowRight, Sparkles } from 'lucide-react'
 import AnimatedSection from '../ui/AnimatedSection'
 
 export default function ProductRequests() {
