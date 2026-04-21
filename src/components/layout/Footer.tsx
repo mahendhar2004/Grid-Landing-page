@@ -26,6 +26,7 @@ export default function Footer() {
                 Platform
               </h4>
               <div className="flex flex-col gap-3">
+                <Link to="/about" className="text-text-muted text-sm hover:text-primary transition-colors">About Grid</Link>
                 <a href="/#features" className="text-text-muted text-sm hover:text-primary transition-colors">Features</a>
                 <a href="/#how-it-works" className="text-text-muted text-sm hover:text-primary transition-colors">How it Works</a>
                 <a href="/#categories" className="text-text-muted text-sm hover:text-primary transition-colors">Categories</a>

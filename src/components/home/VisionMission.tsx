@@ -4,7 +4,7 @@ import AnimatedSection from '../ui/AnimatedSection'
 
 export default function VisionMission() {
   return (
-    <section className="py-24 lg:py-32 relative overflow-hidden transition-colors duration-500">
+    <section id="about" className="py-24 lg:py-32 relative overflow-hidden transition-colors duration-500">
       {/* Dot-grid */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.4]"

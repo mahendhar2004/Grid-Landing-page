@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion'
-import { EyeOff, ShieldCheck, Moon, Lock, UserX, CheckCheck, Droplets, ArrowRight, Calendar, Sun, MessageCircle, Tag, ArrowLeftRight, CheckCircle2, MapPin, Home, Clock, Send } from 'lucide-react'
+import { 
+  EyeOff, ShieldCheck, Moon, Lock, UserX, CheckCheck, Droplets, 
+  ArrowRight, Calendar, Sun, MessageCircle, Tag, ArrowLeftRight, 
+  CheckCircle2, MapPin, Home, Clock, Send, Zap, BellRing, Search
+} from 'lucide-react'
 import AnimatedSection from '../ui/AnimatedSection'
 
 const showcaseSlides = [
@@ -25,9 +29,19 @@ const showcaseSlides = [
     primary: '#f59e0b'
   },
   {
+    id: 'requests',
+    tag: 'Product Requests',
+    number: '03',
+    title: ['Can\'t find it?', 'Just request it.'],
+    description: "Looking for a specific lab coat, a mini-fridge, or a rare textbook? Post a request. Sellers across the campus get notified and reach out to you if they have it.",
+    icon: Zap,
+    color: 'from-blue-600/20 to-cyan-600/20',
+    primary: '#0ea5e9'
+  },
+  {
     id: 'anonymous',
     tag: 'Anonymous Mode',
-    number: '03',
+    number: '04',
     title: ['Sell without', 'showing your face.'],
     description: "Don't want your hostel neighbours knowing you're selling your calculator? Go anonymous. List, chat, and close deals — your identity stays hidden until you choose to reveal it.",
     icon: EyeOff,
@@ -37,7 +51,7 @@ const showcaseSlides = [
   {
     id: 'security',
     tag: 'Privacy Controls',
-    number: '04',
+    number: '05',
     title: ['You control', 'who reaches you.'],
     description: "Hide your online status, control who can message you, and manage exactly how visible you are. Sell on your terms — without feeling exposed or pressured.",
     icon: ShieldCheck,
@@ -47,7 +61,7 @@ const showcaseSlides = [
   {
     id: 'themes',
     tag: 'Dark & Light Mode',
-    number: '05',
+    number: '06',
     title: ['Built for late nights', 'and bright days.'],
     description: "Browsing listings at 2AM before your lab submission? Or outside between lectures? Grid's Dark and Light modes adapt to your environment — sharp, clear, and easy on the eyes.",
     icon: Moon,
@@ -118,6 +132,13 @@ export default function ExperienceShowcase() {
                     </div>
 
                     <div className="flex flex-wrap gap-3 lg:gap-4">
+                      {slide.id === 'requests' && (
+                        <>
+                          <FeatureTag icon={Zap} label="Instantly Notify" />
+                          <FeatureTag icon={Search} label="Targeted Search" />
+                          <FeatureTag icon={BellRing} label="Smart Match" />
+                        </>
+                      )}
                       {slide.id === 'anonymous' && (
                         <>
                           <FeatureTag icon={EyeOff} label="Masked Avatar" />
@@ -169,6 +190,7 @@ export default function ExperienceShowcase() {
                       <div className="absolute inset-0 flex items-center justify-center p-4 lg:p-10">
                         {slide.id === 'anonymous' && <AnonymousVisual />}
                         {slide.id === 'availability' && <AvailabilityVisual />}
+                        {slide.id === 'requests' && <RequestsVisual />}
                         {slide.id === 'security' && <SecurityVisual />}
                         {slide.id === 'themes' && <ThemeVisual />}
                         {slide.id === 'chat' && <ChatVisual />}
@@ -282,6 +304,52 @@ function AnonymousVisual() {
       >
         {isAnon ? 'Stealth Mode On' : 'Go Stealth'}
       </button>
+    </div>
+  )
+}
+
+function RequestsVisual() {
+  const [items, setItems] = useState([
+    { title: 'Mini Fridge', details: 'Looking for 40L+, good condition', icon: <Zap size={10} />, active: true },
+    { title: 'Lab Coat', details: 'Size M, white, urgently needed', icon: <Zap size={10} />, active: false },
+  ])
+
+  return (
+    <div className="flex flex-col gap-6 w-full px-4">
+      <div className="p-5 rounded-3xl bg-primary/10 border border-primary/30 flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
+            <Search size={14} strokeWidth={3} />
+          </div>
+          <span className="text-xs font-black uppercase tracking-widest text-primary italic">active request</span>
+        </div>
+        <div>
+          <h4 className="text-lg font-black text-secondary tracking-tight italic">Engineering Graphics Set</h4>
+          <p className="text-[10px] text-text-muted font-medium mt-1">Found 4 potential matching sellers in your hostels</p>
+        </div>
+        <div className="flex gap-2">
+            {[1, 2, 3, 4].map(i => (
+                <div key={i} className="w-8 h-8 rounded-full border-2 border-surface bg-muted relative overflow-hidden">
+                    <div className="absolute inset-0 bg-primary/20" />
+                </div>
+            ))}
+            <div className="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center text-[8px] font-black text-text-muted">+12</div>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {items.map((item, i) => (
+          <div key={i} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${item.active ? 'bg-surface border-primary/20 shadow-lg' : 'bg-surface/40 border-border opacity-60'}`}>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[12px] font-black text-secondary tracking-tight">{item.title}</span>
+              <span className="text-[9px] text-text-muted font-medium">{item.details}</span>
+            </div>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${item.active ? 'bg-primary text-white' : 'bg-border text-text-muted'}`}>
+                {item.icon}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import {
   School, Layers, MessageCircle, SlidersHorizontal,
   ShieldCheck, Heart, EyeOff, Gift, Archive, HandCoins, Calendar,
+  BellRing, Zap
 } from 'lucide-react'
 
 export const features = [
@@ -69,6 +70,12 @@ export const features = [
     title: 'Referral Rewards',
     description: 'Invite your batchmates and earn free listing credits. The more friends you bring, the more you save.',
     color: 'amber' as const,
+  },
+  {
+    icon: Zap,
+    title: 'Product Requests',
+    description: "Can't find what you're looking for? Post a request! Let the campus know what you need, and wait for sellers to come to you.",
+    color: 'blue' as const,
   },
   {
     icon: ShieldCheck,

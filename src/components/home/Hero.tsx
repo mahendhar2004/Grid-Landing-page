@@ -52,20 +52,20 @@ export default function Hero() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
                 </span>
-                <span className="text-[10px] font-black uppercase tracking-[2px] leading-none">Campus Exclusive</span>
+                <span className="text-[10px] font-black uppercase tracking-[2px] leading-none">Two-Way Campus Commerce</span>
               </div>
             </AnimatedSection>
 
             <AnimatedSection delay={0.05}>
               <h1 className="text-[44px] sm:text-6xl lg:text-[80px] font-black leading-[0.95] sm:leading-[1] tracking-tighter text-secondary mb-6 transition-colors italic">
-                Buy and Sell<br />
-                <span className="bg-gradient-to-r from-primary via-blue-500 to-primary bg-clip-text text-transparent not-italic">Within Your Campus.</span>
+                Buy, Sell &<br />
+                <span className="bg-gradient-to-r from-primary via-blue-500 to-primary bg-clip-text text-transparent not-italic">Request on Campus.</span>
               </h1>
             </AnimatedSection>
 
             <AnimatedSection delay={0.1}>
               <p className="text-lg sm:text-xl text-text-muted max-w-[480px] mb-10 leading-relaxed transition-colors">
-                Sell what you no longer need, find what you do — all within your campus, from students like you.
+                The ultimate student marketplace. Sell what you no longer need, or request what you're looking for, from people you trust.
               </p>
             </AnimatedSection>
 

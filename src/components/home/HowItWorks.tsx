@@ -13,9 +13,9 @@ const steps = [
   {
     number: '02',
     icon: Search,
-    title: 'Browse or List',
-    description: 'Explore items listed by your campus peers or post your own with photos, price, and category.',
-    tag: '100+ categories',
+    title: 'Browse, List, or Request',
+    description: "Explore campus listings, post your own items, or put out a request for something you can't find.",
+    tag: 'Two-way commerce',
   },
   {
     number: '03',

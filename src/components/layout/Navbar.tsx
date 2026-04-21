@@ -59,11 +59,11 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop nav */}
-          <div className="hidden lg:flex items-center gap-7">
-
+          {/* Desktop nav — links centered between the logo and the action cluster */}
+          <div className="hidden lg:flex flex-1 items-center justify-center gap-7">
             {[
               { label: 'Home', to: '/' },
+              { label: 'About', to: '/about' },
               { label: 'Contact Us', to: '/contact' },
               { label: 'FAQs', to: '/faqs' },
               { label: 'Privacy Policy', to: '/privacy' },
@@ -95,7 +95,7 @@ export default function Navbar() {
               </button>
 
               {moreOpen && (
-                <div className="absolute right-0 top-full mt-3 w-52 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] border border-border/60 bg-surface overflow-hidden">
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-52 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] border border-border/60 bg-surface overflow-hidden">
                   <div className="py-1.5">
                     {MORE_LINKS.map((link) => (
                       <Link
@@ -114,14 +114,15 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="h-6 w-[1.5px] bg-border mx-2" />
-
+          {/* Right-side action cluster */}
+          <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
             <button
               onClick={toggleTheme}
               className={`p-2.5 rounded-xl border transition-all duration-500 scale-100 hover:scale-105 active:scale-95 cursor-pointer ${
-                theme === 'dark' 
-                ? 'bg-zinc-900 border-zinc-800 text-primary shadow-[0_0_20px_rgba(37,99,235,0.1)]' 
+                theme === 'dark'
+                ? 'bg-zinc-900 border-zinc-800 text-primary shadow-[0_0_20px_rgba(37,99,235,0.1)]'
                 : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-primary/30'
               }`}
               aria-label="Toggle theme"
@@ -159,12 +160,16 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile menu — fully opaque surface so it reads cleanly over any page content */}
         {mobileOpen && (
-          <div className="lg:hidden backdrop-blur-2xl border-t bg-surface/95 border-border/50 overflow-hidden">
+          <div
+            className="lg:hidden border-t border-border/50 overflow-hidden shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
+            style={{ backgroundColor: 'var(--color-surface)' }}
+          >
             <div className="px-6 py-6 flex flex-col gap-1">
               {[
                 { label: 'Home', to: '/' },
+                { label: 'About', to: '/about' },
                 { label: 'Contact Us', to: '/contact' },
                 { label: 'FAQs', to: '/faqs' },
                 { label: 'Privacy Policy', to: '/privacy' },

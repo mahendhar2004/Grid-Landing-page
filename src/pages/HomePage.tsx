@@ -1,6 +1,7 @@
 import Hero from '../components/home/Hero'
 import Lifecycle from '../components/home/Lifecycle'
 import HowItWorks from '../components/home/HowItWorks'
+import ProductRequests from '../components/home/ProductRequests'
 import ExperienceShowcase from '../components/home/ExperienceShowcase'
 import Features from '../components/home/Features'
 import Pricing from '../components/home/Pricing'
@@ -26,6 +27,9 @@ export default function HomePage() {
 
       {/* 3. HOW — remove friction, show it's dead simple */}
       <HowItWorks />
+
+      {/* NEW: THE GAME CHANGER — Two-Way search */}
+      <ProductRequests />
 
       {/* 4. DESIRE — wow them with the full experience */}
       <ExperienceShowcase />
