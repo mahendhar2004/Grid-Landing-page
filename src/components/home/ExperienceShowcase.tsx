@@ -15,7 +15,7 @@ const showcaseSlides = [
     title: ['Bargain, agree,', 'and close — in chat.'],
     description: "Send an offer. Seller counters. You accept. Share the pickup spot — all without leaving the conversation. Grid's built-in deal flow means no chaotic back-and-forth on WhatsApp.",
     icon: MessageCircle,
-    color: 'from-primary/20 to-blue-600/20',
+    color: 'from-primary/20 to-primary-bright/20',
     primary: 'var(--color-primary)'
   },
   {
@@ -33,7 +33,7 @@ const showcaseSlides = [
     tag: 'Product Requests',
     number: '03',
     title: ['Can\'t find it?', 'Just request it.'],
-    description: "Looking for a specific lab coat, a mini-fridge, or a rare textbook? Post a request. Sellers across the campus get notified and reach out to you if they have it.",
+    description: "Looking for a specific lab coat, a mini-fridge, or a rare textbook? Post a request. It goes up on the board for your Hub, and sellers come back with real priced offers you can counter or turn down.",
     icon: Zap,
     color: 'from-blue-600/20 to-cyan-600/20',
     primary: '#0ea5e9'
@@ -65,8 +65,8 @@ const showcaseSlides = [
     title: ['Built for late nights', 'and bright days.'],
     description: "Browsing listings at 2AM before your lab submission? Or outside between lectures? Grid's Dark and Light modes adapt to your environment — sharp, clear, and easy on the eyes.",
     icon: Moon,
-    color: 'from-blue-600/20 to-indigo-600/20',
-    primary: '#3b82f6'
+    color: 'from-primary/20 to-primary-bright/20',
+    primary: 'var(--color-primary)'
   }
 ]
 
@@ -85,10 +85,10 @@ export default function ExperienceShowcase() {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 mb-20 lg:mb-32">
         <AnimatedSection direction="left">
-          <span className="inline-block text-primary font-bold text-sm tracking-widest uppercase mb-4 italic">Built for campus life</span>
+          <span className="inline-block text-primary font-bold text-sm tracking-widest uppercase mb-4 italic">Inside the app</span>
           <h2 className="text-5xl sm:text-7xl font-black text-secondary tracking-tighter leading-[0.9] italic">
-            Features that actually<br />
-            <span className="text-primary not-italic">make sense for students.</span>
+            Built around how<br />
+            <span className="text-primary not-italic">deals actually happen.</span>
           </h2>
         </AnimatedSection>
       </div>
@@ -134,15 +134,15 @@ export default function ExperienceShowcase() {
                     <div className="flex flex-wrap gap-3 lg:gap-4">
                       {slide.id === 'requests' && (
                         <>
-                          <FeatureTag icon={Zap} label="Instantly Notify" />
-                          <FeatureTag icon={Search} label="Targeted Search" />
-                          <FeatureTag icon={BellRing} label="Smart Match" />
+                          <FeatureTag icon={Zap} label="Priced Offers" />
+                          <FeatureTag icon={Search} label="On the Board" />
+                          <FeatureTag icon={BellRing} label="Counter or Accept" />
                         </>
                       )}
                       {slide.id === 'anonymous' && (
                         <>
                           <FeatureTag icon={EyeOff} label="Masked Avatar" />
-                          <FeatureTag icon={Lock} label="Campus Trust" />
+                          <FeatureTag icon={Lock} label="Hub Trust" />
                         </>
                       )}
                       {slide.id === 'availability' && (
@@ -325,7 +325,7 @@ function RequestsVisual() {
         </div>
         <div>
           <h4 className="text-lg font-black text-secondary tracking-tight italic">Engineering Graphics Set</h4>
-          <p className="text-[10px] text-text-muted font-medium mt-1">Found 4 potential matching sellers in your hostels</p>
+          <p className="text-[10px] text-text-muted font-medium mt-1">4 priced offers from sellers in your Hub</p>
         </div>
         <div className="flex gap-2">
             {[1, 2, 3, 4].map(i => (
@@ -462,7 +462,7 @@ function ChatVisual() {
     <div className="flex flex-col w-full h-full max-h-[500px] lg:max-h-[600px] rounded-[40px] overflow-hidden border border-white/10 bg-[#0d0d0d] shadow-2xl transition-all duration-700">
       {/* Chat header */}
       <div className="flex items-center gap-4 px-6 py-4 border-b border-white/5 bg-[#111] flex-shrink-0">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-primary flex items-center justify-center text-white text-[13px] font-black shadow-lg">R</div>
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-bright to-primary flex items-center justify-center text-white text-[13px] font-black shadow-lg">R</div>
         <div>
           <p className="text-[13px] font-black text-white tracking-tight">Rahul K.</p>
           <div className="flex items-center gap-1.5">

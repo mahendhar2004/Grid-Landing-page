@@ -10,7 +10,7 @@ export default function Referral() {
         style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, var(--color-text-muted) 1px, transparent 0)', backgroundSize: '32px 32px', opacity: 0.15 }}
       />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse, rgba(37,99,235,0.05) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(ellipse, var(--color-primary-soft) 0%, transparent 70%)' }}
       />
 
       <div className="max-w-6xl mx-auto px-6 relative">
@@ -26,7 +26,7 @@ export default function Referral() {
               }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full blur-[100px] opacity-40 pointer-events-none mix-blend-multiply"
-              style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.3) 0%, rgba(139,92,246,0.1) 70%)' }}
+              style={{ background: 'radial-gradient(circle, rgba(110,82,232,0.3) 0%, rgba(132,104,245,0.1) 70%)' }}
             />
 
             <motion.div
@@ -36,7 +36,7 @@ export default function Referral() {
               }}
               transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
               className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full blur-[100px] opacity-30 pointer-events-none mix-blend-multiply"
-              style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.2) 0%, rgba(59,130,246,0.1) 70%)' }}
+              style={{ background: 'radial-gradient(circle, rgba(27,122,92,0.2) 0%, rgba(110,82,232,0.1) 70%)' }}
             />
 
             {/* Inner Content */}
@@ -63,7 +63,7 @@ export default function Referral() {
                   className="text-5xl sm:text-6xl font-extrabold text-secondary mb-6 leading-[1.1] tracking-tight"
                 >
                   Grow the Grid,<br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-bright">
                     Earn Rewards.
                   </span>
                 </motion.h2>
@@ -75,7 +75,7 @@ export default function Referral() {
                   transition={{ duration: 0.6, delay: 0.2 }}
                   className="text-text-muted text-lg sm:text-xl mb-10 leading-relaxed font-medium"
                 >
-                  Invite your friends to the campus marketplace. Build your local student grid and get free listing credits for every signup.
+                  A marketplace of verified peers only works once your peers are actually on it. Bring your batch or your team across, and earn credit every time someone joins.
                 </motion.p>
 
                 <motion.div
@@ -86,8 +86,8 @@ export default function Referral() {
                   className="grid grid-cols-1 sm:grid-cols-2 gap-6"
                 >
                   {[
-                    { icon: Gift, title: 'Free Listings', desc: 'List items at zero cost' },
-                    { icon: Users, title: 'Build Community', desc: 'Grow your campus grid' },
+                    { icon: Gift, title: 'Earn Credit', desc: 'Every signup pays you back' },
+                    { icon: Users, title: 'Build the Hub', desc: 'A fuller Hub is a better one' },
                     { icon: Zap, title: 'Instant Credits', desc: 'Applied automatically' },
                     { icon: Award, title: 'No Limits', desc: 'Refer as many as you want' },
                   ].map((perk, i) => (
@@ -143,12 +143,12 @@ export default function Referral() {
                       </motion.div>
                     </div>
 
-                    <h3 className="text-[26px] font-black text-secondary mb-3 leading-tight transition-colors">Claim your free listing</h3>
-                    <p className="text-text-muted text-[15px] mb-8 leading-relaxed transition-colors">Refer friends to Grid and watch the zero-cost listing credits roll in.</p>
+                    <h3 className="text-[26px] font-black text-secondary mb-3 leading-tight transition-colors">Earn credit for every join</h3>
+                    <p className="text-text-muted text-[15px] mb-8 leading-relaxed transition-colors">The more of your Hub that's on Grid, the more there is worth buying in it.</p>
 
                     <motion.a
-                      href="#download"
-                      whileHover={{ scale: 1.03, boxShadow: "0 10px 30px -5px rgba(37,99,235, 0.4)" }}
+                      href="#stay-posted"
+                      whileHover={{ scale: 1.03, boxShadow: "0 10px 30px -5px rgba(110,82,232,0.4)" }}
                       whileTap={{ scale: 0.97 }}
                       className="w-full relative overflow-hidden bg-primary text-white py-4.5 rounded-xl font-bold text-[14px] uppercase tracking-[1.5px] flex items-center justify-center gap-2 group/btn transition-all shadow-lg"
                     >

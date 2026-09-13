@@ -1,10 +1,11 @@
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
-import { useRef } from 'react'
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion'
+import { useRef, useState } from 'react'
 import {
   Banknote, Store, TrendingUp,
   Monitor, GraduationCap,
   Zap, BadgePercent, Shuffle,
-  Flag, Briefcase, Home, Sparkles
+  Flag, Briefcase, Home, Sparkles,
+  MapPin, Armchair
 } from 'lucide-react'
 import AnimatedSection from '../ui/AnimatedSection'
 
@@ -23,17 +24,57 @@ const problemSolutions = [
   {
     category: "The Logistics Void",
     problem: "Navigating campus social groups to sell your used cycle or novels is a nightmare. Lowballers, ghosting, and awkward public meetups eat your time.",
-    solution: "Close deals in minutes. List with a tap, chat securely, and schedule pick-ups using your campus credits. Zero commission, zero stress.",
+    solution: "Close deals in minutes. List with a tap, negotiate in chat, and sort out the pickup in the same thread — with someone who verified into your Hub the same way you did.",
     problemIcon: Shuffle,
     solutionIcon: Zap,
     accent: "#f59e0b",
-    solutionAccent: "#3b82f6",
+    solutionAccent: "var(--color-primary)",
     gradient: "from-amber-500/10 via-transparent to-transparent",
-    solutionGradient: "from-blue-500/10 via-transparent to-transparent"
+    solutionGradient: "from-primary/10 via-transparent to-transparent"
   }
 ]
 
-const useCases = [
+/* Employees don't have semesters — their cycle is driven by moves, not years. */
+const workplaceJourney = [
+  {
+    year: "Move 4 • Moving on",
+    title: "Clear the Flat in a Week.",
+    description: "New job, new city, or a flight out. Sell the whole setup fast to people you already work with, rather than haggling with strangers on the internet with a week to go.",
+    icon: Banknote,
+    nodeIcon: Flag,
+    color: "amber",
+    tag: "The Clean Exit"
+  },
+  {
+    year: "Move 3 • The upgrade",
+    title: "Trade Up, Not Out.",
+    description: "An ultrawide, a chair that survives a full sprint, a keyboard worth the noise. Sell the old kit to the joiner two desks down and put it straight toward the better one.",
+    icon: Monitor,
+    nodeIcon: Sparkles,
+    color: "blue",
+    tag: "Level Up"
+  },
+  {
+    year: "Move 2 • The desk setup",
+    title: "Build a Desk Worth Sitting At.",
+    description: "Monitor, chair, keyboard, second screen. Half your floor is upgrading theirs this quarter — buy the one they're about to replace, at the price they actually paid attention to.",
+    icon: Armchair,
+    nodeIcon: Briefcase,
+    color: "rose",
+    tag: "Hybrid Ready"
+  },
+  {
+    year: "Move 1 • New city, day one",
+    title: "Land Without Buying New.",
+    description: "You relocated for the job and the flat is empty. Bed, fridge, microwave, a cycle for the commute — from colleagues who made the exact same move a year ago.",
+    icon: Home,
+    nodeIcon: MapPin,
+    color: "emerald",
+    tag: "The Landing"
+  }
+]
+
+const campusJourney = [
   {
     year: "Year 4 • Graduate & Cash Out",
     title: "Liquidate for the Next Chapter.",
@@ -73,6 +114,8 @@ const useCases = [
 ]
 
 export default function Lifecycle() {
+  const [track, setTrack] = useState<'campus' | 'workplace'>('campus')
+  const journey = track === 'campus' ? campusJourney : workplaceJourney
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -96,7 +139,7 @@ export default function Lifecycle() {
         <motion.div
           animate={{ scale: [1, 1.3, 1], x: [0, -40, 0], y: [0, 60, 0] }}
           transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-[20%] -right-[10%] w-[600px] h-[600px] bg-blue-500/5 blur-[140px] rounded-full"
+          className="absolute bottom-[20%] -right-[10%] w-[600px] h-[600px] bg-primary/5 blur-[140px] rounded-full"
         />
       </div>
 
@@ -110,15 +153,15 @@ export default function Lifecycle() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
-              <span className="text-[10px] font-black uppercase tracking-[6px] text-text-muted">The Campus Lifecycle</span>
+              <span className="text-[10px] font-black uppercase tracking-[6px] text-text-muted">The Grid Lifecycle</span>
             </div>
             <h2 className="text-6xl sm:text-[140px] font-black leading-[0.8] tracking-tightest mb-12 text-secondary italic">
               The Grid <br />
-              <span className="text-primary not-italic bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">Ecosystem.</span>
+              <span className="text-primary not-italic bg-gradient-to-r from-primary to-primary-bright bg-clip-text text-transparent">Ecosystem.</span>
             </h2>
             <p className="text-text-muted text-lg sm:text-2xl max-w-3xl mx-auto font-semibold italic opacity-60">
-              We've re-engineered the campus market from the ground up. <br />
-              Buy, Use, Sell, Repeat. 100% Student Value.
+              We rebuilt the campus market from the ground up for v2. <br />
+              Buy, use, sell, repeat — inside a circle you can actually trust.
             </p>
           </AnimatedSection>
         </div>
@@ -134,8 +177,43 @@ export default function Lifecycle() {
         <div className="relative">
 
           <div className="text-center mb-32">
-            <h3 className="text-2xl sm:text-5xl font-black text-secondary italic tracking-tighter mb-4">Your 4-Year Journey</h3>
-            <div className="h-1 w-20 bg-primary mx-auto rounded-full shadow-[0_0_20px_rgba(var(--color-primary-rgb),0.5)]" />
+            <h3 className="text-2xl sm:text-5xl font-black text-secondary italic tracking-tighter mb-4">
+              {track === 'campus' ? 'Your 4-Year Journey' : 'Every Move, Covered'}
+            </h3>
+            <p className="text-text-muted text-base sm:text-lg font-semibold italic opacity-60 max-w-xl mx-auto mb-8">
+              {track === 'campus'
+                ? 'Four years on campus, and something worth trading in every one of them.'
+                : 'Nobody at work counts in semesters. The cycle runs on moves instead.'}
+            </p>
+
+            {/* Track toggle */}
+            <div
+              className="inline-flex items-center gap-1 p-1 rounded-full border"
+              style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+            >
+              {([['campus', 'Campus'], ['workplace', 'Workplace']] as const).map(([key, label]) => {
+                const active = track === key
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setTrack(key)}
+                    className="relative px-6 py-2.5 rounded-full text-[11px] font-black uppercase tracking-[2px] transition-colors duration-300 cursor-pointer"
+                    style={{ color: active ? '#fff' : 'var(--color-text-muted)' }}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="lifecycle-track-pill"
+                        className="absolute inset-0 rounded-full bg-primary shadow-lg shadow-primary/25"
+                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                      />
+                    )}
+                    <span className="relative z-10">{label}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="h-1 w-20 bg-primary mx-auto rounded-full shadow-[0_0_20px_rgba(var(--color-primary-rgb),0.5)] mt-10" />
           </div>
 
           <div className="relative">
@@ -143,18 +221,29 @@ export default function Lifecycle() {
             <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-border/10 hidden lg:block overflow-hidden">
               <motion.div
                 style={{ top: glowY }}
-                className="absolute left-1/2 -translate-x-1/2 w-4 h-64 bg-gradient-to-b from-primary via-blue-500 to-transparent blur-3xl opacity-80"
+                className="absolute left-1/2 -translate-x-1/2 w-4 h-64 bg-gradient-to-b from-primary via-primary-bright to-transparent blur-3xl opacity-80"
               />
               <motion.div
                 style={{ scaleY: pathLength }}
-                className="absolute top-0 left-0 right-0 h-full bg-gradient-to-b from-primary to-blue-500 origin-top shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.5)]"
+                className="absolute top-0 left-0 right-0 h-full bg-gradient-to-b from-primary to-primary-bright origin-top shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.5)]"
               />
             </div>
 
             <div className="space-y-40 lg:space-y-72 relative">
-              {useCases.map((useCase, index) => (
-                <LifecycleNode key={index} item={useCase} index={index} />
-              ))}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={track}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="space-y-40 lg:space-y-72"
+                >
+                  {journey.map((useCase, index) => (
+                    <LifecycleNode key={`${track}-${index}`} item={useCase} index={index} />
+                  ))}
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -164,7 +253,7 @@ export default function Lifecycle() {
             <div className="p-12 rounded-[64px] bg-surface-base border border-border/40 backdrop-blur-3xl relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
               <span className="text-[12px] font-black uppercase tracking-[15px] text-text-muted opacity-30 italic block mb-4">
-                The Full Cycle of Campus Life.
+                Campus or office. Same cycle.
               </span>
               <p className="text-secondary text-2xl font-black italic">Start your economy today.</p>
             </div>
@@ -233,7 +322,7 @@ function ProblemSolutionCard({ item, index }: { item: typeof problemSolutions[0]
   )
 }
 
-function LifecycleNode({ item, index }: { item: typeof useCases[0], index: number }) {
+function LifecycleNode({ item, index }: { item: typeof campusJourney[0], index: number }) {
   const isEven = index % 2 === 0
 
   return (
@@ -298,7 +387,7 @@ function LifecycleNode({ item, index }: { item: typeof useCases[0], index: numbe
 
               {/* Corner Accents */}
               <div className="absolute top-10 right-10 w-3 h-3 rounded-full bg-primary/40 blur-sm" />
-              <div className="absolute bottom-10 left-10 w-3 h-3 rounded-full bg-blue-500/40 blur-sm" />
+              <div className="absolute bottom-10 left-10 w-3 h-3 rounded-full bg-primary/40 blur-sm" />
             </motion.div>
           </AnimatedSection>
         </div>

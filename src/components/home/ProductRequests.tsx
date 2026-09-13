@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Search, Zap, BellRing, Navigation, ArrowRight, Sparkles } from 'lucide-react'
+import { Search, Zap, Repeat2, IndianRupee, ArrowRight, Sparkles } from 'lucide-react'
 import AnimatedSection from '../ui/AnimatedSection'
 
 export default function ProductRequests() {
@@ -8,7 +8,7 @@ export default function ProductRequests() {
       
       {/* Dynamic Background */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/[0.03] rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/[0.02] rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary/[0.02] rounded-full blur-[100px] pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-6">
         
@@ -55,8 +55,8 @@ export default function ProductRequests() {
                        <Zap size={16} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black italic text-primary uppercase leading-none mb-1">Seller Notified</span>
-                      <span className="text-[11px] font-bold text-secondary">Has what you need</span>
+                      <span className="text-[10px] font-black italic text-primary uppercase leading-none mb-1">Offer received</span>
+                      <span className="text-[11px] font-bold text-secondary">Has one — ₹1,200</span>
                     </div>
                     {/* Connection Line */}
                     <div className="absolute top-1/2 right-full w-20 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent pointer-events-none" />
@@ -80,36 +80,36 @@ export default function ProductRequests() {
             <AnimatedSection direction="right">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 mb-6 font-bold text-[10px] uppercase tracking-widest italic">
                 <Sparkles size={12} className="animate-pulse" />
-                The New Two-Way Era
+                Requests, rebuilt in v2
               </div>
-              
+
               <h2 className="text-5xl lg:text-7xl font-black text-secondary tracking-tighter leading-[0.9] italic mb-8">
                 Stop Browsing.<br />
                 <span className="text-primary not-italic">Start Requesting.</span>
               </h2>
 
               <p className="text-lg text-text-muted leading-relaxed font-medium mb-10 italic max-w-xl">
-                Grid is now much more than just a list of items. It's a living campus network. If it isn't listed, just ask. Our smart matching algorithm notifies sellers across the campus who might have exactly what you're looking for.
+                If nobody has listed it, ask for it. Your request goes up on the board and into the Wanted Near You strip for everyone in range. In v1 what came back was a raised hand. In v2 it's a real offer, with a price on it.
               </p>
 
               <div className="grid sm:grid-cols-2 gap-8 mb-12">
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 text-secondary">
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                      <Navigation size={16} />
+                      <IndianRupee size={16} />
                     </div>
-                    <span className="text-sm font-black italic uppercase tracking-tight">Geo-Spatial Match</span>
+                    <span className="text-sm font-black italic uppercase tracking-tight">Offers With Numbers</span>
                   </div>
-                  <p className="text-xs text-text-muted leading-relaxed">Notifications are sent to sellers in your hostel or batch first for fastest pickup.</p>
+                  <p className="text-xs text-text-muted leading-relaxed">Sellers reply with an actual price, so you know where you stand before the conversation even starts.</p>
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 text-secondary">
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                      <BellRing size={16} />
+                      <Repeat2 size={16} />
                     </div>
-                    <span className="text-sm font-black italic uppercase tracking-tight">Smart Alerts</span>
+                    <span className="text-sm font-black italic uppercase tracking-tight">Counter or Decline</span>
                   </div>
-                  <p className="text-xs text-text-muted leading-relaxed">Sellers get a gentle nudge when their unlisted items match your specific request.</p>
+                  <p className="text-xs text-text-muted leading-relaxed">Push back with your own number, or turn it down. Your request stays open until you close it yourself.</p>
                 </div>
               </div>
 
@@ -117,10 +117,10 @@ export default function ProductRequests() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-8 py-5 rounded-[20px] bg-primary text-white font-black uppercase tracking-[3px] text-[11px] italic shadow-2xl shadow-primary/30 flex items-center justify-center gap-4 transition-all"
+                  onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="px-8 py-5 rounded-[20px] bg-primary text-white font-black uppercase tracking-[3px] text-[11px] italic shadow-2xl shadow-primary/30 flex items-center justify-center gap-4 transition-all cursor-pointer"
                 >
-                  Try Product Requests <ArrowRight size={18} />
+                  See the rest of v2 <ArrowRight size={18} />
                 </motion.button>
               </div>
             </AnimatedSection>

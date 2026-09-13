@@ -37,17 +37,17 @@ export default function Features() {
           <AnimatedSection direction="left">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 mb-6 font-bold text-[10px] uppercase tracking-tighter">
               <span className="w-1 h-1 rounded-full bg-primary animate-pulse" />
-              The Grid Advantage
+              Everything in v2
             </div>
             <h2 className="text-5xl sm:text-7xl font-black text-secondary tracking-tighter leading-[0.9] italic">
-              Engineered for<br />
-              <span className="text-primary not-italic">Campus Life.</span>
+              Rebuilt from<br />
+              <span className="text-primary not-italic">the ground up.</span>
             </h2>
           </AnimatedSection>
 
           <AnimatedSection direction="right" className="max-w-md">
             <p className="text-text-muted text-lg font-medium leading-relaxed italic opacity-80">
-              Every feature is built specifically for the chaos, timing, and needs of a student. No generic marketplace bloat—just sheer utility.
+              v2 isn't a coat of paint on v1 — it's a new app. Here's what you get when it lands, feature by feature.
             </p>
           </AnimatedSection>
         </div>
@@ -93,10 +93,10 @@ export default function Features() {
                   </p>
 
                   <button 
-                    onClick={() => document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => document.getElementById('stay-posted')?.scrollIntoView({ behavior: 'smooth' })}
                     className="mt-auto pt-10 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary opacity-0 group-hover/card:opacity-100 transition-all duration-500 translate-y-2 group-hover/card:translate-y-0 active:scale-95 cursor-pointer"
                   >
-                    Learn More <ChevronRight size={12} />
+                    Get notified <ChevronRight size={12} />
                   </button>
                 </div>
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Instagram, Twitter } from 'lucide-react'
+import { Instagram } from 'lucide-react'
 
 export default function Footer() {
   return (
@@ -15,7 +15,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-text-muted text-sm leading-relaxed transition-colors">
-              The smarter campus marketplace. Simplifying student life across India.
+              A marketplace of verified peers — for campuses and workplaces across India. v2 coming soon.
             </p>
           </div>
 
@@ -27,9 +27,9 @@ export default function Footer() {
               </h4>
               <div className="flex flex-col gap-3">
                 <Link to="/about" className="text-text-muted text-sm hover:text-primary transition-colors">About Grid</Link>
+                <a href="/#hubs" className="text-text-muted text-sm hover:text-primary transition-colors">Hubs</a>
                 <a href="/#features" className="text-text-muted text-sm hover:text-primary transition-colors">Features</a>
                 <a href="/#how-it-works" className="text-text-muted text-sm hover:text-primary transition-colors">How it Works</a>
-                <a href="/#categories" className="text-text-muted text-sm hover:text-primary transition-colors">Categories</a>
                 <a href="/#referrals" className="text-text-muted text-sm hover:text-primary transition-colors">Referrals</a>
               </div>
             </div>
@@ -67,9 +67,6 @@ export default function Footer() {
           <div className="flex gap-5">
             <a href="https://www.instagram.com/gridmarketplace?igsh=eXZ1ZjFsOGxrZDR0" target="_blank" rel="noopener noreferrer" className="text-text-muted hover:text-primary transition-colors" aria-label="Instagram">
               <Instagram size={18} />
-            </a>
-            <a href="#" className="text-text-muted hover:text-primary transition-colors" aria-label="Twitter">
-              <Twitter size={18} />
             </a>
           </div>
         </div>

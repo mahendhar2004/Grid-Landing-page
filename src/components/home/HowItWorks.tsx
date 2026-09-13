@@ -1,35 +1,35 @@
 import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { UserCheck, Search, MessageCircle, Handshake } from 'lucide-react'
+import { MailCheck, Building2, Search, Handshake } from 'lucide-react'
 
 const steps = [
   {
     number: '01',
-    icon: UserCheck,
-    title: 'Sign Up Instantly',
-    description: "Create your account with Google in seconds. Select your college, set your graduation year, and you're all set.",
-    tag: 'Free & instant',
+    icon: MailCheck,
+    title: 'Verify Your Email',
+    description: 'Enter your college or work email. We check the domain is real and send a one-time code. No password to create, ever.',
+    tag: 'Two screens',
   },
   {
     number: '02',
-    icon: Search,
-    title: 'Browse, List, or Request',
-    description: "Explore campus listings, post your own items, or put out a request for something you can't find.",
-    tag: 'Two-way commerce',
+    icon: Building2,
+    title: 'Land in Your Hub',
+    description: 'Your domain places you in your Hub — your campus or your office. Everyone you see got in the exact same way.',
+    tag: 'Verified peers',
   },
   {
     number: '03',
-    icon: MessageCircle,
-    title: 'Chat in Real-Time',
-    description: 'Message buyers or sellers directly. Negotiate prices, ask questions, and finalize details — all in-app.',
-    tag: 'Negotiate freely',
+    icon: Search,
+    title: 'Browse, Post or Request',
+    description: "Search your Hub, widen out to nearby ones, or post a request and let sellers come to you instead.",
+    tag: 'Two-way',
   },
   {
     number: '04',
     icon: Handshake,
-    title: 'Close the Deal',
-    description: 'Meet on campus and make the exchange. Safe, local, and hassle-free — no shipping needed.',
-    tag: 'Campus-safe',
+    title: 'Settle It in Chat',
+    description: 'Propose, counter, accept — the whole negotiation happens in chat. Then you meet up and hand it over.',
+    tag: 'Propose & counter',
   },
 ]
 
@@ -74,10 +74,10 @@ export default function HowItWorks() {
             Getting Started
           </span>
           <h2 className="text-4xl sm:text-5xl font-extrabold text-secondary mb-5 transition-colors">
-            How <span className="text-primary">Grid</span> Works
+            How <span className="text-primary">Grid v2</span> Works
           </h2>
           <p className="text-text-muted text-lg max-w-2xl mx-auto transition-colors">
-            Four simple steps from signup to sealed deal. It's that easy.
+            From a cold email address to a closed deal. Signing up takes two screens.
           </p>
         </motion.div>
 

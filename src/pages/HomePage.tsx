@@ -1,61 +1,65 @@
 import Hero from '../components/home/Hero'
+import Hubs from '../components/home/Hubs'
 import Lifecycle from '../components/home/Lifecycle'
 import HowItWorks from '../components/home/HowItWorks'
+import Reach from '../components/home/Reach'
 import ProductRequests from '../components/home/ProductRequests'
 import ExperienceShowcase from '../components/home/ExperienceShowcase'
 import Features from '../components/home/Features'
-import Pricing from '../components/home/Pricing'
 import Testimonials from '../components/home/Testimonials'
 import Referral from '../components/home/Referral'
 import AppExperience from '../components/home/AppExperience'
-import VisionMission from '../components/home/VisionMission'
-import FreeListingBonus from '../components/home/FreeListingBonus'
+import TrustSafety from '../components/home/TrustSafety'
 import DataPrivacy from '../components/home/DataPrivacy'
+import VisionMission from '../components/home/VisionMission'
 import DownloadCTA from '../components/home/DownloadCTA'
 
 export default function HomePage() {
   return (
     <>
-      {/* 1. HOOK — grab attention, set the stage */}
+      {/* 1. HOOK — v2 is coming, and here's the one-line reason it matters */}
       <Hero />
 
-      {/* NEW BONUS — the immediate incentive */}
-      <FreeListingBonus />
+      {/* 2. THE BIG IDEA — verified Hubs are what v2 is built around */}
+      <Hubs />
 
-      {/* 2. THE ECOSYSTEM — problems, solutions, and lifelong campus value */}
+      {/* 3. THE ECOSYSTEM — the problems it solves across campus life */}
       <Lifecycle />
 
-      {/* 3. HOW — remove friction, show it's dead simple */}
+      {/* 4. HOW — two screens from a cold email to browsing */}
       <HowItWorks />
 
-      {/* NEW: THE GAME CHANGER — Two-Way search */}
+      {/* 5. REACH — control how far you post, choose how wide you look */}
+      <Reach />
+
+      {/* 6. TWO-WAY — requests that come back with real priced offers */}
       <ProductRequests />
 
-      {/* 4. DESIRE — wow them with the full experience */}
+      {/* 7. DESIRE — the full experience, end to end */}
       <ExperienceShowcase />
 
-      {/* 5. FEATURES — deepen desire with specifics */}
+      {/* 8. FEATURES — the complete v2 set */}
       <Features />
 
-      {/* 6. PRICE OBJECTION — zero commission, costs nothing to try */}
-      <Pricing />
-
-      {/* 7. SOCIAL PROOF — real students already use it */}
+      {/* 9. SOCIAL PROOF — what students say about Grid */}
       <Testimonials />
 
-      {/* 8. INCENTIVE — refer friends, earn money (FOMO + bonus value) */}
+      {/* 10. INCENTIVE — bring your Hub across */}
       <Referral />
 
-      {/* 9. VISUAL APPEAL — it looks stunning, I want this on my phone */}
+      {/* 11. VISUAL APPEAL — it looks good on your phone */}
       <AppExperience />
 
-      {/* 10. CREDIBILITY — we're serious people building this */}
-      <VisionMission />
+      {/* 12. TRUST — screening, consequences, anonymity */}
+      <TrustSafety />
 
-      {/* 11. TRUST — data privacy commitment */}
+      {/* 13. PRIVACY — your data, and what we refuse to do with it */}
       <DataPrivacy />
 
-      {/* 12. ACTION — download RIGHT NOW */}
+      {/* 14. CREDIBILITY — who's building this and why */}
+      <VisionMission />
+
+      {/* 15. ACTION — follow along until launch day */}
       <DownloadCTA />
     </>
   )

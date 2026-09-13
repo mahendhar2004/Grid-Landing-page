@@ -66,7 +66,7 @@ export default function VisionMission() {
                 <motion.div
                   className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-6"
                   style={{ backgroundColor: 'var(--color-primary-soft)' }}
-                  whileHover={{ scale: 1.12, backgroundColor: 'rgba(37,99,235,0.18)' }}
+                  whileHover={{ scale: 1.12 }}
                   transition={{ type: 'spring', stiffness: 380, damping: 22 }}
                 >
                   <Compass size={22} className="text-primary" />
@@ -76,13 +76,13 @@ export default function VisionMission() {
                   Vision
                 </p>
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-secondary leading-snug mb-6 transition-colors">
-                  The Digital Pulse of Every Campus
+                  The Trusted Circle Inside Every Campus and Office
                 </h3>
 
                 <div className="w-10 h-[2px] bg-primary/30 rounded-full mb-6" />
 
                 <p className="text-text-muted text-base leading-relaxed transition-colors">
-                  To become the most trusted digital pulse of every college campus, where students can seamlessly trade, connect, and build a sustainable local economy.
+                  To become the marketplace people reach for first inside their own campus or workplace — where trading with a stranger stops being the default, and a local economy builds itself.
                 </p>
               </div>
             </motion.div>
@@ -101,7 +101,10 @@ export default function VisionMission() {
               transition={{ type: 'spring', stiffness: 280, damping: 28 }}
             >
               {/* Top accent line */}
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-violet-500/0 via-violet-500 to-violet-500/0" />
+              <div
+                className="absolute top-0 left-0 right-0 h-[3px]"
+                style={{ background: 'linear-gradient(to right, transparent, var(--color-accent-warm), transparent)' }}
+              />
               {/* Corner glow */}
               <div
                 className="absolute -top-20 -right-20 w-52 h-52 rounded-full pointer-events-none transition-colors"
@@ -113,25 +116,25 @@ export default function VisionMission() {
 
               <div className="relative">
                 <motion.div
-                  className="w-12 h-12 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-6"
-                  style={{ backgroundColor: 'rgba(139,92,246,0.1)' }}
-                  whileHover={{ scale: 1.12, backgroundColor: 'rgba(139,92,246,0.18)' }}
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6"
+                  style={{ backgroundColor: 'var(--color-accent-warm-soft)' }}
+                  whileHover={{ scale: 1.12 }}
                   transition={{ type: 'spring', stiffness: 380, damping: 22 }}
                 >
-                  <Target size={22} className="text-violet-600" />
+                  <Target size={22} style={{ color: 'var(--color-accent-warm)' }} />
                 </motion.div>
 
-                <p className="text-xs font-bold tracking-[3px] uppercase text-violet-600 mb-3">
+                <p className="text-xs font-bold tracking-[3px] uppercase mb-3" style={{ color: 'var(--color-accent-warm)' }}>
                   Mission
                 </p>
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-secondary leading-snug mb-6 transition-colors">
-                  Empower Students, Simplify Campus Life
+                  Make Trading With Your Own People Effortless
                 </h3>
 
-                <div className="w-10 h-[2px] bg-violet-500/30 rounded-full mb-6" />
+                <div className="w-10 h-[2px] rounded-full mb-6 opacity-30" style={{ backgroundColor: 'var(--color-accent-warm)' }} />
 
                 <p className="text-text-muted text-base leading-relaxed transition-colors">
-                  To empower students by providing a secure, high-performance marketplace that simplifies campus life, reduces waste, and fosters trust through reliable campus-scoped interactions.
+                  To give students and employees a fast, secure place to trade that cuts waste, saves money, and earns trust by keeping every deal inside a circle where reputation actually counts for something.
                 </p>
               </div>
             </motion.div>

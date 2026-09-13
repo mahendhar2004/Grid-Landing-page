@@ -1,4 +1,4 @@
-import { Shield, Lock, EyeOff, UserCheck } from 'lucide-react'
+import { Shield, EyeOff, DownloadCloud, Megaphone } from 'lucide-react'
 import { motion } from 'framer-motion'
 import AnimatedSection from '../ui/AnimatedSection'
 
@@ -6,30 +6,30 @@ const commitments = [
   {
     icon: Shield,
     label: 'Your Data, Your Property',
-    body: 'Everything you share on Grid — your profile, listings, messages — belongs to you. We hold it in trust and nothing more.',
+    body: 'Everything you put into Grid — your profile, your listings, your messages — belongs to you. We hold it in trust and nothing more.',
     accent: 'var(--color-primary)',
     accentSoft: 'var(--color-primary-soft)',
   },
   {
     icon: EyeOff,
     label: 'Never Sold. Ever.',
-    body: 'We do not sell, rent, or trade your personal data to advertisers, data brokers, or any third-party service. Period.',
-    accent: '#8b5cf6',
-    accentSoft: 'rgba(139,92,246,0.1)',
+    body: 'We do not sell, rent or trade your personal data to advertisers, data brokers, or any third-party service. Period.',
+    accent: 'var(--color-accent-warm)',
+    accentSoft: 'var(--color-accent-warm-soft)',
   },
   {
-    icon: Lock,
-    label: 'Secured End-to-End',
-    body: 'Your data is stored with industry-standard encryption. Access is tightly scoped — only you can see what belongs to you.',
-    accent: '#10b981',
-    accentSoft: 'rgba(16,185,129,0.1)',
+    icon: DownloadCloud,
+    label: 'Export It or Erase It',
+    body: "Pull everything Grid holds about you into a file, or delete the account outright — both from inside the app, both built to India's DPDP rules.",
+    accent: 'var(--color-accent-green)',
+    accentSoft: 'var(--color-accent-green-soft)',
   },
   {
-    icon: UserCheck,
-    label: 'You Stay in Control',
-    body: 'Request deletion of your account and data at any time. No dark patterns, no buried settings — full transparency, always.',
-    accent: '#f59e0b',
-    accentSoft: 'rgba(245,158,11,0.1)',
+    icon: Megaphone,
+    label: "Ads That Don't Profile You",
+    body: 'v2 carries sponsored listings, and they are never targeted by gender. That was a deliberate decision about what we are willing to do with what we know.',
+    accent: 'var(--color-accent-gold)',
+    accentSoft: 'var(--color-accent-gold-soft)',
   },
 ]
 
@@ -68,8 +68,8 @@ export default function DataPrivacy() {
             <span className="text-primary">100% Private</span>
           </h2>
           <p className="text-text-muted text-lg max-w-2xl mx-auto leading-relaxed transition-colors">
-            Grid is built on trust. We will never sell, share, or monetise your personal data.
-            What you put in stays yours — always.
+            Verifying who you are means we hold real information about you. Here is exactly what we
+            will and won't do with it.
           </p>
         </AnimatedSection>
 

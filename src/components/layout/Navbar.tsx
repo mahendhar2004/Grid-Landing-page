@@ -122,7 +122,7 @@ export default function Navbar() {
               onClick={toggleTheme}
               className={`p-2.5 rounded-xl border transition-all duration-500 scale-100 hover:scale-105 active:scale-95 cursor-pointer ${
                 theme === 'dark'
-                ? 'bg-zinc-900 border-zinc-800 text-primary shadow-[0_0_20px_rgba(37,99,235,0.1)]'
+                ? 'bg-zinc-900 border-zinc-800 text-primary shadow-[0_0_20px_rgba(110,82,232,0.14)]'
                 : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-primary/30'
               }`}
               aria-label="Toggle theme"
@@ -131,10 +131,10 @@ export default function Navbar() {
             </button>
 
             <a
-              href="/#download"
+              href="/#stay-posted"
               className="bg-primary text-white px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-[2px] hover:bg-primary-dark transition-all hover:-translate-y-0.5 shadow-xl shadow-primary/20"
             >
-              Get App
+              Get Notified
             </a>
           </div>
 
@@ -205,10 +205,10 @@ export default function Navbar() {
               </div>
 
               <a
-                href="/#download"
+                href="/#stay-posted"
                 className="bg-primary text-white w-full py-4 rounded-[20px] font-black text-xs uppercase tracking-[3px] text-center mt-6 shadow-2xl shadow-primary/30"
               >
-                Get App
+                Get Notified
               </a>
             </div>
           </div>

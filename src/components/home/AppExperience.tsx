@@ -57,7 +57,7 @@ const colorStyles: Record<string, any> = {
 
 export default function AppExperience() {
   return (
-    <section id="experience" className="py-24 lg:py-32 relative overflow-hidden transition-colors duration-500">
+    <section id="app-experience" className="py-24 lg:py-32 relative overflow-hidden transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-6">
         
         <AnimatedSection direction="up" className="text-center mb-16 lg:mb-24">
@@ -66,10 +66,10 @@ export default function AppExperience() {
             <span className="text-[10px] font-black uppercase tracking-widest leading-none">Engineered for Excellence</span>
           </div>
           <h2 className="text-4xl sm:text-6xl font-black text-secondary tracking-tight leading-[1.1] mb-6 transition-colors">
-            Built for Students.<br /><span className="text-primary">Optimized for Life.</span>
+            Rebuilt from scratch.<br /><span className="text-primary">It shows.</span>
           </h2>
           <p className="text-text-muted text-lg max-w-xl mx-auto leading-relaxed transition-colors">
-            We stripped away the complexity of traditional marketplaces to build an experience that's fast, focused, and undeniably premium.
+            v2 is a new app, not a new skin on the old one. We started over and stripped out everything that made the first version feel slow.
           </p>
         </AnimatedSection>
 
