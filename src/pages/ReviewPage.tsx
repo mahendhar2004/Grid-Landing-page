@@ -69,6 +69,11 @@ export default function ReviewPage() {
       return
     }
 
+    if (!supabase) {
+      setError('Reviews are temporarily unavailable. Please try again later.')
+      return
+    }
+
     setLoading(true)
     try {
       const { error: sbErr } = await supabase.from('reviews').insert({
@@ -113,7 +118,7 @@ export default function ReviewPage() {
           </div>
           <h2 className="text-3xl font-bold text-secondary tracking-tight mb-4 transition-colors">Shared with love</h2>
           <p className="text-text-muted text-base leading-relaxed mb-10 transition-colors">
-            Thank you for sharing your experience. Your feedback helps the entire campus community thrive on Grid.
+            Thank you for sharing your experience. Your feedback helps everyone in your Hub get more out of Grid.
           </p>
           <button
             onClick={resetForm}
@@ -148,7 +153,7 @@ export default function ReviewPage() {
           </h1>
           
           <p className="text-text-muted text-lg leading-relaxed mb-12 max-w-sm transition-colors">
-            Tell us about your experience with Grid. Your feedback helps other students decide and helps us improve the campus marketplace.
+            Tell us about your experience with Grid. Your feedback helps other people decide, and helps us build a better v2.
           </p>
 
           <div className="space-y-4 max-w-md">
@@ -200,12 +205,12 @@ export default function ReviewPage() {
                     <TextInput id="name" name="name" value={form.name} onChange={handleChange} placeholder="What's your name?" maxLength={100} autoComplete="name" />
                   </Field>
                   <Field label="Email Address" required>
-                    <TextInput id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="name@college.edu" maxLength={254} autoComplete="email" />
+                    <TextInput id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@yourorg.com" maxLength={254} autoComplete="email" />
                   </Field>
                 </div>
 
-                <Field label="College / University">
-                  <TextInput id="college" name="college" value={form.college} onChange={handleChange} placeholder="e.g. IIT Delhi" maxLength={100} />
+                <Field label="College or Company">
+                  <TextInput id="college" name="college" value={form.college} onChange={handleChange} placeholder="e.g. IIT Delhi or Infosys" maxLength={100} />
                 </Field>
 
                 <Field label="Your Rating" required>

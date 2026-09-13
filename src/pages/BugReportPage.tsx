@@ -11,7 +11,7 @@ const CATEGORIES = [
   { value: 'crash',           label: 'App Crash',        icon: '💥' },
   { value: 'ui_bug',          label: 'UI Bug',            icon: '🎨' },
   { value: 'performance',     label: 'Performance',       icon: '⚡' },
-  { value: 'payment_issue',   label: 'Payment Issue',     icon: '💳' },
+  { value: 'payment_issue',   label: 'Billing / Purchase', icon: '💳' },
   { value: 'chat_issue',      label: 'Chat Issue',        icon: '💬' },
   { value: 'feature_request', label: 'Feature Request',   icon: '✨' },
   { value: 'other',           label: 'Other',             icon: '📋' },
@@ -109,6 +109,7 @@ export default function BugReportPage() {
   }
 
   async function uploadImages(): Promise<string[]> {
+    if (!supabase) throw new Error('Upload failed')
     const urls: string[] = []
     for (let i = 0; i < images.length; i++) {
       setImages((prev) => prev.map((x, j) => j === i ? { ...x, uploading: true } : x))
@@ -130,6 +131,11 @@ export default function BugReportPage() {
     if (!form.name.trim() || !form.email.trim() || !form.title.trim() || !form.description.trim()) { setError('Please fill in all fields.'); return }
     if (!isValidEmail(form.email.trim())) { setError('Invalid email.'); return }
     if (!VALID_CATEGORIES.has(form.category) || !VALID_SEVERITIES.has(form.severity)) { setError('Invalid selection.'); return }
+
+    if (!supabase) {
+      setError('Bug reporting is temporarily unavailable. Please email contact.galvam@gmail.com instead.')
+      return
+    }
 
     setLoading(true)
     try {
@@ -230,7 +236,7 @@ export default function BugReportPage() {
               </div>
               <div>
                 <p className="text-sm font-bold text-secondary transition-colors">Swift Response</p>
-                <p className="text-xs text-text-muted opacity-70 transition-colors">Critical reports triaged within 24h</p>
+                <p className="text-xs text-text-muted opacity-70 transition-colors">Critical reports jump the queue</p>
               </div>
             </div>
 

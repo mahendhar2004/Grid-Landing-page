@@ -122,7 +122,7 @@ export default function FAQPage() {
                 style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
             >
               <div className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-[11px] font-bold uppercase tracking-wide text-text-muted transition-colors">Response in &lt; 24h</span>
+              <span className="text-[11px] font-bold uppercase tracking-wide text-text-muted transition-colors">A real person replies</span>
             </div>
           </AnimatedSection>
         </div>

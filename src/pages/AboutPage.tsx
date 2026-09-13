@@ -6,7 +6,7 @@ import {
   Sparkles,
   Recycle,
   ArrowRight,
-  School,
+  Building2,
   MessageCircle,
   Wallet,
   Search,
@@ -50,23 +50,23 @@ export default function AboutPage() {
               About Grid
             </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-secondary leading-[1.05] mb-6">
-              The campus marketplace,
+              A marketplace where
               <br />
-              <span className="text-primary">built by students, for students.</span>
+              <span className="text-primary">nobody is a stranger.</span>
             </h1>
             <p className="text-text-muted text-lg sm:text-xl leading-relaxed max-w-2xl mx-auto">
-              Grid is where college campuses across India buy, sell, and request the
-              things that power student life — safely, locally, and in minutes, not
-              days. No outsiders. No dodgy messages. Just your campus.
+              Grid is where verified students and employees across India buy, sell and
+              request the things they actually need — from people who got in the same
+              way they did. No outsiders. No dodgy messages. Just your Hub.
             </p>
           </AnimatedSection>
 
           {/* Quick stats row */}
           <AnimatedSection delay={0.15}>
             <div className="mt-12 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto">
-              <Stat value="100%" label="Verified students" />
-              <Stat value="0%" label="Platform commission" />
-              <Stat value="1 campus" label="1 community" />
+              <Stat value="100%" label="Verified members" />
+              <Stat value="2" label="Kinds of Hub" />
+              <Stat value="0" label="Strangers in your feed" />
             </div>
           </AnimatedSection>
         </div>
@@ -80,7 +80,7 @@ export default function AboutPage() {
               Our story
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-secondary mb-6 leading-tight">
-              Students were already trading.
+              People were already trading.
               <br />
               <span className="text-primary">We just made it safer.</span>
             </h2>
@@ -89,24 +89,24 @@ export default function AboutPage() {
           <AnimatedSection delay={0.1}>
             <div className="max-w-3xl mx-auto space-y-5 text-text-muted text-base sm:text-lg leading-relaxed">
               <p>
-                Every hostel has a seniors' group with a used cycle, a calculator, a
-                mattress, a cooler — someone passing them down to the next batch at
-                the start of every semester. But the handoff usually happens on a
-                crowded WhatsApp group, between strangers on a sketchy listing app,
-                or not at all — and good stuff ends up in a dump.
+                Every hostel has a seniors' group passing down a cycle, a calculator,
+                a cooler at the start of each semester. Every office has the same thing
+                in a different shape — someone leaving the city, someone upgrading their
+                monitor, a chair nobody wants to move. The handoff usually happens in a
+                crowded group chat, or between strangers on a sketchy listing app, or
+                not at all — and good stuff ends up in a dump.
               </p>
               <p>
-                Grid was built to fix that. We took everything that already worked
-                about trading with a peer you pass in the corridor — trust, price
-                fairness, zero commission — and put it behind an app that only your
-                campus can access. No scammers pretending to be students. No
-                listings from cities you've never been to. Just the people you
-                already share a mess hall with.
+                Grid was built to fix that. We took what already worked about trading
+                with a peer you pass in the corridor — trust, fair prices, no
+                haggling with strangers — and put it behind an app you can only enter
+                with a real college or work email. Nobody pretending to be a student.
+                Nobody pretending to work where they don't.
               </p>
               <p className="text-secondary font-semibold">
-                If you've ever sold a book at a flea price because you didn't know
-                who to sell it to, or dropped a bucket because you couldn't haul it
-                home — Grid is for you.
+                If you've ever sold a book for a pittance because you didn't know who
+                to sell it to, or abandoned a perfectly good desk because you couldn't
+                move it — Grid is for you.
               </p>
             </div>
           </AnimatedSection>
@@ -122,20 +122,21 @@ export default function AboutPage() {
                 The core principle
               </span>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-secondary mb-6 leading-tight">
-                One campus.
+                One Hub.
                 <br />
                 <span className="text-primary">One circle.</span>
               </h2>
               <p className="text-text-muted text-base sm:text-lg leading-relaxed mb-5">
-                On Grid, every listing, every request, every message stays inside
-                the walls of your own college. Your feed is your campus — not the
-                city, not the state, not a random region.
+                Your email domain puts you in your Hub — your campus or your office —
+                and that is your feed by default. Every listing carries its own reach
+                setting, so you decide whether something stays in your building, your
+                organisation, or travels further.
               </p>
               <p className="text-text-muted text-base sm:text-lg leading-relaxed">
-                This single rule is what makes Grid feel different. You can meet
-                the seller between classes. Returns are simple. Price is fair. And
-                if something goes wrong, you're not hunting down a stranger — you
-                know who they are.
+                That is what makes Grid feel different. You can meet the seller between
+                classes or by the lifts. Price is fair. And if something goes wrong,
+                you're not chasing a stranger — they verified in exactly the way you did,
+                and they have a reputation in the same room.
               </p>
             </AnimatedSection>
 
@@ -153,12 +154,12 @@ export default function AboutPage() {
                 />
                 <div className="relative space-y-5">
                   <CampusRow
-                    icon={<School size={18} />}
-                    text="Every user is verified through their college"
+                    icon={<Building2 size={18} />}
+                    text="Everyone verifies with a real college or work email"
                   />
                   <CampusRow
                     icon={<ShieldCheck size={18} />}
-                    text="Listings are visible only to peers on the same campus"
+                    text="You choose how far each listing travels"
                   />
                   <CampusRow
                     icon={<Users size={18} />}
@@ -166,7 +167,7 @@ export default function AboutPage() {
                   />
                   <CampusRow
                     icon={<EyeOff size={18} />}
-                    text="Anonymous listing mode for sensitive categories"
+                    text="Anonymous mode, per listing or per conversation"
                   />
                 </div>
               </div>
@@ -183,10 +184,10 @@ export default function AboutPage() {
               What Grid is for
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-secondary mb-5 leading-tight">
-              A campus in your pocket.
+              Your Hub in your pocket.
             </h2>
             <p className="text-text-muted text-base sm:text-lg leading-relaxed">
-              Six ways Grid fits into a normal student week.
+              Six ways Grid fits into a normal week, on campus or at work.
             </p>
           </AnimatedSection>
 
@@ -194,7 +195,7 @@ export default function AboutPage() {
             <FeatureCard
               icon={<Sparkles size={20} />}
               title="Sell in minutes"
-              body="Snap a photo, set a price, post. Everyone in your hostel sees it before dinner."
+              body="Snap a photo, set a price, choose who sees it, post. Your Hub sees it straight away."
             />
             <FeatureCard
               icon={<Search size={20} />}
@@ -209,17 +210,17 @@ export default function AboutPage() {
             <FeatureCard
               icon={<Users size={20} />}
               title="Post a request"
-              body="Need a specific item? Put up a Wanted post — sellers come to you instead."
+              body="Need something specific? Post a request and sellers come back with real priced offers."
             />
             <FeatureCard
               icon={<Wallet size={20} />}
-              title="Wallet + payments"
-              body="Razorpay-powered wallet for quick top-ups, free listing credits, and fair listing fees."
+              title="Wallet + credits"
+              body="Top up once and spend credit as you post. Billing runs through Apple and Google — we never see your card."
             />
             <FeatureCard
               icon={<Gift size={20} />}
               title="Earn by referring"
-              body="Invite friends onto your campus. Every successful referral unlocks free listings."
+              body="Bring your batch or your team across. Every successful referral earns you credit."
             />
           </div>
         </div>
@@ -245,7 +246,7 @@ export default function AboutPage() {
               number="01"
               icon={<ShieldCheck size={20} />}
               title="Trust over reach"
-              body="We'd rather have 500 real students on a single campus than 50,000 random accounts. Verification is non-negotiable."
+              body="We'd rather have 500 verified people in one Hub than 50,000 random accounts. Verification is non-negotiable."
             />
             <PrincipleCard
               number="02"
@@ -256,14 +257,14 @@ export default function AboutPage() {
             <PrincipleCard
               number="03"
               icon={<Users size={20} />}
-              title="Community before commission"
-              body="We don't take a cut of your sale. A small listing fee keeps the platform clean — that's it. Your money stays yours."
+              title="Community before extraction"
+              body="What the buyer pays, the seller gets. We charge for posting to keep the feed clean — we don't take a slice of your sale."
             />
             <PrincipleCard
               number="04"
               icon={<Recycle size={20} />}
               title="Circular, not disposable"
-              body="Every item resold on Grid is one less item in a landfill. Campus commerce is inherently sustainable — we just scaled it."
+              body="Every item resold on Grid is one less in a landfill. Passing things on between peers is already sustainable — we just made it easy."
             />
           </div>
         </div>
@@ -294,7 +295,7 @@ export default function AboutPage() {
             <div className="mt-10 inline-flex items-center gap-3 px-5 py-3 rounded-full border border-border/70 bg-surface/50 backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-sm font-bold text-text-muted uppercase tracking-[2px]">
-                Actively rolling out to new campuses
+                Grid v2 — coming soon
               </span>
             </div>
           </AnimatedSection>

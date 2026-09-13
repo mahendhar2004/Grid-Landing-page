@@ -36,7 +36,7 @@ export default function Categories() {
               <Plus size={16} className="text-primary" />
             </div>
             <p className="text-sm font-semibold text-text-muted">
-              <span className="text-secondary">112+ categories</span> across 8 groups — and if it's not listed, just pick "Other" and post anyway.
+              <span className="text-secondary">90+ categories</span> across 8 groups — and if it's not listed, just pick "Other" and post anyway.
             </p>
           </div>
         </AnimatedSection>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Smartphone, Database, AlertTriangle, ShieldCheck, Mail } from 'lucide-react'
+import { ArrowRight, Smartphone, Database, AlertTriangle, ShieldCheck, Mail, DownloadCloud } from 'lucide-react'
 import AnimatedSection from '../components/ui/AnimatedSection'
 
 export default function DeleteAccountPage() {
@@ -35,6 +35,10 @@ export default function DeleteAccountPage() {
             <div className="prose-custom">
               <div className="grid gap-16">
                 
+                <OffboardingSection icon={<DownloadCloud size={22} />} title="Want a Copy First?">
+                  Deletion is irreversible, so if you want to keep anything, export it before you go. You can download a copy of the personal data Grid holds about you from inside the app &mdash; a right provided under India&rsquo;s DPDP framework. Once the account is gone, we cannot recover it for you.
+                </OffboardingSection>
+
                 <OffboardingSection icon={<Smartphone size={22} />} title="How to Delete">
                   You can delete your Grid account directly from within the application. It's the fastest way to scrub your data:
                   <ol className="list-decimal pl-6 mt-6 space-y-4 font-medium text-secondary">
@@ -49,7 +53,7 @@ export default function DeleteAccountPage() {
                   When you delete your account, we atomically scrub the following data from our active database:
                   <ul className="list-none grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
                     {[
-                      'Profile details & Phone',
+                      'Profile details',
                       'Active & Sold Listings',
                       'Conversation history',
                       'Saved products & Likes',
@@ -67,13 +71,13 @@ export default function DeleteAccountPage() {
                 <OffboardingSection icon={<AlertTriangle size={22} />} title="Important Notice">
                   <div className="p-8 rounded-[32px] border bg-primary/5 border-primary/20">
                     <p className="text-sm font-medium text-text-muted leading-relaxed">
-                      Any remaining <span className="font-bold text-secondary">Grid Wallet balance</span> at the time of deletion will be forfeited. Credits are non-refundable and non-transferable as per our <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>.
+                      <span className="font-bold text-secondary">Before you delete, sort out your wallet and any subscription.</span> Unspent credit can be returned to you on request &mdash; email us first, because deletion is irreversible and removes the wallet record. Credit already spent on a listing is not refundable. If you have an active subscription, cancel it separately through Apple or Google: deleting your Grid account does <span className="font-bold text-secondary">not</span> stop store billing. See our <Link to="/terms" className="text-primary hover:underline">Terms</Link> for detail.
                     </p>
                   </div>
                 </OffboardingSection>
 
                 <OffboardingSection icon={<ShieldCheck size={22} />} title="Records Retained">
-                  For legal and financial compliance (GST, income tax), transaction records are retained for up to 7 years. Additionally, safety or moderation logs (reports, flags) may be kept for up to 2 years to protect our campus community.
+                  For legal and financial compliance, transaction records may be retained for up to 7 years. Safety and moderation logs (reports, flags) may be kept for up to 2 years to protect everyone in your Hub.
                 </OffboardingSection>
 
                 <OffboardingSection icon={<Mail size={22} />} title="Need Assistance?">

@@ -8,6 +8,8 @@ import AnimatedSection from '../components/ui/AnimatedSection'
 
 const SUBJECTS = [
   { value: 'general',      label: 'General Question' },
+  { value: 'early_access', label: 'Early Access / v2 Launch' },
+  { value: 'hub_request',  label: 'Bring Grid to my campus or company' },
   { value: 'partnership',  label: 'Partnership / Collaboration' },
   { value: 'feature',      label: 'Feature Request' },
   { value: 'media',        label: 'Media Enquiry' },
@@ -69,6 +71,11 @@ export default function ContactPage() {
 
     const subjectLabel = SUBJECTS.find(s => s.value === form.subject)?.label || 'General Question'
 
+    if (!supabase) {
+      setError('Messaging is temporarily unavailable. Please email contact.galvam@gmail.com instead.')
+      return
+    }
+
     setLoading(true)
     try {
       const { error: sbErr } = await supabase.from('contact_messages').insert({
@@ -107,7 +114,7 @@ export default function ContactPage() {
           </div>
           <h2 className="text-3xl font-bold text-secondary tracking-tight mb-4 transition-colors">Message received!</h2>
           <p className="text-text-muted text-base leading-relaxed mb-10 transition-colors">
-            We've got your message and we'll get back to you at <span className="text-primary font-semibold">{form.email}</span> within 24 hours.
+            We've got your message and we'll get back to you at <span className="text-primary font-semibold">{form.email}</span> as soon as we can.
           </p>
           <button
             onClick={() => { setSubmitted(false); setError(null); setForm({ name: '', email: '', subject: 'general', message: '', honeypot: '' }) }}
@@ -181,7 +188,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <p className="text-sm font-bold text-secondary transition-colors">Response Time</p>
-                <p className="text-xs text-text-muted opacity-70 transition-colors">Usually within 24 hours</p>
+                <p className="text-xs text-text-muted opacity-70 transition-colors">We reply as soon as we can</p>
               </div>
             </div>
           </div>

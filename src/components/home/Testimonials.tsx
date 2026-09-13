@@ -23,6 +23,7 @@ export default function Testimonials() {
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
+    if (!supabase) return
     supabase
       .from('reviews')
       .select('id, reviewer_name, college, rating, feedback')
