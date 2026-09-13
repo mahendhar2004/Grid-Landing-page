@@ -92,6 +92,11 @@ function Summary({ inbox, item }: { inbox: Inbox; item: TriageItem }) {
 
   // Both bug report shapes.
   const images = Array.isArray(item['image_keys']) ? (item['image_keys'] as string[]).length : 0
+  // Only the web form collects these - an in-app report is already tied to a
+  // signed-in user. Shown because a bug report is the one inbox where the
+  // answer is usually "we need one more detail from you", and without the
+  // address there is no way to ask.
+  const reporter = [text(item, 'reporter_name'), text(item, 'reporter_email')].filter(Boolean).join(' · ')
   return (
     <>
       <p className="text-sm font-semibold text-[var(--color-text)]">
@@ -103,6 +108,7 @@ function Summary({ inbox, item }: { inbox: Inbox; item: TriageItem }) {
           .filter(Boolean)
           .join(' · ')}
       </p>
+      {reporter ? <p className="mt-1 text-xs text-[var(--color-text-muted)]">{reporter}</p> : null}
     </>
   )
 }

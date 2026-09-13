@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { supabase } from '../../lib/supabase'
+import { getTestimonials, isApiConfigured, type PublicTestimonial } from '../../lib/publicApi'
 
-interface Review {
-  id: string
-  reviewer_name: string
-  college: string | null
-  rating: number
-  feedback: string
-}
+/**
+ * The strip reads whatever the admin console's Reviews inbox has featured.
+ * A review arrives PENDING from `/review`, an admin approves it, and only a
+ * second, separate "Feature on homepage" decision puts it here - so nothing
+ * a stranger submits can appear on the homepage on its own.
+ */
+type Review = PublicTestimonial
 
 // Build a marquee row with enough duplicates to fill 2× viewport widths
 function buildRow(reviews: Review[], offset: number, total: number) {
@@ -23,16 +23,24 @@ export default function Testimonials() {
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    if (!supabase) return
-    supabase
-      .from('reviews')
-      .select('id, reviewer_name, college, rating, feedback')
-      .eq('is_featured', true)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setReviews(data || [])
+    if (!isApiConfigured) return
+    let cancelled = false
+    // A failed fetch leaves `loaded` false, which renders nothing - the same
+    // outcome as an unconfigured build. A marketing strip is not worth
+    // showing an error state for, but it is worth logging: silently missing
+    // testimonials would otherwise look like "nothing has been featured yet".
+    getTestimonials()
+      .then((data) => {
+        if (cancelled) return
+        setReviews(data)
         setLoaded(true)
       })
+      .catch((error: unknown) => {
+        console.error('testimonials.fetch_failed', error)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   if (!loaded || reviews.length === 0) return null
@@ -190,11 +198,11 @@ function ReviewCard({ review }: { review: Review }) {
       <div className="flex items-center gap-3 pt-3 border-t border-border/60">
         <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
           <span className="text-xs font-black text-primary">
-            {review.reviewer_name.charAt(0).toUpperCase()}
+            {review.reviewerName.charAt(0).toUpperCase()}
           </span>
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-black text-secondary truncate transition-colors">{review.reviewer_name}</p>
+          <p className="text-sm font-black text-secondary truncate transition-colors">{review.reviewerName}</p>
           {review.college && (
             <p className="text-[11px] text-text-muted truncate transition-colors">{review.college}</p>
           )}

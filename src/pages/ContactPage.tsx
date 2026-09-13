@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Instagram, Mail, Clock, ArrowRight, ChevronDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '../lib/supabase'
+import { isApiConfigured, submitContactMessage } from '../lib/publicApi'
 import AnimatedSection from '../components/ui/AnimatedSection'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -23,7 +23,7 @@ const RATE_LIMIT_KEY = 'grid_contact_last'
 
 function sanitize(v: string) {
   return v.replace(/<[^>]*>/g, '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')
-          .replace(/'/g, '&#x27;').replace(/\x00/g, '').trim()
+          .replace(/'/g, '&#x27;').split('\u0000').join('').trim()
 }
 
 function isValidEmail(e: string) {
@@ -34,7 +34,16 @@ function isRateLimited() {
   try { const l = localStorage.getItem(RATE_LIMIT_KEY); return !!l && Date.now() - +l < RATE_LIMIT_MS } catch { return false }
 }
 function markSubmission() {
-  try { localStorage.setItem(RATE_LIMIT_KEY, String(Date.now())) } catch {}
+  // Safari private mode and disabled site data both throw here. This rate
+  // limit is a courtesy, not a control - the server enforces the real one by
+  // IP - so failing to record it must never block the submission the visitor
+  // just made. Logged rather than swallowed, so "the limit never applies on
+  // this browser" stays diagnosable.
+  try {
+    localStorage.setItem(RATE_LIMIT_KEY, String(Date.now()))
+  } catch (error) {
+    console.warn('rate_limit.persist_failed', error)
+  }
 }
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -71,20 +80,19 @@ export default function ContactPage() {
 
     const subjectLabel = SUBJECTS.find(s => s.value === form.subject)?.label || 'General Question'
 
-    if (!supabase) {
+    if (!isApiConfigured) {
       setError('Messaging is temporarily unavailable. Please email contact.galvam@gmail.com instead.')
       return
     }
 
     setLoading(true)
     try {
-      const { error: sbErr } = await supabase.from('contact_messages').insert({
+      await submitContactMessage({
         name: sanitize(form.name),
         email: form.email.trim().toLowerCase(),
         subject: subjectLabel,
         message: sanitize(form.message),
       })
-      if (sbErr) throw new Error(sbErr.message)
       markSubmission()
       setSubmitted(true)
     } catch {

@@ -2,7 +2,14 @@ import { useState, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Clock, ArrowRight, ChevronDown, Upload, X, Shield, Zap } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '../lib/supabase'
+import {
+  getBugReportUploadTarget,
+  isApiConfigured,
+  submitBugReport,
+  uploadToPresignedTarget,
+  type BugCategory,
+  type BugSeverity,
+} from '../lib/publicApi'
 import AnimatedSection from '../components/ui/AnimatedSection'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -37,7 +44,7 @@ const RATE_LIMIT_KEY = 'grid_bugreport_last'
 
 function sanitize(v: string) {
   return v.replace(/<[^>]*>/g, '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')
-          .replace(/'/g, '&#x27;').replace(/\x00/g, '').trim()
+          .replace(/'/g, '&#x27;').split('\u0000').join('').trim()
 }
 
 function isValidEmail(e: string) {
@@ -49,7 +56,16 @@ function isRateLimited() {
   try { const l = localStorage.getItem(RATE_LIMIT_KEY); return !!l && Date.now() - +l < RATE_LIMIT_MS } catch { return false }
 }
 function markSubmission() {
-  try { localStorage.setItem(RATE_LIMIT_KEY, String(Date.now())) } catch {}
+  // Safari private mode and disabled site data both throw here. This rate
+  // limit is a courtesy, not a control - the server enforces the real one by
+  // IP - so failing to record it must never block the submission the visitor
+  // just made. Logged rather than swallowed, so "the limit never applies on
+  // this browser" stays diagnosable.
+  try {
+    localStorage.setItem(RATE_LIMIT_KEY, String(Date.now()))
+  } catch (error) {
+    console.warn('rate_limit.persist_failed', error)
+  }
 }
 
 function validateFile(f: File): string | null {
@@ -57,11 +73,6 @@ function validateFile(f: File): string | null {
   if (!ALLOWED_MIME.has(f.type) || !ALLOWED_EXT.has(ext)) return `"${f.name}" — invalid format`
   if (f.size > MAX_FILE_MB * 1024 * 1024) return `"${f.name}" exceeds ${MAX_FILE_MB}MB`
   return null
-}
-
-function storagePath(f: File) {
-  const ext = (f.name.split('.').pop() ?? 'jpg').toLowerCase()
-  return `landing-page/${crypto.randomUUID()}.${ext}`
 }
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -83,7 +94,12 @@ export default function BugReportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // `HTMLSelectElement` included so the two <select>s can share this handler
+  // honestly - they were previously cast through `any` to fit, which also
+  // disabled every other check on those two elements.
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target
     const maxLengths: Record<string, number> = { name: 100, email: 254, title: 200, description: 5000 }
     const max = maxLengths[name]
@@ -108,19 +124,29 @@ export default function BugReportPage() {
     setImages((prev) => { URL.revokeObjectURL(prev[i].preview); return prev.filter((_, j) => j !== i) })
   }
 
+  /**
+   * Returns S3 object *keys*, not URLs - `/v1/public/bug-report` requires
+   * every key to sit under its own `public-bug-reports/` prefix, and a full
+   * URL fails that check. The key is chosen by the backend when it mints the
+   * target, so the client no longer builds a storage path at all.
+   *
+   * Still sequential rather than `Promise.all`: each target is rate limited
+   * by IP, and firing four at once is the shape that trips the limit.
+   */
   async function uploadImages(): Promise<string[]> {
-    if (!supabase) throw new Error('Upload failed')
-    const urls: string[] = []
+    const keys: string[] = []
     for (let i = 0; i < images.length; i++) {
       setImages((prev) => prev.map((x, j) => j === i ? { ...x, uploading: true } : x))
-      const path = storagePath(images[i].file)
-      const { error: upErr } = await supabase.storage.from('bug-report-images').upload(path, images[i].file, { contentType: images[i].file.type, upsert: false })
-      if (upErr) { setImages((prev) => prev.map((x, j) => j === i ? { ...x, uploading: false, error: 'Failed' } : x)); throw new Error('Upload failed') }
-      const { data: { publicUrl } } = supabase.storage.from('bug-report-images').getPublicUrl(path)
-      urls.push(publicUrl)
+      try {
+        const target = await getBugReportUploadTarget(images[i].file.type)
+        keys.push(await uploadToPresignedTarget(target, images[i].file))
+      } catch (error) {
+        setImages((prev) => prev.map((x, j) => j === i ? { ...x, uploading: false, error: 'Failed' } : x))
+        throw error
+      }
       setImages((prev) => prev.map((x, j) => j === i ? { ...x, uploading: false } : x))
     }
-    return urls
+    return keys
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -132,27 +158,27 @@ export default function BugReportPage() {
     if (!isValidEmail(form.email.trim())) { setError('Invalid email.'); return }
     if (!VALID_CATEGORIES.has(form.category) || !VALID_SEVERITIES.has(form.severity)) { setError('Invalid selection.'); return }
 
-    if (!supabase) {
+    if (!isApiConfigured) {
       setError('Bug reporting is temporarily unavailable. Please email contact.galvam@gmail.com instead.')
       return
     }
 
     setLoading(true)
     try {
-      const screenshotUrls = images.length ? await uploadImages() : []
-      const { error: sbErr } = await supabase.from('bug_reports').insert({
+      const imageKeys = images.length ? await uploadImages() : []
+      // The reporter's name and email are first-class columns on
+      // `public_bug_reports` now, not a `device_info` blob - the console's
+      // triage inbox shows them, and an admin replying to a report needs
+      // the address where a nested JSON field would have hidden it.
+      await submitBugReport({
         title: sanitize(form.title),
         description: sanitize(form.description),
-        category: form.category,
-        severity: form.severity,
-        screenshots: screenshotUrls,
-        device_info: {
-          source: 'landing_page',
-          reporter_name: sanitize(form.name),
-          reporter_email: form.email.trim().toLowerCase(),
-        },
+        category: form.category as BugCategory,
+        severity: form.severity as BugSeverity,
+        imageKeys,
+        reporterName: sanitize(form.name),
+        reporterEmail: form.email.trim().toLowerCase(),
       })
-      if (sbErr) throw new Error(sbErr.message)
       markSubmission()
       setSubmitted(true)
     } catch {
@@ -283,7 +309,7 @@ export default function BugReportPage() {
                       <select
                         name="category"
                         value={form.category}
-                        onChange={handleChange as any}
+                        onChange={handleChange}
                         className="w-full px-6 py-4 border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all appearance-none cursor-pointer"
                         style={{ backgroundColor: 'var(--color-bg-page)', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
                       >
@@ -302,7 +328,7 @@ export default function BugReportPage() {
                       <select
                         name="severity"
                         value={form.severity}
-                        onChange={handleChange as any}
+                        onChange={handleChange}
                         className="w-full px-6 py-4 border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all appearance-none cursor-pointer"
                         style={{ backgroundColor: 'var(--color-bg-page)', borderColor: 'var(--color-border)', color: 'var(--color-secondary)' }}
                       >

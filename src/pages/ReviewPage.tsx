@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Star, ShieldCheck, ArrowRight, Heart, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '../lib/supabase'
+import { isApiConfigured, submitReview } from '../lib/publicApi'
 import AnimatedSection from '../components/ui/AnimatedSection'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -14,7 +14,7 @@ const RATE_LIMIT_KEY = 'grid_review_last'
 
 function sanitize(v: string) {
   return v.replace(/<[^>]*>/g, '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')
-          .replace(/'/g, '&#x27;').replace(/\x00/g, '').trim()
+          .replace(/'/g, '&#x27;').split('\u0000').join('').trim()
 }
 
 function isValidEmail(e: string) {
@@ -26,7 +26,16 @@ function isRateLimited() {
   try { const l = localStorage.getItem(RATE_LIMIT_KEY); return !!l && Date.now() - +l < RATE_LIMIT_MS } catch { return false }
 }
 function markSubmission() {
-  try { localStorage.setItem(RATE_LIMIT_KEY, String(Date.now())) } catch {}
+  // Safari private mode and disabled site data both throw here. This rate
+  // limit is a courtesy, not a control - the server enforces the real one by
+  // IP - so failing to record it must never block the submission the visitor
+  // just made. Logged rather than swallowed, so "the limit never applies on
+  // this browser" stays diagnosable.
+  try {
+    localStorage.setItem(RATE_LIMIT_KEY, String(Date.now()))
+  } catch (error) {
+    console.warn('rate_limit.persist_failed', error)
+  }
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -69,21 +78,20 @@ export default function ReviewPage() {
       return
     }
 
-    if (!supabase) {
+    if (!isApiConfigured) {
       setError('Reviews are temporarily unavailable. Please try again later.')
       return
     }
 
     setLoading(true)
     try {
-      const { error: sbErr } = await supabase.from('reviews').insert({
-        reviewer_name: sanitize(form.name),
-        reviewer_email: form.email.trim().toLowerCase(),
+      await submitReview({
+        reviewerName: sanitize(form.name),
+        reviewerEmail: form.email.trim().toLowerCase(),
         college: form.college.trim() ? sanitize(form.college) : null,
         rating: form.rating,
         feedback: sanitize(form.feedback),
       })
-      if (sbErr) throw new Error(sbErr.message)
       markSubmission()
       setSubmitted(true)
     } catch {

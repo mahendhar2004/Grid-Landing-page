@@ -1,8 +1,43 @@
 # Moving the landing page off Supabase onto AWS — findings
 
-**Status:** research only. No code written, nothing provisioned, nothing changed.
-**Date:** 2026-09-13 · **updated 2026-09-13** with two answers from the owner and
-three facts checked against the migrations.
+**Status: superseded — Option C was taken and the client-side work is done.**
+**Date:** 2026-09-13 · updated 2026-09-13 with two answers from the owner and three
+facts checked against the migrations · **updated again 2026-09-13: the code has
+been written.**
+
+> ### The migration happened
+>
+> This document below still reads as a decision to be made. It is kept for the
+> reasoning, not as a description of the current code. What is true now:
+>
+> - **`@supabase/supabase-js` is removed from this repo.** `src/lib/supabase.ts`
+>   is deleted and nothing imports it. The public bundle no longer ships a
+>   database client at all.
+> - **All four consumers moved to the Grid v2 API** through the new
+>   `src/lib/publicApi.ts` (deliberately separate from `src/admin/lib/api.ts`,
+>   which carries an admin bearer token that must never be attached to a public
+>   request):
+>
+>   | Page | Was | Now |
+>   |---|---|---|
+>   | `Testimonials` | `reviews` where `is_featured` | `GET /v1/public/testimonials` |
+>   | `ContactPage` | insert `contact_messages` | `POST /v1/public/contact` |
+>   | `ReviewPage` | insert `reviews` | `POST /v1/public/review` |
+>   | `BugReportPage` | insert `bug_reports` + Supabase Storage | `POST /v1/public/bug-report` + presigned S3 |
+>
+> - **Screenshots go to S3 by presigned POST**, one target per file, rate limited
+>   by IP before the URL is minted, and constrained to the
+>   `public-bug-reports/` prefix. The client no longer chooses the object key.
+> - **The admin console is now connected end to end.** Featuring a review in the
+>   console's Reviews inbox is what puts it on this homepage; before this change
+>   the console wrote to Postgres and the site read Supabase, so the button did
+>   nothing visible.
+>
+> **Still true and still outstanding:** none of this works until the AWS stack is
+> actually deployed and `VITE_API_URL` points at a real API. Until then the forms
+> show their "temporarily unavailable" message and the testimonial strip renders
+> nothing — the same degradation as an unconfigured Supabase build, which is why
+> `isApiConfigured` mirrors the old `supabase === null` contract exactly.
 
 > ### What changed in this update
 >
