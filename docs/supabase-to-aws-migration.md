@@ -52,6 +52,35 @@ three facts checked against the migrations.
 > `bug_reports` does but is unusable as-is. Two new migrations minimum, three if
 > testimonials get their own table.
 >
+> **Update, same day — the backend half is now built.** Owner asked for the
+> separate tables, so migration `20261214090000_create_public_submissions.sql`
+> and five handlers under `src/functions/public/` exist in the Grid_App repo:
+>
+> | Route | Method | Notes |
+> |---|---|---|
+> | `/v1/public/contact` | POST | 5/hour per IP |
+> | `/v1/public/reviews` | POST | 3/hour. Lands `PENDING`, unfeatured |
+> | `/v1/public/testimonials` | GET | Cacheable, not rate limited |
+> | `/v1/public/bug-reports` | POST | 5/hour. Screenshot keys constrained to the `public-bug-reports/` prefix |
+> | `/v1/public/bug-reports/presigned-url` | POST | 15/hour. Allow-listed content types only |
+>
+> Tables: `contact_messages`, `public_reviews`, `public_bug_reports`, plus
+> `public_rate_limits` — because `rate_limit_counters.user_id` is *also*
+> `NOT NULL REFERENCES users(id)`, so the existing rate-limit helper could not
+> serve anonymous callers either. That was the second instance of the same
+> wall, and it is worth noting the pattern: this codebase assumes an
+> authenticated caller everywhere, not just in the handlers.
+>
+> CORS is now scoped to `CORS_ALLOWED_ORIGINS` (default `grid.in`) rather than
+> `false` — never `true`, which would emit `*` across all routes.
+>
+> **None of this is deployed**, and it cannot be called until the stack is. It
+> also does not change the Option A/B/C recommendation below: Option B still
+> stands, because the cost was never in writing the handlers.
+>
+> Still to do on this repo's side when the time comes: swap the four Supabase
+> call sites, delete `@supabase/supabase-js`, and export the existing rows.
+>
 > **Still unverified, unchanged:** whether anything is deployed in AWS, the
 > Supabase RLS policies, and how much data is in Supabase today. The RLS audit
 > remains the one urgent item — it is a live exposure and costs an afternoon.
