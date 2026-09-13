@@ -48,6 +48,37 @@ const CATEGORY_TONE: Record<string, 'neutral' | 'warn' | 'bad'> = {
   OTHER: 'neutral',
 }
 
+/**
+ * The legal clock a report is running against.
+ *
+ * **Duplicated from `packages/constants/src/dpdp.ts` in the Grid monorepo**,
+ * because this repository is separate and cannot import from it. Kept as a
+ * named constant with this note rather than inlined, so the next person to
+ * change the law in one place can find the other.
+ *
+ * 36 hours is IT Rules Rule 3(1)(b) as amended in February 2026 - the clock
+ * that a user-reported item runs against. Two shorter ones exist and are not
+ * modelled here because neither arrives through this queue: a court order or
+ * government notice is 3 hours, and non-consensual intimate imagery is 2.
+ * Both reach a human directly, not through the in-app report button.
+ */
+const REPORT_SLA_HOURS = 36
+
+/** How long this report has been waiting, and whether that is now a problem. */
+function slaState(createdAt: string): { label: string; tone: 'neutral' | 'warn' | 'bad' } {
+  const hours = (Date.now() - new Date(createdAt).getTime()) / 3_600_000
+  const rounded = hours < 1 ? `${Math.round(hours * 60)}m` : `${Math.floor(hours)}h`
+
+  if (hours >= REPORT_SLA_HOURS) {
+    return { label: `${rounded} · past ${REPORT_SLA_HOURS}h`, tone: 'bad' }
+  }
+  // Three quarters through. Early enough that acting still costs nothing.
+  if (hours >= REPORT_SLA_HOURS * 0.75) {
+    return { label: `${rounded} of ${REPORT_SLA_HOURS}h`, tone: 'warn' }
+  }
+  return { label: rounded, tone: 'neutral' }
+}
+
 export function Reports() {
   const [status, setStatus] = useState<'OPEN' | 'ACTIONED' | 'DISMISSED'>('OPEN')
   const [pending, setPending] = useState<PendingAction | null>(null)
@@ -124,6 +155,13 @@ export function Reports() {
                     // The strongest signal on the screen, so it is the loudest
                     // thing in the row.
                     <Badge tone="bad">{report.report_count} reports</Badge>
+                  ) : null}
+                  {/* Only meaningful while it is still open - a resolved
+                      report's age is history, not a deadline. */}
+                  {status === 'OPEN' ? (
+                    <Badge tone={slaState(report.created_at).tone}>
+                      {slaState(report.created_at).label}
+                    </Badge>
                   ) : null}
                   <span className="ml-auto text-xs text-[var(--color-text-muted)]">
                     {new Date(report.created_at).toLocaleString()}
