@@ -43,10 +43,22 @@ export default function DeleteAccountPage() {
                   You can delete your Grid account directly from within the application. It's the fastest way to scrub your data:
                   <ol className="list-decimal pl-6 mt-6 space-y-4 font-medium text-secondary">
                     <li>Open <strong>Grid</strong> and go to the <strong>Profile</strong> tab</li>
-                    <li>Tap on <strong>Edit Profile</strong></li>
-                    <li>Scroll to the bottom and select <strong>Delete Account</strong></li>
+                    <li>Tap the <strong>Account &amp; Settings</strong> button in the top-right corner</li>
+                    <li>Under <strong>Your data</strong>, select <strong>Delete Account</strong></li>
                     <li>Confirm the deletion. This action is <span className="text-primary font-bold italic">immediate and irreversible.</span></li>
                   </ol>
+                </OffboardingSection>
+
+                <OffboardingSection icon={<Mail size={22} />} title="Don't Have the App Anymore?">
+                  You do not need Grid installed to have your account deleted. Email{' '}
+                  <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline font-bold">
+                    contact.galvam@gmail.com
+                  </a>{' '}
+                  from the address your account uses, with the subject <strong>Delete my account</strong>.
+                  We reply within 48 hours and complete the deletion within 30 days, as required
+                  under India&rsquo;s DPDP framework. Emailing from the account&rsquo;s own address is
+                  how we confirm the request is yours &mdash; we cannot action a request sent from
+                  any other address.
                 </OffboardingSection>
 
                 <OffboardingSection icon={<Database size={22} />} title="What Gets Removed">
