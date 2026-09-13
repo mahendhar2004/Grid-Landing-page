@@ -12,6 +12,11 @@ import { Badge, Button, EmptyNote, ErrorNote, Field, Panel } from '../components
  * this the most privileged screen in the console, which is why the form asks
  * for a reason and why every submission is audited.
  *
+ * What it does *not* bypass is the MX check. Ownership and deliverability are
+ * different questions: an admin can vouch that a college is real, but nobody
+ * can join an organization whose domain cannot receive the sign-in OTP. A
+ * mistyped domain is the error this catches.
+ *
  * `domain` is create-only and cannot be edited afterwards. `users.org_domain`
  * is a foreign key on that exact string, so changing it would disconnect every
  * member of the organization - the API does not accept it and this form does
@@ -114,7 +119,7 @@ export function Organizations() {
                 value={form.domain}
                 onChange={(domain) => setForm({ ...form, domain })}
                 placeholder="iitd.ac.in"
-                hint="Permanent. Every member's account is keyed to it and it can never be changed."
+                hint="Permanent, and checked for an MX record: sign-in is an emailed OTP, so a domain that cannot receive email is an organization nobody can join. Every member's account is keyed to this and it can never be changed."
               />
               <Field
                 label="Display name"
