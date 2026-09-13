@@ -1,7 +1,11 @@
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+import { next, rewrite } from '@vercel/functions'
 
 export const config = {
+  /**
+   * Node.js rather than the deprecated edge runtime. `middleware.ts` defaults
+   * to edge, which Vercel now warns about on every build.
+   */
+  runtime: 'nodejs',
   /**
    * Every path except the build output and the well-known files. The console
    * lives behind an arbitrary secret segment, so there is no narrower matcher
@@ -138,7 +142,7 @@ const SITE_ORIGIN = 'https://gridmarketplace.in'
 /** The three segments `packages/constants/src/share.ts` defines. Kept literal so an unknown segment 404s rather than reaching the API. */
 const SHARE_SEGMENTS = new Set(['listing', 'request', 'u'])
 
-async function handleShareLink(request: NextRequest, segment: string, id: string) {
+async function handleShareLink(segment: string, id: string) {
   const apiBase = process.env['SHARE_PREVIEW_API_URL'] ?? process.env['VITE_API_URL']
   const canonicalUrl = `${SITE_ORIGIN}/l/${segment}/${id}`
   const appPath = `l/${segment}/${id}`
@@ -166,7 +170,7 @@ async function handleShareLink(request: NextRequest, segment: string, id: string
         signal: AbortSignal.timeout(2500),
       })
       if (response.status === 404) {
-        return new NextResponse('Not found', { status: 404 })
+        return new Response('Not found', { status: 404 })
       }
       if (response.ok) {
         const json = (await response.json()) as { data?: SharePreview }
@@ -178,7 +182,7 @@ async function handleShareLink(request: NextRequest, segment: string, id: string
     }
   }
 
-  return new NextResponse(sharePage(preview, canonicalUrl, appPath), {
+  return new Response(sharePage(preview, canonicalUrl, appPath), {
     status: 200,
     headers: {
       'content-type': 'text/html; charset=utf-8',
@@ -189,9 +193,9 @@ async function handleShareLink(request: NextRequest, segment: string, id: string
   })
 }
 
-export default async function middleware(request: NextRequest) {
+export default async function middleware(request: Request) {
   const secret = process.env['ADMIN_PATH_SEGMENT']
-  const { pathname } = request.nextUrl
+  const { pathname } = new URL(request.url)
 
   // Share links, checked before the admin path: `/l/...` is a fixed, public
   // prefix and can never collide with a secret segment.
@@ -199,14 +203,14 @@ export default async function middleware(request: NextRequest) {
   if (share) {
     const [, segment, id] = share
     if (!SHARE_SEGMENTS.has(segment!)) {
-      return new NextResponse('Not found', { status: 404 })
+      return new Response('Not found', { status: 404 })
     }
-    return handleShareLink(request, segment!, decodeURIComponent(id!))
+    return handleShareLink(segment!, decodeURIComponent(id!))
   }
 
   const isAdminShaped = pathname.endsWith('/admin') || pathname.includes('/admin/')
   if (!isAdminShaped) {
-    return NextResponse.next()
+    return next()
   }
 
   /**
@@ -215,14 +219,15 @@ export default async function middleware(request: NextRequest) {
    * admin-shaped path - failing closed is the only safe direction here.
    */
   if (!secret) {
-    return new NextResponse('Not found', { status: 404 })
+    return new Response('Not found', { status: 404 })
   }
 
   const expected = `/${secret}/admin`
   if (pathname === expected || pathname.startsWith(`${expected}/`)) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/admin.html'
-    return NextResponse.rewrite(url)
+    // Swap only the pathname, so any query string survives the rewrite.
+    const target = new URL(request.url)
+    target.pathname = '/admin.html'
+    return rewrite(target)
   }
 
   /**
@@ -230,5 +235,5 @@ export default async function middleware(request: NextRequest) {
    * confirm that something exists at this shape, which is precisely the
    * information the secret is meant to withhold.
    */
-  return new NextResponse('Not found', { status: 404 })
+  return new Response('Not found', { status: 404 })
 }
