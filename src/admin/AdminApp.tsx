@@ -7,28 +7,30 @@ import { Organizations } from './screens/Organizations'
 import { Pricing } from './screens/Pricing'
 import { Reports } from './screens/Reports'
 import { SignIn } from './screens/SignIn'
+import { Tiers } from './screens/Tiers'
 import { Triage } from './screens/Triage'
 
 /**
  * The console shell.
  *
- * No router. The whole tool is six flat screens with no deep links worth
+ * No router. The whole tool is seven flat screens with no deep links worth
  * having, and adding `react-router` here would pull the public site's routing
  * dependency into a bundle that exists specifically to share nothing with it.
- * A `useState` is the honest shape for six tabs.
+ * A `useState` is the honest shape for seven tabs.
  *
  * The secret path this is served from is handled entirely by `vercel.json` -
  * nothing in this bundle knows or needs to know what it is, which is what
  * keeps it out of the JavaScript.
  */
 
-type Tab = 'reports' | 'triage' | 'organizations' | 'pricing' | 'analytics' | 'audit'
+type Tab = 'reports' | 'triage' | 'organizations' | 'pricing' | 'tiers' | 'analytics' | 'audit'
 
 const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
   { id: 'reports', label: 'Reports' },
   { id: 'triage', label: 'Inboxes' },
   { id: 'organizations', label: 'Organizations' },
   { id: 'pricing', label: 'Pricing' },
+  { id: 'tiers', label: 'Tiers' },
   { id: 'analytics', label: 'Analytics' },
   { id: 'audit', label: 'Audit log' },
 ]
@@ -91,6 +93,7 @@ export function AdminApp() {
         {tab === 'triage' ? <Triage /> : null}
         {tab === 'organizations' ? <Organizations /> : null}
         {tab === 'pricing' ? <Pricing /> : null}
+        {tab === 'tiers' ? <Tiers /> : null}
         {tab === 'analytics' ? <Analytics /> : null}
         {tab === 'audit' ? <AuditLog /> : null}
       </main>

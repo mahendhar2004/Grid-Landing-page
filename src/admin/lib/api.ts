@@ -145,6 +145,11 @@ export function apiPatch<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, { method: 'PATCH', body: JSON.stringify(body) })
 }
 
+/** A full replacement, not a merge - `PUT /v1/admin/tiers/{tier}` requires every entitlement in the body, and omitting one is a validation error rather than "leave that field alone". */
+export function apiPut<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, { method: 'PUT', body: JSON.stringify(body) })
+}
+
 /** Sends the six-digit code. Unauthenticated - it is how a session starts. */
 export function sendOtp(email: string): Promise<unknown> {
   return apiPost('/v1/auth/send-otp', { email })
