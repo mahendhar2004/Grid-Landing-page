@@ -86,6 +86,24 @@ interface ApiEnvelope<T> {
   error?: { code?: string; message?: string; correlationId?: string }
 }
 
+/**
+ * `crypto.randomUUID` needs a secure context. The console is served over
+ * https, so the fallback is for the one case that would otherwise fail
+ * confusingly - someone opening the built site over plain http locally - and
+ * uses `getRandomValues`, which has no such requirement, rather than
+ * `Math.random`.
+ */
+function newIdempotencyKey(): string {
+  if (typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  const bytes = crypto.getRandomValues(new Uint8Array(16))
+  bytes[6] = (bytes[6]! & 0x0f) | 0x40
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!API_BASE_URL) {
     throw new ApiError(0, 'CONFIG_MISSING', 'VITE_API_URL is not set for this build.', null)
@@ -98,6 +116,20 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
+  }
+  // The backend requires `X-Idempotency-Key` (a UUID) on every mutating
+  // route - `lib/idempotency.ts` rejects the request outright without one,
+  // which is why signing in failed with "A valid X-Idempotency-Key header
+  // (UUID) is required for this request." on /v1/auth/send-otp. The mobile
+  // client has always sent one; this console never did.
+  //
+  // A fresh key per call, not a stable one: the point is that a *retry* of
+  // the same intent is collapsed, and every call from here is a new intent -
+  // a caller that genuinely needs to retry safely can pass its own header in
+  // `init`, which this leaves alone.
+  const method = (init.method ?? 'GET').toUpperCase()
+  if (method !== 'GET' && method !== 'HEAD' && !headers['X-Idempotency-Key']) {
+    headers['X-Idempotency-Key'] = newIdempotencyKey()
   }
 
   let response: Response
