@@ -1,13 +1,24 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 
 const lastUpdated = 'September 16, 2026'
 
 export default function TermsPage() {
+  const [searchParams] = useSearchParams()
+  const isEmbedded = searchParams.get('embed') === '1'
+
   return (
     <div className="pt-8 pb-16 lg:pt-10 lg:pb-24">
       <div className="max-w-3xl mx-auto px-6">
         <div className="mb-12">
-          <Link to="/" className="text-primary text-sm font-semibold hover:underline">&larr; Back to Home</Link>
+          {/*
+            Hidden in the app's WebView, like the navbar and footer above it
+            (`layout/Layout.tsx`): "Home" here means the marketing site, and
+            following it inside the app strands the reader on a page with no
+            way back. The app's own header already has a back button.
+          */}
+          {!isEmbedded && (
+            <Link to="/" className="text-primary text-sm font-semibold hover:underline">&larr; Back to Home</Link>
+          )}
           <h1 className="text-4xl sm:text-5xl font-extrabold text-secondary mt-6 mb-4">Terms &amp; Conditions</h1>
           <p className="text-text-muted">Last updated: {lastUpdated}</p>
         </div>
