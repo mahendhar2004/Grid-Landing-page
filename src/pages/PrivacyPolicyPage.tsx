@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-const lastUpdated = 'September 13, 2026'
+const lastUpdated = 'September 16, 2026'
 
 export default function PrivacyPolicyPage() {
   return (
@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
         <div className="prose-custom space-y-10">
           <section>
             <p className="text-text-muted leading-relaxed">
-              At Grid ("we," "our," or "us"), we respect your privacy and are committed to protecting the personal information you share with us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and services.
+              At Grid, operated by Galvam ("we," "our," or "us"), we respect your privacy and are committed to protecting the personal information you share with us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and services.
             </p>
             <p className="text-text-muted leading-relaxed mt-4">
               Grid is a marketplace for verified members of an organisation — a college or a workplace. Your organisation is referred to throughout this policy as your <strong>Hub</strong>.
@@ -128,7 +128,8 @@ export default function PrivacyPolicyPage() {
           </Section>
 
           <Section title="8. Your Rights &amp; Controls">
-            <p>You have the following controls over your data:</p>
+            <p>Under the Digital Personal Data Protection Act, 2023 you are a <strong>data principal</strong>, with the rights to obtain a summary of the personal data we hold and how we process it, to have inaccurate or incomplete data <strong>corrected or completed</strong>, to have data <strong>erased</strong> once it is no longer needed for the purpose it was collected, to <strong>withdraw consent</strong> as easily as you gave it, to <strong>nominate</strong> another person to exercise these rights on your behalf if you die or become incapacitated, and to complain to our Grievance Officer and — if that does not resolve it — to the Data Protection Board of India.</p>
+            <p className="mt-4">The controls below are how you exercise those rights:</p>
             <ul className="list-disc pl-6 space-y-2 text-text-muted mt-4">
               <li><strong>Export Your Data</strong> — Download a copy of the personal data Grid holds about you, from within the app. This right is provided in line with India's Digital Personal Data Protection framework.</li>
               <li><strong>View &amp; Edit Profile</strong> — Access and update your display name, photo and profile details at any time</li>
@@ -144,6 +145,9 @@ export default function PrivacyPolicyPage() {
                 <strong>Delete Account</strong> — You can permanently delete your account and associated personal data from within the app.
                 Deletion is irreversible. <strong>If you hold unspent wallet credit, request its return before deleting</strong> (see section 9), and if you have an active subscription, cancel it separately through Apple or Google — deleting your Grid account does not stop store billing.
                 Alternatively, email <a href="mailto:contact.galvam@gmail.com?subject=Account%20Deletion%20Request" className="text-primary hover:underline">contact.galvam@gmail.com</a> with the subject "Account Deletion Request".
+              </li>
+              <li>
+                <strong>Nominate Someone</strong> — DPDP section 14 lets you name another individual to exercise these rights if you die or become incapacitated. There is no in-app screen for this yet: write to our Grievance Officer (section 14) with the nominee's name and contact details and we will record it against your account.
               </li>
             </ul>
           </Section>
@@ -171,13 +175,34 @@ export default function PrivacyPolicyPage() {
             <p>We may update this Privacy Policy from time to time. When we make changes, we will update the "Last Updated" date at the top of this page and notify users through the app. Your continued use of Grid after changes constitutes acceptance of the updated policy.</p>
           </Section>
 
-          <Section title="14. Contact Us &amp; Grievances">
-            <p>If you have questions or concerns about this Privacy Policy, our data practices, or a decision made about your account, or if you wish to exercise any right described in section 8, please contact us:</p>
-            <ul className="list-none space-y-2 text-text-muted mt-4">
-              <li><strong>Email:</strong> <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">contact.galvam@gmail.com</a></li>
-              <li><strong>Entity:</strong> Grid</li>
-            </ul>
-            <p className="mt-4">We aim to acknowledge privacy and grievance requests as quickly as we can, and to resolve them within the timeframes required under applicable law.</p>
+          <Section title="14. Grievance Officer, Nodal Contact Person &amp; Contact">
+            <p>If you have questions or concerns about this Privacy Policy, our data practices, or a decision made about your account, or if you wish to exercise any right described in section 8, please write to our Grievance Officer.</p>
+            <p className="mt-4">Grid publishes two named points of contact, as Indian law requires. They are the same person because Grid is operated by an individual, not a company &mdash; what the law requires is that both appointments are made and published, not that two different people hold them.</p>
+
+            <Subsection title="Grievance Officer">
+              <p className="text-sm text-text-muted mb-2">Under the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules and the Digital Personal Data Protection Act, 2023.</p>
+              <ul className="list-none space-y-2 text-text-muted mt-2">
+                <li><strong>Name:</strong> Mahendhar Seelam</li>
+                <li><strong>Designation:</strong> Grievance Officer, Grid (operated by Galvam)</li>
+                <li><strong>Email:</strong> <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">contact.galvam@gmail.com</a></li>
+              </ul>
+              <p className="mt-3">Write here about your account, your personal data, a listing, a transaction, or any complaint about Grid. <strong>We acknowledge every complaint within 24 hours and resolve it within 7 days</strong>, as required by the IT Rules as amended in February 2026 and by the DPDP Act.</p>
+            </Subsection>
+
+            <Subsection title="Nodal Contact Person">
+              <p className="text-sm text-text-muted mb-2">Under the Consumer Protection (E-Commerce) Rules, 2020, Rule 4(5).</p>
+              <ul className="list-none space-y-2 text-text-muted mt-2">
+                <li><strong>Name:</strong> Mahendhar Seelam, resident in India</li>
+                <li><strong>Email:</strong> <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">contact.galvam@gmail.com</a></li>
+              </ul>
+              <p className="mt-3">This is the point of contact for law enforcement agencies and regulators seeking compliance coordination. If you are a user with a complaint, the Grievance Officer above is the right address &mdash; it runs on the published timelines.</p>
+            </Subsection>
+
+            <p className="mt-6">If your complaint is not resolved to your satisfaction, you may escalate it to the Data Protection Board of India.</p>
+          </Section>
+
+          <Section title="15. Governing Law">
+            <p>This Privacy Policy is governed by the laws of India, including the Digital Personal Data Protection Act, 2023. Any dispute arising from this Policy is subject to the exclusive jurisdiction of the courts described in our <a href="/terms" className="text-primary hover:underline">Terms &amp; Conditions</a>.</p>
           </Section>
         </div>
       </div>

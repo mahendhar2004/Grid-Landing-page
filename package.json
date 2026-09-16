@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/check-legal.mjs && tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:legal": "node scripts/check-legal.mjs"
   },
   "dependencies": {
     "@vercel/functions": "^3.9.7",

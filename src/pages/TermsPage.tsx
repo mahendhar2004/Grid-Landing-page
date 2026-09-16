@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-const lastUpdated = 'September 13, 2026'
+const lastUpdated = 'September 16, 2026'
 
 export default function TermsPage() {
   return (
@@ -14,7 +14,7 @@ export default function TermsPage() {
 
         <div className="space-y-10">
           <p className="text-text-muted leading-relaxed">
-            Welcome to Grid ("we," "our," or "us"). These Terms and Conditions ("Terms") govern your access to and use of the Grid mobile application and services. By creating an account or using Grid, you agree to be bound by these Terms. If you do not agree, please do not use the service.
+            Welcome to Grid, operated by Galvam ("we," "our," or "us"). These Terms and Conditions ("Terms") govern your access to and use of the Grid mobile application and services. By creating an account or using Grid, you agree to be bound by these Terms. If you do not agree, please do not use the service.
           </p>
           <p className="text-text-muted leading-relaxed">
             Grid is a marketplace for verified members of an organisation — a college or a workplace. Your organisation is referred to throughout these Terms as your <strong>Hub</strong>.
@@ -212,12 +212,18 @@ export default function TermsPage() {
             <p>We may update these Terms from time to time. When we make changes, we will update the "Last Updated" date and notify users through the app. Your continued use of Grid after changes constitutes acceptance of the updated Terms. If you do not agree to the new Terms, you should stop using the service.</p>
           </Section>
 
-          <Section title="19. Contact Us">
-            <p>If you have any questions about these Terms, wish to appeal a moderation decision, or wish to request the return of unspent credit, please contact us:</p>
+          <Section title="19. Indemnification">
+            <p>You agree to indemnify and hold harmless Galvam, its officers and personnel from any claim, loss or expense (including reasonable legal fees) arising from your use of Grid, the content you post, your violation of these Terms, or your violation of any right of another person. This matters on a marketplace where the transaction itself happens between two members and Grid is not a party to it.</p>
+          </Section>
+
+          <Section title="20. Grievance Officer, Nodal Contact Person &amp; Contact">
+            <p>If you have any questions about these Terms, wish to appeal a moderation decision, or wish to request the return of unspent credit, please write to our Grievance Officer. Grid publishes two named points of contact, as Indian law requires; they are the same person because Grid is operated by an individual, not a company.</p>
             <ul className="list-none space-y-2 mt-4">
+              <li><strong>Grievance Officer:</strong> Mahendhar Seelam &mdash; Grid (operated by Galvam)</li>
+              <li><strong>Nodal Contact Person:</strong> Mahendhar Seelam, resident in India &mdash; Consumer Protection (E-Commerce) Rules, 2020, Rule 4(5)</li>
               <li><strong>Email:</strong> <a href="mailto:contact.galvam@gmail.com" className="text-primary hover:underline">contact.galvam@gmail.com</a></li>
-              <li><strong>Entity:</strong> Grid</li>
             </ul>
+            <p className="mt-4">We acknowledge every complaint within <strong>24 hours</strong> and aim to resolve it within <strong>7 days</strong>. The Nodal Contact Person is the point of contact for law enforcement agencies and regulators; users with a complaint should write to the Grievance Officer, which runs on those published timelines. Full detail is in section 14 of our <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.</p>
           </Section>
         </div>
       </div>
