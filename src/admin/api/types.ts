@@ -155,14 +155,75 @@ export interface AuthTokens {
 }
 
 /**
- * One affiliate or sponsored ad unit.
+ * The advertising platform's own vocabulary
+ * (`docs/grid-v2/ADVERTISING_PLATFORM_PLAN.md` §3), which is the publisher
+ * side of the industry rather than the advertiser side: an advertiser buys an
+ * order, an order carries line items that each target an audience, and a
+ * creative is the artwork, reviewed once and reusable across them.
  *
- * camelCase, because the service maps it rather than handing back a Postgres
- * row. `docs/grid-v2/ADVERTISING_PLATFORM_PLAN.md` §8 is what this screen is
- * phase 0 of.
+ * camelCase throughout, because the services map their rows rather than
+ * handing back Postgres.
  */
-export interface AdUnit {
+
+export type AdvertiserTier = 'LOCAL' | 'BRAND' | 'HOUSE'
+export type LineItemStatus = 'DRAFT' | 'SCHEDULED' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'ARCHIVED'
+export type CreativeReviewStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
+export type AdPlacement = 'FEED' | 'SEARCH' | 'MAP'
+
+/** The company an ad belongs to. Everything to do with money or trust hangs off this. */
+export interface Advertiser {
   id: string
+  name: string
+  /** Who the invoice is made out to, routinely different from the name on the ad. */
+  legalName: string | null
+  tier: AdvertiserTier
+  gstNumber: string | null
+  billingEmail: string | null
+  contactName: string | null
+  contactPhone: string | null
+  notes: string | null
+  /** Set only by Grid, on policy grounds. Suspending stops every ad they own. */
+  suspendedAt: string | null
+  suspendedReason: string | null
+  archivedAt: string | null
+  createdAt: string
+  updatedAt: string
+  orderCount: number
+  activeLineItemCount: number
+  pendingCreativeCount: number
+}
+
+export interface AdvertisersPage {
+  advertisers: Advertiser[]
+  nextCursor: string | null
+}
+
+/** What was sold, to whom, for how much. */
+export interface AdOrder {
+  id: string
+  advertiserId: string
+  advertiserName: string
+  name: string
+  amountPaise: number
+  startsAt: string | null
+  endsAt: string | null
+  notes: string | null
+  archivedAt: string | null
+  createdAt: string
+  updatedAt: string
+  lineItemCount: number
+}
+
+export interface AdOrdersPage {
+  orders: AdOrder[]
+  nextCursor: string | null
+}
+
+/** An image, its copy and its destination — reviewed once, reusable across campaigns. */
+export interface Creative {
+  id: string
+  advertiserId: string
+  advertiserName: string
   title: string
   sponsorName: string
   imageUrl: string
@@ -173,19 +234,58 @@ export interface AdUnit {
    * arrangements need nothing, and "Sponsored" on the card covers them.
    */
   disclosure: string | null
+  reviewStatus: CreativeReviewStatus
+  reviewReason: string | null
+  reviewedAt: string | null
+  archivedAt: string | null
+  createdAt: string
+  updatedAt: string
+  /** How many campaigns stop if this is rejected. Rejecting a creative is never a one-ad decision. */
+  lineItemCount: number
+}
+
+export interface CreativesPage {
+  creatives: Creative[]
+  nextCursor: string | null
+}
+
+/** A creative as it hangs off one ad — enough to draw the row without another call. */
+export interface LineItemCreative {
+  id: string
+  title: string
+  imageUrl: string
+  reviewStatus: CreativeReviewStatus
+  archivedAt: string | null
+}
+
+/** One ad: targeting, placements and schedule, under an order. */
+export interface LineItem {
+  id: string
+  orderId: string
+  orderName: string
+  advertiserId: string
+  advertiserName: string
+  name: string
+  status: LineItemStatus
+  /** Grid's own stop, which `status` cannot clear. */
+  suspendedAt: string | null
+  suspendedReason: string | null
+  placements: AdPlacement[]
   category: string | null
   keywords: string[] | null
   minPricePaise: number | null
   maxPricePaise: number | null
-  priorityWeight: number
-  isActive: boolean
-  impressionCount: number
-  clickCount: number
+  startsAt: string | null
+  endsAt: string | null
+  notes: string | null
   createdAt: string
   updatedAt: string
+  creatives: LineItemCreative[]
+  impressionCount: number
+  clickCount: number
 }
 
-export interface AdUnitsPage {
-  adUnits: AdUnit[]
+export interface LineItemsPage {
+  lineItems: LineItem[]
   nextCursor: string | null
 }

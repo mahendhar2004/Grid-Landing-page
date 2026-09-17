@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { clearTokens, getAccessToken } from './lib/api'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { ActionCentre } from './screens/ActionCentre'
-import { AdUnits } from './screens/AdUnits'
+import { Ads } from './screens/Ads'
 import { Analytics } from './screens/Analytics'
 import { AuditLog } from './screens/AuditLog'
 import { Organizations } from './screens/Organizations'
@@ -131,7 +131,7 @@ export function AdminApp() {
           {tab === 'users' ? <Users /> : null}
           {tab === 'organizations' ? <Organizations /> : null}
           {tab === 'pricing' ? <Pricing /> : null}
-          {tab === 'ads' ? <AdUnits /> : null}
+          {tab === 'ads' ? <Ads /> : null}
           {tab === 'tiers' ? <Tiers /> : null}
           {tab === 'analytics' ? <Analytics /> : null}
           {tab === 'audit' ? <AuditLog /> : null}

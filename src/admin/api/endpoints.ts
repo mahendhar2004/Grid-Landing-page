@@ -1,8 +1,16 @@
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../lib/api'
 import type {
-  AdUnit,
-  AdUnitsPage,
+  AdOrder,
+  AdOrdersPage,
+  AdPlacement,
   AdminOrganization,
+  Advertiser,
+  AdvertiserTier,
+  AdvertisersPage,
+  Creative,
+  CreativesPage,
+  LineItem,
+  LineItemsPage,
   AdminReport,
   AdminUser,
   AuditEntry,
@@ -327,40 +335,201 @@ const users = {
 
 // -------------------------------------------------------- ads
 
-/** Everything an ad unit needs to exist. Matches the route's own required set exactly. */
-export interface CreateAdUnitBody {
+/** Everything an advertiser needs to exist. Matches the route's own required set exactly. */
+export interface CreateAdvertiserBody {
+  name: string
+  legalName: string | null
+  tier: AdvertiserTier
+  gstNumber: string | null
+  billingEmail: string | null
+  contactName: string | null
+  contactPhone: string | null
+  notes: string | null
+}
+
+/** Every field optional, because the route patches. Standing changes are separate calls, deliberately — see `suspend` and `archive`. */
+export type UpdateAdvertiserBody = Partial<CreateAdvertiserBody>
+
+export interface CreateAdOrderBody {
+  advertiserId: string
+  name: string
+  amountPaise: number
+  startsAt: string | null
+  endsAt: string | null
+  notes: string | null
+}
+
+export type UpdateAdOrderBody = Partial<Omit<CreateAdOrderBody, 'advertiserId'>>
+
+export interface CreateCreativeBody {
+  advertiserId: string
   title: string
   sponsorName: string
   imageUrl: string
   targetUrl: string
   disclosure: string | null
+}
+
+export type UpdateCreativeBody = Partial<Omit<CreateCreativeBody, 'advertiserId'>>
+
+export interface CreateLineItemBody {
+  orderId: string
+  name: string
+  placements: AdPlacement[]
   category: string | null
   keywords: string[] | null
   minPricePaise: number | null
   maxPricePaise: number | null
-  priorityWeight: number
-  isActive: boolean
+  startsAt: string | null
+  endsAt: string | null
+  notes: string | null
+  creativeIds: string[]
 }
 
-/** Every field optional, because the route patches. Omitting a nullable field leaves it; sending `null` clears it. */
-export type UpdateAdUnitBody = Partial<CreateAdUnitBody>
+export type UpdateLineItemBody = Partial<Omit<CreateLineItemBody, 'orderId' | 'creativeIds'>>
 
-const adUnits = {
-  /**
-   * Cursor-paged, not offset - unlike every other admin list. That is the
-   * route's own design (Rule 25 cursor pagination), so the console follows it
-   * rather than asking the API to change shape for one screen.
-   */
-  list(cursor: string | null, limit = 50): Promise<AdUnitsPage> {
-    return apiGet<AdUnitsPage>('/v1/admin/ad-units', { ...(cursor ? { cursor } : {}), limit })
+/**
+ * A status change, shaped the way the route shapes it: the reason is part of
+ * the arm rather than an optional field beside it, so a console screen cannot
+ * compile a pause with nothing to explain it.
+ */
+export type LineItemStatusChange =
+  | { readonly status: 'DRAFT' }
+  | { readonly status: 'SCHEDULED' }
+  | { readonly status: 'ACTIVE' }
+  | { readonly status: 'PAUSED'; readonly reason: string }
+  | { readonly status: 'ARCHIVED'; readonly reason: string }
+
+/** Same idea for review: approving needs no explanation, rejecting always does. */
+export type CreativeReviewDecision =
+  | { readonly decision: 'APPROVED' }
+  | { readonly decision: 'REJECTED'; readonly reason: string }
+
+/**
+ * All four ad resources page by cursor rather than offset — unlike every other
+ * admin list. That is the routes' own design (Rule 25 cursor pagination), so
+ * the console follows it rather than asking the API to change shape.
+ */
+const advertisers = {
+  list(cursor: string | null, filters: { search?: string; tier?: string; includeArchived?: boolean; suspendedOnly?: boolean } = {}, limit = 50) {
+    return apiGet<AdvertisersPage>('/v1/admin/advertisers', {
+      ...(cursor ? { cursor } : {}),
+      ...(filters.search ? { search: filters.search } : {}),
+      ...(filters.tier ? { tier: filters.tier } : {}),
+      ...(filters.includeArchived ? { includeArchived: true } : {}),
+      ...(filters.suspendedOnly ? { suspendedOnly: true } : {}),
+      limit,
+    })
   },
 
-  create(body: CreateAdUnitBody): Promise<AdUnit> {
-    return apiPost<AdUnit>('/v1/admin/ad-units', body)
+  create(body: CreateAdvertiserBody): Promise<Advertiser> {
+    return apiPost<Advertiser>('/v1/admin/advertisers', body)
   },
 
-  update(id: string, body: UpdateAdUnitBody): Promise<AdUnit> {
-    return apiPatch<AdUnit>(`/v1/admin/ad-units/${id}`, body)
+  update(id: string, body: UpdateAdvertiserBody): Promise<Advertiser> {
+    return apiPatch<Advertiser>(`/v1/admin/advertisers/${id}`, body)
+  },
+
+  /** `reason` is required going in and ignored coming out, which is what the route's own refinement says. */
+  setSuspension(id: string, suspended: boolean, reason: string | null): Promise<Advertiser> {
+    return apiPost<Advertiser>(`/v1/admin/advertisers/${id}/suspension`, { suspended, reason })
+  },
+
+  archive(id: string, reason: string): Promise<Advertiser> {
+    return apiPost<Advertiser>(`/v1/admin/advertisers/${id}/archive`, { reason })
+  },
+}
+
+const adOrders = {
+  list(cursor: string | null, filters: { advertiserId?: string; includeArchived?: boolean } = {}, limit = 50) {
+    return apiGet<AdOrdersPage>('/v1/admin/ad-orders', {
+      ...(cursor ? { cursor } : {}),
+      ...(filters.advertiserId ? { advertiserId: filters.advertiserId } : {}),
+      ...(filters.includeArchived ? { includeArchived: true } : {}),
+      limit,
+    })
+  },
+
+  create(body: CreateAdOrderBody): Promise<AdOrder> {
+    return apiPost<AdOrder>('/v1/admin/ad-orders', body)
+  },
+
+  update(id: string, body: UpdateAdOrderBody): Promise<AdOrder> {
+    return apiPatch<AdOrder>(`/v1/admin/ad-orders/${id}`, body)
+  },
+
+  archive(id: string, reason: string): Promise<AdOrder> {
+    return apiPost<AdOrder>(`/v1/admin/ad-orders/${id}/archive`, { reason })
+  },
+}
+
+const creatives = {
+  list(cursor: string | null, filters: { advertiserId?: string; reviewStatus?: string; includeArchived?: boolean } = {}, limit = 50) {
+    return apiGet<CreativesPage>('/v1/admin/creatives', {
+      ...(cursor ? { cursor } : {}),
+      ...(filters.advertiserId ? { advertiserId: filters.advertiserId } : {}),
+      ...(filters.reviewStatus ? { reviewStatus: filters.reviewStatus } : {}),
+      ...(filters.includeArchived ? { includeArchived: true } : {}),
+      limit,
+    })
+  },
+
+  create(body: CreateCreativeBody): Promise<Creative> {
+    return apiPost<Creative>('/v1/admin/creatives', body)
+  },
+
+  update(id: string, body: UpdateCreativeBody): Promise<Creative> {
+    return apiPatch<Creative>(`/v1/admin/creatives/${id}`, body)
+  },
+
+  review(id: string, decision: CreativeReviewDecision): Promise<Creative> {
+    return apiPost<Creative>(`/v1/admin/creatives/${id}/review`, decision)
+  },
+
+  archive(id: string, reason: string): Promise<Creative> {
+    return apiPost<Creative>(`/v1/admin/creatives/${id}/archive`, { reason })
+  },
+}
+
+const lineItems = {
+  list(
+    cursor: string | null,
+    filters: { advertiserId?: string; orderId?: string; status?: string; suspendedOnly?: boolean; includeArchived?: boolean } = {},
+    limit = 50,
+  ) {
+    return apiGet<LineItemsPage>('/v1/admin/line-items', {
+      ...(cursor ? { cursor } : {}),
+      ...(filters.advertiserId ? { advertiserId: filters.advertiserId } : {}),
+      ...(filters.orderId ? { orderId: filters.orderId } : {}),
+      ...(filters.status ? { status: filters.status } : {}),
+      ...(filters.suspendedOnly ? { suspendedOnly: true } : {}),
+      ...(filters.includeArchived ? { includeArchived: true } : {}),
+      limit,
+    })
+  },
+
+  create(body: CreateLineItemBody): Promise<LineItem> {
+    return apiPost<LineItem>('/v1/admin/line-items', body)
+  },
+
+  update(id: string, body: UpdateLineItemBody): Promise<LineItem> {
+    return apiPatch<LineItem>(`/v1/admin/line-items/${id}`, body)
+  },
+
+  setStatus(id: string, change: LineItemStatusChange): Promise<LineItem> {
+    return apiPost<LineItem>(`/v1/admin/line-items/${id}/status`, change)
+  },
+
+  setSuspension(id: string, suspended: boolean, reason: string | null): Promise<LineItem> {
+    return apiPost<LineItem>(`/v1/admin/line-items/${id}/suspension`, { suspended, reason })
+  },
+
+  attachCreative(id: string, creativeId: string): Promise<LineItem> {
+    return apiPost<LineItem>(`/v1/admin/line-items/${id}/creatives`, { creativeId })
+  },
+
+  detachCreative(id: string, creativeId: string): Promise<LineItem> {
+    return apiDelete<LineItem>(`/v1/admin/line-items/${id}/creatives/${creativeId}`)
   },
 }
 
@@ -397,7 +566,10 @@ export const api = {
   organizations,
   users,
   content,
-  adUnits,
+  advertisers,
+  adOrders,
+  creatives,
+  lineItems,
   pricing,
   tiers,
   audit,

@@ -1,6 +1,6 @@
 import { Badge, EmptyNote, ErrorNote, Panel } from '../components/ui'
 import { api } from '../api/endpoints'
-import type { AdminOrganization, AdminReport, TriageCounts } from '../api/types'
+import type { AdminOrganization, AdminReport, Creative, TriageCounts } from '../api/types'
 import { useAsyncData } from '../lib/useAsyncData'
 
 /**
@@ -25,9 +25,12 @@ import { useAsyncData } from '../lib/useAsyncData'
  * 3. **Hubs awaiting visibility** — a registered organisation that nobody
  *    can find. Every hour here is a campus that signed up and sees an empty
  *    map, which is how a new Hub dies before it starts.
- * 4. **Bug reports** — someone hit something broken and took the trouble to
+ * 4. **Ad creatives awaiting review** — nothing serves until somebody looks,
+ *    so a campaign that was paid for is quietly not running. Time-bound
+ *    rather than urgent: the cost is ours and an advertiser's, not a user's.
+ * 5. **Bug reports** — someone hit something broken and took the trouble to
  *    say so.
- * 5. **Feedback and reviews** — worth reading, no clock.
+ * 6. **Feedback and reviews** — worth reading, no clock.
  *
  * It composes from endpoints that already exist rather than adding a
  * dashboard route to the backend: three parallel calls the console was
@@ -67,12 +70,16 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
       blank the whole page - a dashboard showing nothing because one of five
       numbers is missing is worse than one showing four.
     */
-    const [counts, reports, organizations] = await Promise.all([
+    const [counts, reports, organizations, pendingCreatives] = await Promise.all([
       api.triage.counts().catch(() => ({}) as TriageCounts),
       // A glance, not a queue: the first page of each is enough to say how
       // much is waiting, and the tab itself is where you work through it.
       api.reports.list('OPEN', null, 100, 0).catch(() => [] as AdminReport[]),
       api.organizations.list(undefined, 100, 0).catch(() => [] as AdminOrganization[]),
+      api.creatives
+        .list(null, { reviewStatus: 'PENDING' }, 100)
+        .then((page) => page.creatives)
+        .catch(() => [] as Creative[]),
     ])
 
     const pendingHubs = organizations.filter((organization) => organization.hubStatus !== 'ACTIVE').length
@@ -103,6 +110,14 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
         severity: 'high',
         why: 'A registered organisation nobody can find. Every hour is a campus looking at an empty map.',
         tab: 'organizations',
+      },
+      {
+        key: 'creatives',
+        label: 'Ad creatives awaiting review',
+        count: pendingCreatives.length,
+        severity: 'high',
+        why: 'Nothing serves until somebody looks. A campaign that was paid for is silently not running, and the advertiser finds out before we do.',
+        tab: 'ads',
       },
       {
         key: 'bugs',
