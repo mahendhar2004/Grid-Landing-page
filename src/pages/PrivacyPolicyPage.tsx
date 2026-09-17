@@ -71,6 +71,10 @@ export default function PrivacyPolicyPage() {
             <Subsection title="Reports &amp; Blocks">
               <p>When you report a user or listing, we store the report including the reason you selected, the target, and a timestamp, used solely for moderation. When you block someone, we store that relationship to prevent them contacting you. Neither your reports nor your block list are visible to other users.</p>
             </Subsection>
+            <Subsection title="Advertising">
+              <p>Some cards in the feed and in search results are marked <strong>Sponsored</strong>. We choose which one to show from <strong>what is on your screen at that moment</strong> — the category you are browsing, the words you searched for, and the price range you are looking at. <strong>We do not build an advertising profile of you</strong>, we do not use your past activity, your identity, or your location to pick an ad, and we do not use a device advertising identifier. Nothing about you is shared with the advertiser or with any advertising network.</p>
+              <p>When a sponsored card is shown to you or you tap it, we record that it happened, along with your account, so we can bill the advertiser correctly and detect fraudulent clicks. That record is used for those two purposes and is included in your data export. You can report any sponsored card you find inappropriate using the flag on the card itself.</p>
+            </Subsection>
             <Subsection title="Bug Reports">
               <p>When you voluntarily submit a bug report, we collect your description, the category and severity you select, any screenshots you attach, and automatically-captured device information including device model, operating system version, and app version. Submitting a bug report is entirely optional.</p>
             </Subsection>
