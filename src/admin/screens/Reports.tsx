@@ -138,6 +138,7 @@ export function Reports() {
   function targetKind(report: AdminReport): string {
     if (report.target_listing_id) return 'Listing'
     if (report.target_request_id) return 'Request'
+    if (report.target_ad_unit_id) return 'Ad'
     return 'User'
   }
 
@@ -221,25 +222,34 @@ export function Reports() {
                     <Button onClick={() => setPending({ kind: 'DISMISS', report })}>Dismiss</Button>
                     {/* Only offered when there is content to remove - a
                         user-targeted report has none, and the server rejects
-                        it rather than silently doing nothing. */}
-                    {report.target_listing_id || report.target_request_id ? (
+                        it rather than silently doing nothing. For an ad,
+                        "remove" deactivates it, reversibly. */}
+                    {report.target_listing_id || report.target_request_id || report.target_ad_unit_id ? (
                       <Button variant="danger" onClick={() => setPending({ kind: 'REMOVE_CONTENT', report })}>
-                        Remove content
+                        {report.target_ad_unit_id ? 'Take the ad down' : 'Remove content'}
                       </Button>
                     ) : null}
-                    <Button onClick={() => setPending({ kind: 'WARN_USER', report })}>Warn</Button>
-                    <Button
-                      variant="danger"
-                      onClick={() => setPending({ kind: 'BAN_USER', report, durationDays: 7 })}
-                    >
-                      Ban 7d
-                    </Button>
-                    <Button
-                      variant="danger"
-                      onClick={() => setPending({ kind: 'BAN_USER', report, durationDays: null })}
-                    >
-                      Ban indefinitely
-                    </Button>
+                    {/* An ad has no person behind it, so the two user-level
+                        actions genuinely do not apply - the server refuses
+                        them, and offering a Ban button that always fails is
+                        how a console stops being trusted. */}
+                    {report.target_ad_unit_id ? null : (
+                      <>
+                        <Button onClick={() => setPending({ kind: 'WARN_USER', report })}>Warn</Button>
+                        <Button
+                          variant="danger"
+                          onClick={() => setPending({ kind: 'BAN_USER', report, durationDays: 7 })}
+                        >
+                          Ban 7d
+                        </Button>
+                        <Button
+                          variant="danger"
+                          onClick={() => setPending({ kind: 'BAN_USER', report, durationDays: null })}
+                        >
+                          Ban indefinitely
+                        </Button>
+                      </>
+                    )}
                   </div>
                 ) : (
                   /*
@@ -288,7 +298,11 @@ export function Reports() {
             pending.kind === 'DISMISS'
               ? 'Dismiss this report'
               : pending.kind === 'REMOVE_CONTENT'
-                ? 'Remove this content'
+                ? // An ad is deactivated rather than removed, and reversibly,
+                  // so the prompt should not promise something harsher.
+                  pending.report.target_ad_unit_id
+                  ? 'Take this ad down'
+                  : 'Remove this content'
                 : pending.kind === 'RESTORE_CONTENT'
                   ? 'Put this content back'
                   : pending.kind === 'UNBAN_USER'

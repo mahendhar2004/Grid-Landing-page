@@ -50,6 +50,8 @@ export interface AdminReport {
   target_listing_id: string | null
   target_user_id: string | null
   target_request_id: string | null
+  /** Reporting an ad - App Store guideline 2.5.18. Optional per rule 9 until the API carrying it is deployed. */
+  target_ad_unit_id?: string | null
   category: string
   description: string | null
   status: string
