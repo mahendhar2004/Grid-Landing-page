@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AdSettings } from './AdSettings'
@@ -7,13 +7,24 @@ import type { AdSettings as AdSettingsData } from '../api/types'
 
 vi.mock('../api/endpoints', () => ({
   api: {
-    adSettings: { get: vi.fn(), update: vi.fn(), setEnabled: vi.fn() },
+    adSettings: {
+      get: vi.fn(),
+      update: vi.fn(),
+      setEnabled: vi.fn(),
+      setHubOverride: vi.fn(),
+      clearHubOverride: vi.fn(),
+    },
+    // The campus picker reads the list the console already fetches elsewhere.
+    organizations: { list: vi.fn() },
   },
 }))
 
 const getMock = vi.mocked(api.adSettings.get)
 const updateMock = vi.mocked(api.adSettings.update)
 const setEnabledMock = vi.mocked(api.adSettings.setEnabled)
+const setHubOverrideMock = vi.mocked(api.adSettings.setHubOverride)
+const clearHubOverrideMock = vi.mocked(api.adSettings.clearHubOverride)
+const organizationsMock = vi.mocked(api.organizations.list)
 
 function settings(overrides: Partial<AdSettingsData> = {}): AdSettingsData {
   return {
@@ -25,6 +36,7 @@ function settings(overrides: Partial<AdSettingsData> = {}): AdSettingsData {
     blockedSectors: ['LENDING', 'GAMBLING', 'CRYPTO', 'ALCOHOL', 'TOBACCO', 'ADULT'],
     minHubListingsForAds: 0,
     newUserGraceHours: 0,
+    hubOverrides: [],
     updatedAt: '2026-09-17T10:00:00.000Z',
     ...overrides,
   }
@@ -41,6 +53,21 @@ describe('AdSettings', () => {
     vi.clearAllMocks()
     updateMock.mockResolvedValue(settings())
     setEnabledMock.mockResolvedValue(settings())
+    setHubOverrideMock.mockResolvedValue(settings())
+    clearHubOverrideMock.mockResolvedValue(settings())
+    organizationsMock.mockResolvedValue([
+      {
+        id: 'org_1',
+        domain: 'iitd.ac.in',
+        name: 'IIT Delhi',
+        type: 'ACADEMIC',
+        hubId: 'hub_1',
+        hubName: 'Main campus',
+        hubStatus: 'ACTIVE',
+        memberCount: 400,
+        listingCount: 120,
+      },
+    ] as never)
   })
 
   afterEach(() => {
@@ -188,5 +215,131 @@ describe('AdSettings', () => {
         expect.objectContaining({ blockedSectors: ['LENDING', 'CRYPTO', 'ALCOHOL', 'TOBACCO', 'ADULT'] }),
       ),
     )
+  })
+})
+
+describe('AdSettings, campuses with their own answer', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    setHubOverrideMock.mockResolvedValue(settings())
+    clearHubOverrideMock.mockResolvedValue(settings())
+    organizationsMock.mockResolvedValue([
+      {
+        id: 'org_1',
+        domain: 'iitd.ac.in',
+        name: 'IIT Delhi',
+        type: 'ACADEMIC',
+        hubId: 'hub_1',
+        hubName: 'Main campus',
+        hubStatus: 'ACTIVE',
+        memberCount: 400,
+        listingCount: 120,
+      },
+    ] as never)
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  async function render_(data = settings()) {
+    getMock.mockResolvedValue(data)
+    render(<AdSettings />)
+    await waitFor(() => expect(screen.getByText('Campuses with their own answer')).toBeTruthy())
+  }
+
+  it('says plainly when no campus has one, rather than showing an empty list', async () => {
+    await render_()
+
+    expect(screen.getByText(/Every Hub follows the settings above/)).toBeTruthy()
+  })
+
+  it('shows the decision and the reason, which is the only place that answer exists', async () => {
+    await render_(
+      settings({
+        hubOverrides: [
+          {
+            hubId: 'hub_1',
+            hubName: 'Main campus',
+            organizationName: 'IIT Delhi',
+            adsEnabled: false,
+            reason: 'The campus asked us not to',
+            updatedAt: '2026-09-17T10:00:00.000Z',
+          },
+        ],
+      }),
+    )
+
+    expect(screen.getByText('Ads off')).toBeTruthy()
+    expect(screen.getByText('The campus asked us not to')).toBeTruthy()
+  })
+
+  it('requires a reason before a campus can be given its own answer', async () => {
+    await render_()
+
+    fireEvent.change(screen.getByLabelText('Campus'), { target: { value: 'hub_1' } })
+    fireEvent.click(screen.getByText('Set'))
+
+    expect(setHubOverrideMock).not.toHaveBeenCalled()
+  })
+
+  it('sends the campus, the direction and the reason together', async () => {
+    await render_()
+
+    fireEvent.change(screen.getByLabelText('Campus'), { target: { value: 'hub_1' } })
+    fireEvent.click(screen.getByLabelText('Run ads here'))
+    fireEvent.change(screen.getByLabelText('Why this campus'), {
+      target: { value: 'Pilot for the Diwali fortnight' },
+    })
+    fireEvent.click(screen.getByText('Set'))
+
+    await waitFor(() =>
+      expect(setHubOverrideMock).toHaveBeenCalledWith('hub_1', true, 'Pilot for the Diwali fortnight'),
+    )
+  })
+
+  /*
+    Clearing is deliberately not the same as setting an override that happens
+    to match the global value today: the two stop being the same the moment
+    the global value changes.
+  */
+  it('returns a campus to the global setting rather than overwriting its answer', async () => {
+    await render_(
+      settings({
+        hubOverrides: [
+          {
+            hubId: 'hub_1',
+            hubName: 'Main campus',
+            organizationName: 'IIT Delhi',
+            adsEnabled: false,
+            reason: 'The campus asked us not to',
+            updatedAt: '2026-09-17T10:00:00.000Z',
+          },
+        ],
+      }),
+    )
+
+    fireEvent.click(screen.getByText('Follow global'))
+
+    await waitFor(() => expect(clearHubOverrideMock).toHaveBeenCalledWith('hub_1'))
+  })
+
+  it('leaves out campuses that already have an answer, so the picker cannot restate one', async () => {
+    await render_(
+      settings({
+        hubOverrides: [
+          {
+            hubId: 'hub_1',
+            hubName: 'Main campus',
+            organizationName: 'IIT Delhi',
+            adsEnabled: false,
+            reason: 'asked',
+            updatedAt: '2026-09-17T10:00:00.000Z',
+          },
+        ],
+      }),
+    )
+
+    expect(within(screen.getByLabelText('Campus')).queryByText(/Main campus/)).toBeNull()
   })
 })

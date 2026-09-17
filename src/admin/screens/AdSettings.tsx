@@ -79,6 +79,16 @@ export function AdSettings() {
   const [placementEdits, setPlacementEdits] = useState<AdPlacement[] | null>(null)
   const [blockedEdits, setBlockedEdits] = useState<AdSector[] | null>(null)
   const [confirmingKill, setConfirmingKill] = useState(false)
+  const [newOverride, setNewOverride] = useState({ hubId: '', adsEnabled: false, reason: '' })
+
+  /*
+    The campus list comes from the Organizations endpoint the console already
+    calls - it carries the hub id, its name and its live listing count, which
+    is usually the thing this decision actually turns on.
+  */
+  const { data: organizations } = useAsyncData(() => api.organizations.list(undefined, 200, 0), [])
+
+  const decided = new Set((settings?.hubOverrides ?? []).map((override) => override.hubId))
 
   if (loadError && !settings) {
     return <ErrorNote error={loadError} />
@@ -282,6 +292,107 @@ export function AdSettings() {
             {busy ? 'Saving…' : 'Save settings'}
           </Button>
         </div>
+      </Panel>
+
+      <Panel className="space-y-3 p-4">
+        <div>
+          <h2 className="text-base font-bold text-[var(--color-text)]">Campuses with their own answer</h2>
+          <p className="mt-1 max-w-xl text-sm text-[var(--color-text-muted)]">
+            A Hub listed here ignores the global setting. Both directions are real and they are not
+            the same thing: a pilot runs ads at one campus while they are off everywhere, and a
+            campus that asked not to have them keeps not having them while they are on everywhere.
+            Every other Hub follows the settings above.
+          </p>
+        </div>
+
+        {settings.hubOverrides.length === 0 ? (
+          <EmptyNote>No campus has a decision of its own. Every Hub follows the settings above.</EmptyNote>
+        ) : (
+          <ul className="divide-y divide-[var(--color-border)]">
+            {settings.hubOverrides.map((override) => (
+              <li key={override.hubId} className="flex flex-wrap items-center gap-3 py-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    {override.adsEnabled ? <Badge tone="good">Ads on</Badge> : <Badge tone="bad">Ads off</Badge>}
+                    <p className="truncate text-sm font-medium text-[var(--color-text)]">
+                      {override.organizationName} — {override.hubName}
+                    </p>
+                  </div>
+                  <p className="text-xs text-[var(--color-text-muted)]">{override.reason}</p>
+                </div>
+                <Button disabled={busy} onClick={() => void run(() => api.adSettings.clearHubOverride(override.hubId))}>
+                  Follow global
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form
+          onSubmit={(event) => {
+            event.preventDefault()
+            if (!newOverride.hubId || newOverride.reason.trim() === '') return
+            void run(() =>
+              api.adSettings.setHubOverride(newOverride.hubId, newOverride.adsEnabled, newOverride.reason.trim()),
+            ).then((saved) => {
+              if (saved) setNewOverride({ hubId: '', adsEnabled: false, reason: '' })
+            })
+          }}
+          className="space-y-2 border-t border-[var(--color-border)] pt-3"
+        >
+          <label className="block space-y-1">
+            <span className="text-xs font-medium text-[var(--color-text-muted)]">Campus</span>
+            <select
+              // Explicit, because the wrapping label also contains the hint
+              // below: without this the control's accessible name is the
+              // heading and the hint run together, which is what a screen
+              // reader would announce.
+              aria-label="Campus"
+              value={newOverride.hubId}
+              onChange={(e) => setNewOverride({ ...newOverride, hubId: e.target.value })}
+              className="w-full rounded border border-[var(--color-border)] bg-transparent p-2 text-sm text-[var(--color-text)]"
+            >
+              <option value="">Choose a campus…</option>
+              {(organizations ?? [])
+                .filter((organization) => !decided.has(organization.hubId))
+                .map((organization) => (
+                  <option key={organization.hubId} value={organization.hubId}>
+                    {organization.name} — {organization.hubName} ({organization.listingCount} listings)
+                  </option>
+                ))}
+            </select>
+            <span className="block text-xs text-[var(--color-text-muted)]">
+              The listing count is there because it is usually the thing the decision turns on.
+              Campuses already decided are left out.
+            </span>
+          </label>
+
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="flex items-center gap-2 pb-2 text-sm text-[var(--color-text)]">
+              <input
+                type="checkbox"
+                checked={newOverride.adsEnabled}
+                onChange={(e) => setNewOverride({ ...newOverride, adsEnabled: e.target.checked })}
+              />
+              Run ads here
+            </label>
+            <div className="min-w-[16rem] flex-1">
+              <Field
+                label="Why this campus"
+                value={newOverride.reason}
+                onChange={(value) => setNewOverride({ ...newOverride, reason: value })}
+                placeholder="The campus asked us not to / pilot for the Diwali fortnight"
+              />
+            </div>
+            <Button
+              variant="primary"
+              type="submit"
+              onClick={() => undefined}
+              disabled={busy || newOverride.hubId === '' || newOverride.reason.trim() === ''}
+            >
+              {busy ? 'Saving…' : 'Set'}
+            </Button>
+          </div>
+        </form>
       </Panel>
 
       {confirmingKill ? (

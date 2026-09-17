@@ -309,6 +309,10 @@ export interface LineItem {
   suspendedAt: string | null
   suspendedReason: string | null
   placements: AdPlacement[]
+  /** Hubs this may serve in. `null` is every hub — which is what an untargeted ad means and what every pre-targeting row means. */
+  targetHubIds: string[] | null
+  /** `null` is both. Colleges and workplaces are different audiences. */
+  targetOrgTypes: OrganizationType[] | null
   category: string | null
   keywords: string[] | null
   minPricePaise: number | null
@@ -349,5 +353,17 @@ export interface AdSettings {
   minHubListingsForAds: number
   /** No ads to an account younger than this many hours. 0 is off. */
   newUserGraceHours: number
+  hubOverrides: AdHubOverride[]
+  updatedAt: string
+}
+
+/** One campus with an ad decision of its own. No entry means it follows the global setting, which is what almost every Hub means. */
+export interface AdHubOverride {
+  hubId: string
+  hubName: string
+  organizationName: string
+  adsEnabled: boolean
+  /** Required in both directions — this row is the only place the answer to "why does this campus not see ads" will exist. */
+  reason: string
   updatedAt: string
 }

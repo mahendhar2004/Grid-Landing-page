@@ -1,6 +1,13 @@
 import { Link, useSearchParams } from 'react-router-dom'
 
-const lastUpdated = 'September 16, 2026'
+/*
+  Must move whenever the text below does. `CURRENT_PRIVACY_POLICY_VERSION` in
+  the app is 1.4 as of this change; the two are kept in step by release
+  discipline rather than by the type system, because the site can be
+  redeployed without an app release and the consent record stores what the
+  app believed was current.
+*/
+const lastUpdated = 'September 17, 2026'
 
 export default function PrivacyPolicyPage() {
   const [searchParams] = useSearchParams()
@@ -54,7 +61,7 @@ export default function PrivacyPolicyPage() {
               <p>Messages sent through our in-app chat are stored to enable real-time communication. This includes message text, image attachments, timestamps, read receipts, typing indicators, and any structured deal or pickup information exchanged in the conversation.</p>
             </Subsection>
             <Subsection title="Location Data">
-              <p>Grid uses approximate location to place Hubs on the map and to determine which Hubs fall within the distance bands (10 km, 25 km, 50 km) when you choose to browse beyond your own organisation. This is used to show you what is nearby. Your precise position is never displayed to other users, and location is not used to target advertising. Map and radius features can be left unused if you prefer to stay within your own Hub.</p>
+              <p>Grid uses approximate location to place Hubs on the map and to determine which Hubs fall within the distance bands (10 km, 25 km, 50 km) when you choose to browse beyond your own organisation. This is used to show you what is nearby. Your precise position is never displayed to other users, and <strong>your location is never used to choose an advertisement</strong> — an advertiser can buy a campaign at a Hub, which is the organisation your account belongs to, not where your device is. Map and radius features can be left unused if you prefer to stay within your own Hub.</p>
             </Subsection>
             <Subsection title="Ratings &amp; Reputation">
               <p>Completed deals contribute to a rating and reputation that is visible to other members of your Hub. This is part of how trust works on Grid and cannot be hidden while your account is active.</p>
@@ -72,7 +79,9 @@ export default function PrivacyPolicyPage() {
               <p>When you report a user or listing, we store the report including the reason you selected, the target, and a timestamp, used solely for moderation. When you block someone, we store that relationship to prevent them contacting you. Neither your reports nor your block list are visible to other users.</p>
             </Subsection>
             <Subsection title="Advertising">
-              <p>Some cards in the feed and in search results are marked <strong>Sponsored</strong>. We choose which one to show from <strong>what is on your screen at that moment</strong> — the category you are browsing, the words you searched for, and the price range you are looking at. <strong>We do not build an advertising profile of you</strong>, we do not use your past activity, your identity, or your location to pick an ad, and we do not use a device advertising identifier. Nothing about you is shared with the advertiser or with any advertising network.</p>
+              <p>Some cards in the feed and in search results are marked <strong>Sponsored</strong>. We choose which one to show from <strong>what is on your screen at that moment</strong> — the category you are browsing, the words you searched for, and the price range you are looking at — and from <strong>which Hub your account belongs to</strong> and whether it is a college or a workplace. An advertiser can buy a campaign at one campus, and that is how we decide whether their ad is one of the ones you could be shown.</p>
+              <p><strong>We still do not build an advertising profile of you.</strong> We do not use your past activity, your browsing history, your private messages, your precise or device location, or your saved and viewed listings to pick an ad, and we do not use a device advertising identifier. Your Hub is where your account already is — it is not tracked, it is read when the ad is chosen and not kept. Nothing about you is shared with the advertiser or with any advertising network, and an advertiser is never told who saw their ad.</p>
+              <p><strong>Every sponsored card tells you why you are seeing it.</strong> Tap “Why this ad?” and it lists everything that was used to choose it — the screen, the category, your search, and your Hub if the advertiser bought that campus. If it says nothing was used beyond the screen, that is because nothing was.</p>
               <p>When a sponsored card is shown to you or you tap it, we record that it happened, along with your account, so we can bill the advertiser correctly and detect fraudulent clicks. That record is used for those two purposes and is included in your data export. You can report any sponsored card you find inappropriate using the flag on the card itself.</p>
             </Subsection>
             <Subsection title="Bug Reports">
@@ -116,7 +125,7 @@ export default function PrivacyPolicyPage() {
 
           <Section title="5. Advertising">
             <p>Grid displays sponsored listings within the feed. Sellers can also pay to boost their own listings for greater visibility.</p>
-            <p className="mt-3"><strong>We do not target advertising by gender.</strong> This is a deliberate decision about what we are willing to do with what we know about you, and we intend to keep it. We also do not use your precise location, your private messages, or your reported content to target advertising, and we do not share your personal information with advertisers.</p>
+            <p className="mt-3"><strong>We do not target advertising by gender.</strong> This is a deliberate decision about what we are willing to do with what we know about you, and we intend to keep it. We also do not use your precise location, your private messages, or your reported content to target advertising, and we do not share your personal information with advertisers. An advertiser can choose a Hub or a type of organisation to advertise to — they cannot choose a person, and they never learn who was shown their ad.</p>
           </Section>
 
           <Section title="6. Data Sharing">

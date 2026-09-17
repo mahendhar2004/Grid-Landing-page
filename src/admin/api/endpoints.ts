@@ -382,6 +382,8 @@ export interface CreateLineItemBody {
   deliveryType: AdDeliveryType
   priority: number
   shareOfVoicePercent: number | null
+  targetHubIds: string[] | null
+  targetOrgTypes: OrganizationType[] | null
   placements: AdPlacement[]
   category: string | null
   keywords: string[] | null
@@ -515,6 +517,16 @@ const adSettings = {
    */
   setEnabled(enabled: boolean, reason: string | null): Promise<AdSettings> {
     return apiPost<AdSettings>('/v1/admin/ad-settings/enabled', enabled ? { enabled } : { enabled, reason })
+  },
+
+  /** One campus's own answer. A reason is required in both directions: "why does this Hub see ads when nobody else does" is as worth answering as the reverse. */
+  setHubOverride(hubId: string, adsEnabled: boolean, reason: string): Promise<AdSettings> {
+    return apiPut<AdSettings>(`/v1/admin/ad-settings/hubs/${hubId}`, { adsEnabled, reason })
+  },
+
+  /** Returns the Hub to following the global setting — deliberately different from setting an override that happens to match it today. */
+  clearHubOverride(hubId: string): Promise<AdSettings> {
+    return apiDelete<AdSettings>(`/v1/admin/ad-settings/hubs/${hubId}`)
   },
 }
 

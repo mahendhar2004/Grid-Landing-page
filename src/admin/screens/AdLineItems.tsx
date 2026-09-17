@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { api } from '../api/endpoints'
 import type { CreateLineItemBody } from '../api/endpoints'
-import type { AdDeliveryType, AdPlacement, LineItem, LineItemStatus } from '../api/types'
+import type { AdDeliveryType, AdPlacement, LineItem, LineItemStatus, OrganizationType } from '../api/types'
 import { useCursorPagedData } from '../lib/usePagedData'
 import { useAdminAction } from '../lib/useAdminAction'
 import { Badge, Button, EmptyNote, ErrorNote, Field, MoreRow, Panel, ReasonPrompt } from '../components/ui'
@@ -122,6 +122,7 @@ const EMPTY_FORM = {
   name: '',
   delivery: 'STANDARD_8',
   shareOfVoice: '',
+  orgTypes: [] as OrganizationType[],
   placements: ['FEED', 'SEARCH'] as AdPlacement[],
   category: '',
   keywords: '',
@@ -204,6 +205,12 @@ export function AdLineItems() {
       // Only a sponsorship carries one, and it must — the percentage is what
       // the sponsorship is.
       shareOfVoicePercent: delivery.deliveryType === 'SPONSORSHIP' ? Number(form.shareOfVoice) : null,
+      // Hub targeting is set from the order's advertiser later; the form
+      // offers organisation type, which is the axis that needs no id.
+      // `null` means everybody, and an empty selection is sent as null rather
+      // than as an empty array the API would refuse.
+      targetHubIds: null,
+      targetOrgTypes: form.orgTypes.length > 0 ? form.orgTypes : null,
       placements: form.placements,
       category: form.category || null,
       keywords: form.keywords.trim() ? form.keywords.split(',').map((k) => k.trim()).filter(Boolean) : null,
@@ -334,6 +341,35 @@ export function AdLineItems() {
               </select>
             </label>
 
+            <fieldset className="space-y-1">
+              <legend className="text-xs font-medium text-[var(--color-text-muted)]">
+                Show to (optional)
+              </legend>
+              <div className="flex flex-wrap gap-3">
+                {(['ACADEMIC', 'CORPORATE'] as const).map((orgType) => (
+                  <label key={orgType} className="flex items-center gap-2 text-sm text-[var(--color-text)]">
+                    <input
+                      type="checkbox"
+                      checked={form.orgTypes.includes(orgType)}
+                      onChange={() =>
+                        setForm((current) => ({
+                          ...current,
+                          orgTypes: current.orgTypes.includes(orgType)
+                            ? current.orgTypes.filter((entry) => entry !== orgType)
+                            : [...current.orgTypes, orgType],
+                        }))
+                      }
+                    />
+                    {orgType === 'ACADEMIC' ? 'Colleges' : 'Workplaces'}
+                  </label>
+                ))}
+              </div>
+              <span className="block text-xs text-[var(--color-text-muted)]">
+                Neither ticked means everybody, which is what most ads want. Anyone shown this ad
+                can see that their organisation type was used to choose it.
+              </span>
+            </fieldset>
+
             <Field
               label="Keywords (optional, comma separated)"
               value={form.keywords}
@@ -436,6 +472,12 @@ export function AdLineItems() {
                     </div>
                     <p className="mt-1 truncate text-xs text-[var(--color-text-muted)]">
                       {item.advertiserName} · {item.orderName} ·{' '}
+                      {item.targetHubIds !== null
+                        ? `${item.targetHubIds.length} hub${item.targetHubIds.length === 1 ? '' : 's'} · `
+                        : ''}
+                      {item.targetOrgTypes !== null
+                        ? `${item.targetOrgTypes.map((entry) => (entry === 'ACADEMIC' ? 'colleges' : 'workplaces')).join(', ')} · `
+                        : ''}
                       {item.deliveryType === 'SPONSORSHIP'
                         ? `sponsorship, ${item.shareOfVoicePercent}% of the feed`
                         : item.deliveryType === 'HOUSE'

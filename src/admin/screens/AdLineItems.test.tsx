@@ -34,6 +34,8 @@ function lineItem(overrides: Partial<LineItem> = {}): LineItem {
     suspendedAt: null,
     suspendedReason: null,
     placements: ['FEED'],
+    targetHubIds: null,
+    targetOrgTypes: null,
     category: null,
     keywords: null,
     minPricePaise: null,
