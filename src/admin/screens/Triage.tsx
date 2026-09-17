@@ -1,10 +1,22 @@
 import { useState } from 'react'
 
-import { api } from '../api/endpoints'
+import { api, triageStatusValue } from '../api/endpoints'
+import type { TriageStatusFilter } from '../api/endpoints'
 import type { TriageInbox, TriageItem } from '../api/types'
 import type { ApiError } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
-import { Badge, Button, EmptyNote, ErrorNote, Panel, ReasonPrompt } from '../components/ui'
+import { usePagedData } from '../lib/usePagedData'
+import { Badge, Button, EmptyNote, ErrorNote, MoreRow, Panel, ReasonPrompt } from '../components/ui'
+
+const PAGE_SIZE = 50
+
+/** By meaning, not by spelling - each inbox names its resolved state differently, and `triageStatusValue` does that translation. */
+const STATUS_FILTERS: ReadonlyArray<{ value: TriageStatusFilter; label: string }> = [
+  { value: 'OPEN', label: 'Open' },
+  { value: 'RESOLVED', label: 'Resolved' },
+  { value: 'SPAM', label: 'Spam' },
+  { value: null, label: 'All' },
+]
 
 /**
  * The five inboxes: in-app bug reports and feedback, plus contact messages,
@@ -110,25 +122,35 @@ function Summary({ inbox, item }: { inbox: Inbox; item: TriageItem }) {
 
 export function Triage() {
   const [inbox, setInbox] = useState<Inbox>('BUG_REPORT')
+  const [statusFilter, setStatusFilter] = useState<TriageStatusFilter>('OPEN')
   const [pending, setPending] = useState<Pending | null>(null)
   const [busy, setBusy] = useState(false)
   const [actionError, setActionError] = useState<ApiError | null>(null)
 
-  const { data, error: loadError, reload } = useAsyncData(
-    async () => {
-      // One await for both, so the badge counts can never disagree with the
-      // list they sit above.
-      const [items, counts] = await Promise.all([
-        api.triage.list(inbox),
-        api.triage.counts(),
-      ])
-      return { items, counts }
-    },
-    [inbox],
+  /*
+    Two reads, where there used to be one.
+
+    They were fetched together so "the badge counts can never disagree with
+    the list they sit above" - an invariant that stops being meaningful the
+    moment the list has its own status filter. The counts are open items per
+    inbox; the list is whatever is being looked at. Showing "3" beside an
+    inbox while its Resolved tab lists forty is not a disagreement, it is two
+    different questions, and coupling them would imply an agreement that is
+    not supposed to exist.
+  */
+  const { rows: items, error: loadError, hasMore, loadingMore, loadMore, reload: reloadItems } = usePagedData(
+    (offset) => api.triage.list(inbox, triageStatusValue(inbox, statusFilter), PAGE_SIZE, offset),
+    [inbox, statusFilter],
+    PAGE_SIZE,
   )
-  const items = data?.items ?? null
-  const counts = data?.counts ?? null
-  const error = actionError ?? loadError
+  const { data: counts, error: countsError, reload: reloadCounts } = useAsyncData(
+    () => api.triage.counts(),
+    [],
+  )
+  const reload = async () => {
+    await Promise.all([reloadItems(), reloadCounts()])
+  }
+  const error = actionError ?? loadError ?? countsError
 
   async function confirm(reason: string) {
     if (!pending) return
@@ -158,6 +180,21 @@ export function Triage() {
           <Button key={value} variant={inbox === value ? 'primary' : 'default'} onClick={() => setInbox(value)}>
             {INBOX_LABELS[value]}
             {(counts?.[value] ?? 0) > 0 ? ` (${counts?.[value]})` : ''}
+          </Button>
+        ))}
+      </div>
+
+      {/* The badge counts above are open items per inbox; this filters what
+          is listed. Resolved and spam were unreachable before - the only view
+          was whatever the route returned by default. */}
+      <div className="flex flex-wrap gap-1">
+        {STATUS_FILTERS.map((entry) => (
+          <Button
+            key={entry.label}
+            variant={statusFilter === entry.value ? 'primary' : 'default'}
+            onClick={() => setStatusFilter(entry.value)}
+          >
+            {entry.label}
           </Button>
         ))}
       </div>
@@ -214,6 +251,12 @@ export function Triage() {
             })}
           </ul>
         )}
+        <MoreRow
+          shown={items?.length ?? 0}
+          hasMore={hasMore}
+          loading={loadingMore}
+          onLoadMore={loadMore}
+        />
       </Panel>
 
       {pending ? (

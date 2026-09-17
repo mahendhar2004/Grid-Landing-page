@@ -2,6 +2,7 @@ import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../lib/api'
 import type {
   AdminOrganization,
   AdminReport,
+  AdminUser,
   AuditEntry,
   AuthTokens,
   OrganizationType,
@@ -87,9 +88,28 @@ export type ReportDecision =
   | { readonly action: 'REMOVE_CONTENT' | 'WARN_USER' }
   | { readonly action: 'BAN_USER'; readonly banDurationDays: number | null }
 
+export type ReportCategory =
+  | 'FAKE_LISTING'
+  | 'WRONG_DESCRIPTION'
+  | 'PROHIBITED_ITEM'
+  | 'SPAM'
+  | 'SCAM'
+  | 'OTHER'
+
 const reports = {
-  list(status: ReportStatus, limit = 100): Promise<AdminReport[]> {
-    return apiGet<AdminReport[]>('/v1/admin/reports', { status, limit })
+  /** `category` omitted means every category, which is not the same as any particular one — so it is optional rather than a sentinel value. */
+  list(
+    status: ReportStatus,
+    category: ReportCategory | null,
+    limit: number,
+    offset: number,
+  ): Promise<AdminReport[]> {
+    return apiGet<AdminReport[]>('/v1/admin/reports', {
+      status,
+      ...(category ? { category } : {}),
+      limit,
+      offset,
+    })
   },
 
   dismiss(reportId: string, reason: string): Promise<unknown> {
@@ -103,9 +123,48 @@ const reports = {
 
 // ----------------------------------------------------------- triage
 
+/**
+ * "Resolved" is spelled differently per inbox, server-side — a handled
+ * contact message is `HANDLED`, an approved review is `APPROVED`, everything
+ * else is `RESOLVED`. The console filters by meaning, not by spelling, so
+ * that mapping belongs here with the other encoded server rules rather than
+ * as a magic string in the screen.
+ *
+ * Mirrors `queries/admin-triage.ts#RESOLVED_STATUS_FOR_INBOX`. A new inbox
+ * that forgets its entry here is a compile error, not a filter that silently
+ * matches nothing.
+ */
+const RESOLVED_STATUS: Record<TriageInbox, string> = {
+  BUG_REPORT: 'RESOLVED',
+  FEEDBACK: 'RESOLVED',
+  CONTACT_MESSAGE: 'HANDLED',
+  PUBLIC_BUG_REPORT: 'RESOLVED',
+  PUBLIC_REVIEW: 'APPROVED',
+}
+
+/** What the console offers, as meanings. `null` is every status. */
+export type TriageStatusFilter = 'OPEN' | 'RESOLVED' | 'SPAM' | null
+
+/** Turns a meaning into whatever this particular inbox calls it. */
+export function triageStatusValue(inbox: TriageInbox, filter: TriageStatusFilter): string | null {
+  if (filter === null) return null
+  if (filter === 'RESOLVED') return RESOLVED_STATUS[inbox]
+  return filter
+}
+
 const triage = {
-  list(inbox: TriageInbox, limit = 100): Promise<TriageItem[]> {
-    return apiGet<TriageItem[]>('/v1/admin/triage', { inbox, limit })
+  list(
+    inbox: TriageInbox,
+    status: string | null,
+    limit: number,
+    offset: number,
+  ): Promise<TriageItem[]> {
+    return apiGet<TriageItem[]>('/v1/admin/triage', {
+      inbox,
+      ...(status ? { status } : {}),
+      limit,
+      offset,
+    })
   },
 
   counts(): Promise<TriageCounts> {
@@ -145,8 +204,8 @@ export interface UpdateOrganizationBody {
 }
 
 const organizations = {
-  list(search?: string, limit = 100): Promise<AdminOrganization[]> {
-    return apiGet<AdminOrganization[]>('/v1/admin/organizations', { search, limit })
+  list(search: string | undefined, limit: number, offset: number): Promise<AdminOrganization[]> {
+    return apiGet<AdminOrganization[]>('/v1/admin/organizations', { search, limit, offset })
   },
 
   create(body: CreateOrganizationBody): Promise<AdminOrganization> {
@@ -194,8 +253,18 @@ const tiers = {
 // ---------------------------------------------------------- audit
 
 const audit = {
-  list(limit = 200): Promise<AuditEntry[]> {
-    return apiGet<AuditEntry[]>('/v1/admin/audit-log', { limit })
+  /**
+   * `targetType`/`targetId` are how a specific question gets answered —
+   * "what have we done to this organization?" — and the log is the screen
+   * most likely to be opened with one. Both were supported by the route from
+   * the start and neither was wired.
+   */
+  list(
+    filters: { targetType?: string; targetId?: string },
+    limit: number,
+    offset: number,
+  ): Promise<AuditEntry[]> {
+    return apiGet<AuditEntry[]>('/v1/admin/audit-log', { ...filters, limit, offset })
   },
 }
 
@@ -207,6 +276,72 @@ const analytics = {
   },
 }
 
+// ---------------------------------------------------------- users
+
+/**
+ * A ban, shaped so its one rule is unstatable rather than documented:
+ * **`durationDays: null` means permanent**, and the route requires the field
+ * either way, so it is always a choice somebody made rather than a default
+ * nobody saw. Same reasoning as `ReportDecision` above.
+ */
+export interface BanInput {
+  readonly durationDays: number | null
+  readonly reason: string
+}
+
+const users = {
+  /** `banned` is a tri-state: `null` is everyone, and the two present values are the two halves. "No filter" is not "not banned". */
+  list(
+    search: string | undefined,
+    banned: boolean | null,
+    limit: number,
+    offset: number,
+  ): Promise<AdminUser[]> {
+    return apiGet<AdminUser[]>('/v1/admin/users', {
+      search,
+      ...(banned === null ? {} : { banned: String(banned) }),
+      limit,
+      offset,
+    })
+  },
+
+  /** Ban without a report behind it — for something an admin found themselves. */
+  ban(userId: string, input: BanInput): Promise<unknown> {
+    return apiPost(`/v1/admin/users/${userId}/ban`, input)
+  },
+
+  /**
+   * Lift a ban.
+   *
+   * This route existed from the start and **nothing called it**, which made
+   * banning a door that opened and never closed: the console offered "Ban
+   * permanently" as one button press and had no path back from any screen.
+   * Undoing it meant a database write by hand.
+   */
+  unban(userId: string, reason: string): Promise<unknown> {
+    return apiPost(`/v1/admin/users/${userId}/unban`, { reason })
+  },
+}
+
+// -------------------------------------------------------- content
+
+/** Exactly one of the two, because the route refuses both and neither — a union rather than two optional fields. */
+export type RestoreTarget = { readonly listingId: string } | { readonly requestId: string }
+
+const content = {
+  /**
+   * Put back something a moderator removed.
+   *
+   * The other half of the pair above: `REMOVE_CONTENT` was offered on every
+   * report and this route, which has always existed, was never called. A
+   * listing removed in error was gone from its owner's own view with no
+   * console path back.
+   */
+  restore(target: RestoreTarget, reason: string): Promise<unknown> {
+    return apiPost('/v1/admin/content/restore', { ...target, reason })
+  },
+}
+
 /**
  * The whole admin API surface, as one object.
  *
@@ -214,4 +349,15 @@ const analytics = {
  * reads as what it is, and cannot be shadowed by a local variable the way a
  * bare `reports` import silently was.
  */
-export const api = { auth, reports, triage, organizations, pricing, tiers, audit, analytics }
+export const api = {
+  auth,
+  reports,
+  triage,
+  organizations,
+  users,
+  content,
+  pricing,
+  tiers,
+  audit,
+  analytics,
+}

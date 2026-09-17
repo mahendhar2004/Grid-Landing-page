@@ -1,10 +1,11 @@
 import { useState } from 'react'
 
 import { api } from '../api/endpoints'
+import type { ReportCategory } from '../api/endpoints'
 import type { AdminReport } from '../api/types'
-import type { ApiError } from '../lib/api'
-import { useAsyncData } from '../lib/useAsyncData'
-import { Badge, Button, EmptyNote, ErrorNote, Panel, ReasonPrompt } from '../components/ui'
+import { usePagedData } from '../lib/usePagedData'
+import { useAdminAction } from '../lib/useAdminAction'
+import { Badge, Button, EmptyNote, ErrorNote, MoreRow, Panel, ReasonPrompt } from '../components/ui'
 
 /**
  * The moderation queue - the screen this console exists for.
@@ -25,6 +26,23 @@ type PendingAction =
   | { kind: 'REMOVE_CONTENT'; report: AdminReport }
   | { kind: 'WARN_USER'; report: AdminReport }
   | { kind: 'BAN_USER'; report: AdminReport; durationDays: number | null }
+  // The two that undo the two above. Both routes existed from the start and
+  // neither had a caller, which made Remove and Ban one-way doors.
+  | { kind: 'RESTORE_CONTENT'; report: AdminReport }
+  | { kind: 'UNBAN_USER'; report: AdminReport }
+
+const PAGE_SIZE = 50
+
+/** `null` is every category, which is a different question from any one of them. */
+const CATEGORIES: ReadonlyArray<{ value: ReportCategory | null; label: string }> = [
+  { value: null, label: 'All' },
+  { value: 'SCAM', label: 'Scam' },
+  { value: 'PROHIBITED_ITEM', label: 'Prohibited' },
+  { value: 'FAKE_LISTING', label: 'Fake' },
+  { value: 'SPAM', label: 'Spam' },
+  { value: 'WRONG_DESCRIPTION', label: 'Wrong description' },
+  { value: 'OTHER', label: 'Other' },
+]
 
 const CATEGORY_TONE: Record<string, 'neutral' | 'warn' | 'bad'> = {
   PROHIBITED_ITEM: 'bad',
@@ -68,41 +86,53 @@ function slaState(createdAt: string): { label: string; tone: 'neutral' | 'warn' 
 
 export function Reports() {
   const [status, setStatus] = useState<'OPEN' | 'ACTIONED' | 'DISMISSED'>('OPEN')
+  const [category, setCategory] = useState<ReportCategory | null>(null)
   const [pending, setPending] = useState<PendingAction | null>(null)
-  const [busy, setBusy] = useState(false)
-  const [actionError, setActionError] = useState<ApiError | null>(null)
 
-  const { data: reports, error: loadError, reload } = useAsyncData(
-    () => api.reports.list(status),
-    [status],
+  const { rows: reports, error: loadError, hasMore, loadingMore, loadMore, reload } = usePagedData(
+    (offset) => api.reports.list(status, category, PAGE_SIZE, offset),
+    [status, category],
+    PAGE_SIZE,
   )
+
+  // Rule 5: writes go through `useAdminAction`. This screen was doing its own
+  // busy/error/reload by hand, which is the exact duplication that hook
+  // exists to delete.
+  const { run, busy, error: actionError } = useAdminAction(reload)
   const error = actionError ?? loadError
 
   async function runAction(reason: string) {
     if (!pending) return
-    setBusy(true)
-    setActionError(null)
-    try {
+    const report = pending.report
+    const succeeded = await run(async () => {
       if (pending.kind === 'DISMISS') {
-        await api.reports.dismiss(pending.report.id, reason)
-      } else if (pending.kind === 'BAN_USER') {
+        return api.reports.dismiss(report.id, reason)
+      }
+      if (pending.kind === 'BAN_USER') {
         // `null` is a permanent ban, not an omission - the union keeps the
         // two from being confused.
-        await api.reports.act(
-          pending.report.id,
+        return api.reports.act(
+          report.id,
           { action: 'BAN_USER', banDurationDays: pending.durationDays },
           reason,
         )
-      } else {
-        await api.reports.act(pending.report.id, { action: pending.kind }, reason)
       }
-      setPending(null)
-      await reload()
-    } catch (caught) {
-      setActionError(caught as ApiError)
-    } finally {
-      setBusy(false)
-    }
+      if (pending.kind === 'UNBAN_USER') {
+        // Not a report action: the ban belongs to the person, not to the
+        // report that prompted it, so lifting it goes to the user route.
+        return api.users.unban(report.target_owner_id!, reason)
+      }
+      if (pending.kind === 'RESTORE_CONTENT') {
+        return api.content.restore(
+          report.target_listing_id
+            ? { listingId: report.target_listing_id }
+            : { requestId: report.target_request_id! },
+          reason,
+        )
+      }
+      return api.reports.act(report.id, { action: pending.kind }, reason)
+    })
+    if (succeeded) setPending(null)
   }
 
   function targetKind(report: AdminReport): string {
@@ -124,6 +154,21 @@ export function Reports() {
         </div>
       </div>
 
+      {/* Category, not just status. Scams and prohibited items deserve to be
+          worked before wrong descriptions, and until now they were
+          interleaved with them. The route has always accepted this. */}
+      <div className="flex flex-wrap gap-1">
+        {CATEGORIES.map((entry) => (
+          <Button
+            key={entry.label}
+            variant={category === entry.value ? 'primary' : 'default'}
+            onClick={() => setCategory(entry.value)}
+          >
+            {entry.label}
+          </Button>
+        ))}
+      </div>
+
       <ErrorNote error={error} />
 
       <Panel>
@@ -131,7 +176,11 @@ export function Reports() {
           <EmptyNote>Loading…</EmptyNote>
         ) : reports.length === 0 ? (
           <EmptyNote>
-            {status === 'OPEN' ? 'Nothing waiting. The queue is clear.' : `No ${status.toLowerCase()} reports.`}
+            {category
+              ? `No ${status.toLowerCase()} reports in this category.`
+              : status === 'OPEN'
+                ? 'Nothing waiting. The queue is clear.'
+                : `No ${status.toLowerCase()} reports.`}
           </EmptyNote>
         ) : (
           <ul className="divide-y divide-[var(--color-border)]">
@@ -192,11 +241,45 @@ export function Reports() {
                       Ban indefinitely
                     </Button>
                   </div>
-                ) : null}
+                ) : (
+                  /*
+                    The way back.
+
+                    Offered only where there is genuinely something to undo:
+                    `target_removed` and `target_owner_is_banned` come from the
+                    queue itself, so a Restore button never appears over
+                    content that is already live, and Lift ban never appears
+                    over somebody who is not banned. Both fields are optional
+                    (rule 9) - on a console deployed ahead of its API they are
+                    `undefined`, and the actions simply do not render, which is
+                    where this screen already was.
+                  */
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {report.target_removed ? (
+                      <Button onClick={() => setPending({ kind: 'RESTORE_CONTENT', report })}>
+                        Restore content
+                      </Button>
+                    ) : null}
+                    {report.target_owner_is_banned && report.target_owner_id ? (
+                      <Button onClick={() => setPending({ kind: 'UNBAN_USER', report })}>
+                        Lift ban
+                        {report.target_owner_banned_until
+                          ? ` (until ${new Date(report.target_owner_banned_until).toLocaleDateString()})`
+                          : ' (permanent)'}
+                      </Button>
+                    ) : null}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
         )}
+        <MoreRow
+          shown={reports?.length ?? 0}
+          hasMore={hasMore}
+          loading={loadingMore}
+          onLoadMore={loadMore}
+        />
       </Panel>
 
       {pending ? (
@@ -206,22 +289,34 @@ export function Reports() {
               ? 'Dismiss this report'
               : pending.kind === 'REMOVE_CONTENT'
                 ? 'Remove this content'
-                : pending.kind === 'WARN_USER'
-                  ? 'Warn this user'
-                  : pending.durationDays === null
-                    ? 'Ban indefinitely'
-                    : `Ban for ${pending.durationDays} days`
+                : pending.kind === 'RESTORE_CONTENT'
+                  ? 'Put this content back'
+                  : pending.kind === 'UNBAN_USER'
+                    ? 'Lift this ban'
+                    : pending.kind === 'WARN_USER'
+                      ? 'Warn this user'
+                      : pending.durationDays === null
+                        ? 'Ban indefinitely'
+                        : `Ban for ${pending.durationDays} days`
           }
           confirmLabel={pending.kind === 'DISMISS' ? 'Dismiss' : 'Confirm'}
-          variant={pending.kind === 'DISMISS' ? 'default' : 'danger'}
+          variant={
+            pending.kind === 'RESTORE_CONTENT' || pending.kind === 'UNBAN_USER' || pending.kind === 'DISMISS'
+              ? 'default'
+              : 'danger'
+          }
           busy={busy}
           onCancel={() => setPending(null)}
           onConfirm={runAction}
         >
           <p className="mb-3 text-sm text-[var(--color-text-muted)]">
-            {pending.report.report_count > 1
-              ? `This also resolves the other ${pending.report.report_count - 1} report(s) against the same target.`
-              : 'The person affected is notified, and this is recorded in the audit log.'}
+            {pending.kind === 'RESTORE_CONTENT'
+              ? 'The listing or request becomes visible again to everyone who could see it before.'
+              : pending.kind === 'UNBAN_USER'
+                ? 'They can sign in and use Grid again immediately. The ban stays in the history.'
+                : pending.report.report_count > 1
+                  ? `This also resolves the other ${pending.report.report_count - 1} report(s) against the same target.`
+                  : 'The person affected is notified, and this is recorded in the audit log.'}
           </p>
         </ReasonPrompt>
       ) : null}

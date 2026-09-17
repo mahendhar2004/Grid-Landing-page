@@ -11,6 +11,7 @@ import { Reports } from './screens/Reports'
 import { SignIn } from './screens/SignIn'
 import { Tiers } from './screens/Tiers'
 import { Triage } from './screens/Triage'
+import { Users } from './screens/Users'
 
 /**
  * The console shell.
@@ -25,7 +26,16 @@ import { Triage } from './screens/Triage'
  * keeps it out of the JavaScript.
  */
 
-type Tab = 'home' | 'reports' | 'triage' | 'organizations' | 'pricing' | 'tiers' | 'analytics' | 'audit'
+type Tab =
+  | 'home'
+  | 'reports'
+  | 'triage'
+  | 'users'
+  | 'organizations'
+  | 'pricing'
+  | 'tiers'
+  | 'analytics'
+  | 'audit'
 
 const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
   // First, and the landing tab. The console had no answer to "what do I need
@@ -34,6 +44,9 @@ const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
   { id: 'home', label: 'What needs you' },
   { id: 'reports', label: 'Reports' },
   { id: 'triage', label: 'Inboxes' },
+  // Next to the two queues, because it is the third way into the same
+  // decision - and the only one that works when nobody has reported anyone.
+  { id: 'users', label: 'Users' },
   { id: 'organizations', label: 'Organizations' },
   { id: 'pricing', label: 'Pricing' },
   { id: 'tiers', label: 'Tiers' },
@@ -110,6 +123,7 @@ export function AdminApp() {
           {tab === 'home' ? <ActionCentre onOpenTab={(next) => setTab(next as Tab)} /> : null}
           {tab === 'reports' ? <Reports /> : null}
           {tab === 'triage' ? <Triage /> : null}
+          {tab === 'users' ? <Users /> : null}
           {tab === 'organizations' ? <Organizations /> : null}
           {tab === 'pricing' ? <Pricing /> : null}
           {tab === 'tiers' ? <Tiers /> : null}

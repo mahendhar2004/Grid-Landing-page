@@ -4,8 +4,8 @@ import { api } from '../api/endpoints'
 import type { AdminOrganization } from '../api/types'
 import type { ApiError } from '../lib/api'
 import { formatCoordinate, hasUsableCoordinates, parseLatLngPair } from '../lib/coordinates'
-import { useAsyncData } from '../lib/useAsyncData'
-import { Badge, Button, EmptyNote, ErrorNote, Field, Panel } from '../components/ui'
+import { usePagedData } from '../lib/usePagedData'
+import { Badge, Button, EmptyNote, ErrorNote, Field, MoreRow, Panel } from '../components/ui'
 
 /**
  * Adding a college or company by hand.
@@ -33,6 +33,8 @@ interface EditForm {
   longitude: string
   reason: string
 }
+
+const PAGE_SIZE = 50
 
 const EMPTY_FORM = {
   domain: '',
@@ -72,9 +74,10 @@ export function Organizations() {
   const [busy, setBusy] = useState(false)
   const [actionError, setActionError] = useState<ApiError | null>(null)
 
-  const { data: organizations, error: loadError, reload } = useAsyncData(
-    () => api.organizations.list(search),
+  const { rows: organizations, error: loadError, hasMore, loadingMore, loadMore, reload } = usePagedData(
+    (offset) => api.organizations.list(search || undefined, PAGE_SIZE, offset),
     [search],
+    PAGE_SIZE,
   )
   const error = actionError ?? loadError
 
@@ -502,6 +505,12 @@ export function Organizations() {
             ))}
           </ul>
         )}
+        <MoreRow
+          shown={organizations?.length ?? 0}
+          hasMore={hasMore}
+          loading={loadingMore}
+          onLoadMore={loadMore}
+        />
       </Panel>
     </div>
   )

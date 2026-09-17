@@ -57,6 +57,49 @@ export interface AdminReport {
   target_owner_id: string | null
   report_count: number
   created_at: string
+  /**
+   * Whether the reported listing or request is REMOVED **right now**, so
+   * Restore is offered only where there is something to restore. Always
+   * false for a report against a user, which has no content.
+   *
+   * Optional per rule 9 — it arrived in the same change as the UI reading it
+   * and the console deploys independently of the backend. `undefined` reads
+   * as "not known yet" and simply hides the action, which is the behaviour
+   * this console had anyway before the field existed.
+   */
+  target_removed?: boolean
+  /** Whether the reported party is banned right now. Same rule-9 caveat. */
+  target_owner_is_banned?: boolean
+  /** When that ban lifts. Null while banned means permanent; null while not banned means nothing. */
+  target_owner_banned_until?: string | null
+}
+
+/**
+ * One row of the admin user directory.
+ *
+ * camelCase, unlike the report and audit rows beside it, because this one is
+ * mapped in the service rather than handed back from Postgres as it is — the
+ * boundary is still the API's, and matching it exactly is still the rule.
+ */
+export interface AdminUser {
+  id: string
+  email: string
+  displayName: string | null
+  role: string
+  orgDomain: string
+  isAdmin: boolean
+  isBanned: boolean
+  /**
+   * **Null means two different things** and only resolves against `isBanned`:
+   * not banned at all, or banned with no end date. Read together, never
+   * alone — a screen that showed "until —" for both would be saying a
+   * permanent ban expires today.
+   */
+  bannedUntil: string | null
+  createdAt: string
+  /** Distinct people who have reported them, or anything they own. One report is noise; five is a pattern. */
+  reportCount: number
+  listingCount: number
 }
 
 export interface AuditEntry {

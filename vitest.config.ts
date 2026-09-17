@@ -14,6 +14,7 @@ export default defineConfig({
       ['src/admin/screens/**', 'jsdom'],
       // Hooks need a renderer, which needs a DOM.
       ['src/admin/lib/*Action*', 'jsdom'],
+      ['src/admin/lib/*Paged*', 'jsdom'],
     ],
     environment: 'node',
   },

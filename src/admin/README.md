@@ -22,6 +22,7 @@ src/admin/
   lib/
     api.ts           fetch, auth headers, idempotency, refresh-on-401
     useAsyncData.ts  reads: fetch, reload, stale-response protection
+    usePagedData.ts  reads, paged: the same, plus offset and "is there more"
     useAdminAction.ts writes: busy, error, reload-after-success
     coordinates.ts   Hub pin formatting and validation
   screens/           one file per tab, no API knowledge beyond `api.*`
@@ -52,13 +53,28 @@ because `banDurationDays: null` means *permanent ban* while omitting it is an
 error — as an optional number those two are indistinguishable at the call
 site, and the first version of that function silently broke permanent bans.
 
-**5. Reads use `useAsyncData`, writes use `useAdminAction`.** Neither is
+**5. Reads use `useAsyncData` or `usePagedData`, writes use
+`useAdminAction`.** A list that can exceed one page uses `usePagedData`;
+anything bounded (pricing, tiers, the counts) uses `useAsyncData`. Neither is
 optional. `useAsyncData` carries stale-response protection: every screen has a
 filter, switching it fires a second request, and without a guard the slower
 response wins — on a moderation queue that means acting on the wrong report.
 `useAdminAction` clears the previous error before a retry, clears `busy` in
 `finally` so a throw cannot wedge the buttons, and awaits the reload only
 after the write resolves.
+
+**5b. A list says how much of itself you are seeing.** Every screen here was
+one capped fetch — 100 rows, 200 for the audit log — with no "load more" and
+**no sign that anything had been cut off**, so at 101 open reports the console
+showed 100 and looked complete. `MoreRow` renders the count and the button
+together, because "100" reads as a total unless something says otherwise.
+Every one of these routes has accepted `offset` from the start; nothing was
+sending it.
+
+**5c. Every destructive action has its inverse wired.** Ban had no unban and
+Remove had no restore — both routes existed from the first day with no caller,
+which made two of the three things this console can do one-way doors. If a new
+action takes something away, the change that adds it adds the way back.
 
 **6. Distinguish "empty" from "not loaded".** `AsyncScreen` treats `null` as
 loading and `[]` as empty, with different copy. On a queue, "nothing to do"
@@ -88,9 +104,19 @@ some combination of arguments, express that as a union rather than a comment.
 writing through `useAdminAction`, rendering through `AsyncScreen`. Add it to
 `TABS` and the switch in `AdminApp.tsx`; the boundary is already there.
 
-**A new filter** — local `useState`, passed to `api.*`, listed in the
-`useAsyncData` deps. The stale-response guard handles the race; do not add
-your own.
+**A new filter** — local `useState`, passed to `api.*`, listed in the hook's
+`deps`. The stale-response guard handles the race; do not add your own. Check
+the route's own query schema before building one: `category` on reports,
+`status` on triage and `targetType`/`targetId` on the audit log were all
+supported by the API for months while the console sent none of them, so the
+first question is whether the filter already exists server-side.
+
+Note the difference between the two hooks here. `useAsyncData` restarts when
+the *identity* of its fetcher changes, which works only because every call
+site passes a fresh arrow each render — hand it a stable function and the
+filter silently stops resetting the list. `usePagedData` keys on a signature
+of `deps` instead, so its deps must be scalars and its reset does not depend
+on the caller accidentally allocating.
 
 **Access** — there is one way in: an emailed code to an address on the
 `admin_users` allowlist. No password, no second credential, no bypass. The

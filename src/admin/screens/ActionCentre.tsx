@@ -69,8 +69,10 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
     */
     const [counts, reports, organizations] = await Promise.all([
       api.triage.counts().catch(() => ({}) as TriageCounts),
-      api.reports.list('OPEN').catch(() => [] as AdminReport[]),
-      api.organizations.list().catch(() => [] as AdminOrganization[]),
+      // A glance, not a queue: the first page of each is enough to say how
+      // much is waiting, and the tab itself is where you work through it.
+      api.reports.list('OPEN', null, 100, 0).catch(() => [] as AdminReport[]),
+      api.organizations.list(undefined, 100, 0).catch(() => [] as AdminOrganization[]),
     ])
 
     const pendingHubs = organizations.filter((organization) => organization.hubStatus !== 'ACTIVE').length

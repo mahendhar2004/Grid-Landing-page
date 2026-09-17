@@ -180,3 +180,44 @@ export function Badge({ children, tone = 'neutral' }: { children: ReactNode; ton
   }[tone]
   return <span className={`rounded px-2 py-0.5 text-xs font-semibold ${styles}`}>{children}</span>
 }
+
+/**
+ * How many rows are on screen, and whether that is all of them.
+ *
+ * Every list in this console was one capped fetch with **no indication that
+ * anything had been cut off** — at 101 open reports it showed 100 and looked
+ * complete. A count alone would not fix that, because "100" reads as a total
+ * unless something says otherwise; the honest version is the count *and* the
+ * fact that more exist, together, which is why they are one component rather
+ * than a number in the header and a button at the bottom.
+ *
+ * Renders nothing at all when there is one short page, which is the common
+ * case and does not need a chrome row explaining itself.
+ */
+export function MoreRow({
+  shown,
+  hasMore,
+  loading,
+  onLoadMore,
+}: {
+  readonly shown: number
+  readonly hasMore: boolean
+  readonly loading: boolean
+  readonly onLoadMore: () => void
+}) {
+  if (!hasMore && shown === 0) {
+    return null
+  }
+  return (
+    <div className="flex items-center gap-3 border-t border-[var(--color-border)] p-3">
+      <span className="text-xs text-[var(--color-text-muted)]">
+        {hasMore ? `Showing the first ${shown}` : `${shown} in total`}
+      </span>
+      {hasMore ? (
+        <Button onClick={onLoadMore} disabled={loading}>
+          {loading ? 'Loading…' : 'Load more'}
+        </Button>
+      ) : null}
+    </div>
+  )
+}
