@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { ApiError, apiGet, apiPatch, apiPost } from '../lib/api'
+import { ApiError, apiDelete, apiGet, apiPatch, apiPost } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, Field, Panel } from '../components/ui'
 
@@ -31,8 +31,19 @@ interface AdminOrganization {
   hubId: string
   hubName: string
   hubStatus: 'PENDING_VISIBILITY' | 'ACTIVE'
+  /** Where the Hub's pin sits. Captured from the GPS of whoever registered the organisation, so frequently wrong. */
+  hubLatitude: number
+  hubLongitude: number
   memberCount: number
   listingCount: number
+}
+
+interface EditForm {
+  name: string
+  type: 'ACADEMIC' | 'CORPORATE'
+  latitude: string
+  longitude: string
+  reason: string
 }
 
 const EMPTY_FORM = {
@@ -46,6 +57,16 @@ const EMPTY_FORM = {
 
 export function Organizations() {
   const [search, setSearch] = useState('')
+  /*
+    Which organisation is open for editing, and the values being edited.
+
+    A Hub's coordinates come from the GPS of whoever first registered the
+    organisation - who may well have been at home - and everything
+    geographic measures from that point: the map pin, "nearby", the browsing
+    radius. It was the one Hub field nothing could correct.
+  */
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [edit, setEdit] = useState<EditForm | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
   const [activateImmediately, setActivateImmediately] = useState(false)
@@ -78,6 +99,76 @@ export function Organizations() {
       setForm(EMPTY_FORM)
       setActivateImmediately(false)
       setShowForm(false)
+      await reload()
+    } catch (caught) {
+      setActionError(caught as ApiError)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function beginEdit(organization: AdminOrganization) {
+    setActionError(null)
+    setEditingId(organization.id)
+    setEdit({
+      name: organization.name,
+      type: organization.type,
+      // Strings, because a number input that has been cleared is an empty
+      // string and coercing that to 0 would silently move a Hub to the
+      // Atlantic.
+      latitude: String(organization.hubLatitude),
+      longitude: String(organization.hubLongitude),
+      reason: '',
+    })
+  }
+
+  async function saveEdit(organization: AdminOrganization) {
+    if (!edit) return
+    setActionError(null)
+    setBusy(true)
+    try {
+      const latitude = Number(edit.latitude)
+      const longitude = Number(edit.longitude)
+      const moved = latitude !== organization.hubLatitude || longitude !== organization.hubLongitude
+
+      await apiPatch(`/v1/admin/organizations/${organization.id}`, {
+        ...(edit.name.trim() !== organization.name ? { name: edit.name.trim() } : {}),
+        ...(edit.type !== organization.type ? { type: edit.type } : {}),
+        // Both or neither: the endpoint refuses one on its own, because a
+        // new latitude against the old longitude is a Hub nobody chose.
+        ...(moved ? { latitude, longitude } : {}),
+        reason: edit.reason.trim(),
+      })
+      setEditingId(null)
+      setEdit(null)
+      await reload()
+    } catch (caught) {
+      setActionError(caught as ApiError)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  /**
+   * Deleting is for a mistake - a typo'd domain, a test organisation - and
+   * the endpoint refuses the moment anything real is attached, returning the
+   * counts. So this does not try to guess whether it will be allowed: it
+   * asks, sends, and shows whatever comes back.
+   */
+  async function remove(organization: AdminOrganization) {
+    const reason = window.prompt(
+      `Delete ${organization.name} (${organization.domain})?\n\n` +
+        'This removes the organization and its Hub. It will be refused if anyone has joined or posted - ' +
+        'hide the Hub from the map instead for an organization with real members.\n\n' +
+        'Reason (stored on the audit log):',
+    )
+    if (reason === null || reason.trim().length === 0) {
+      return
+    }
+    setActionError(null)
+    setBusy(true)
+    try {
+      await apiDelete(`/v1/admin/organizations/${organization.id}`, { reason: reason.trim() })
       await reload()
     } catch (caught) {
       setActionError(caught as ApiError)
@@ -206,10 +297,98 @@ export function Organizations() {
                   {organization.hubStatus === 'ACTIVE' ? 'On the map' : 'Hidden'}
                 </Badge>
                 <span className="text-xs text-[var(--color-text-muted)]">
-                  {organization.memberCount} members · {organization.listingCount} listings
+                  {organization.memberCount} members · {organization.listingCount} listings ·{' '}
+                  <span className="font-mono">
+                    {organization.hubLatitude.toFixed(4)}, {organization.hubLongitude.toFixed(4)}
+                  </span>
                 </span>
                 {organization.hubStatus !== 'ACTIVE' ? (
                   <Button onClick={() => void activate(organization)}>Show on map</Button>
+                ) : null}
+                <Button onClick={() => (editingId === organization.id ? setEditingId(null) : beginEdit(organization))}>
+                  {editingId === organization.id ? 'Close' : 'Edit'}
+                </Button>
+                {/*
+                  Offered even when it will be refused, deliberately. The
+                  server decides, and its refusal names the counts - which is
+                  more useful than a button that silently is not there and
+                  leaves an admin wondering why.
+                */}
+                <Button variant="danger" disabled={busy} onClick={() => void remove(organization)}>
+                  Delete
+                </Button>
+
+                {editingId === organization.id && edit ? (
+                  <form
+                    className="w-full space-y-4 border-t border-[var(--color-border)] pt-4"
+                    onSubmit={(event) => {
+                      event.preventDefault()
+                      void saveEdit(organization)
+                    }}
+                  >
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field
+                        label="Display name"
+                        value={edit.name}
+                        onChange={(name) => setEdit({ ...edit, name })}
+                        hint="The Hub is renamed with it, unless it has been given its own name."
+                      />
+                      <label className="block text-sm">
+                        <span className="mb-1 block font-medium text-[var(--color-text)]">Type</span>
+                        <select
+                          value={edit.type}
+                          onChange={(event) =>
+                            setEdit({ ...edit, type: event.target.value as 'ACADEMIC' | 'CORPORATE' })
+                          }
+                          className="w-full rounded-md border border-[var(--color-border)] bg-[var(--bg-page)] px-3 py-2 text-sm text-[var(--color-text)]"
+                        >
+                          <option value="ACADEMIC">Academic</option>
+                          <option value="CORPORATE">Corporate</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field
+                        label="Latitude"
+                        value={edit.latitude}
+                        onChange={(latitude) => setEdit({ ...edit, latitude })}
+                        placeholder="23.1793"
+                      />
+                      <Field
+                        label="Longitude"
+                        value={edit.longitude}
+                        onChange={(longitude) => setEdit({ ...edit, longitude })}
+                        placeholder="79.9865"
+                      />
+                    </div>
+                    <p className="text-xs text-[var(--color-text-muted)]">
+                      This is the Hub&apos;s pin on the map, and what &quot;nearby&quot; is measured from. It was
+                      captured from the phone of whoever registered this organisation, so it is often their home
+                      rather than the campus.{' '}
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${edit.latitude},${edit.longitude}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline"
+                      >
+                        Check this point on a map
+                      </a>
+                      .
+                    </p>
+
+                    <Field
+                      label="Reason"
+                      value={edit.reason}
+                      onChange={(reason) => setEdit({ ...edit, reason })}
+                      placeholder="Pin was on the registrant's house"
+                      hint="Stored on the audit log, with the old and new values."
+                    />
+
+                    <Button type="submit" variant="primary" disabled={busy || edit.reason.trim().length === 0}>
+                      {busy ? 'Saving…' : 'Save changes'}
+                    </Button>
+                  </form>
                 ) : null}
               </li>
             ))}

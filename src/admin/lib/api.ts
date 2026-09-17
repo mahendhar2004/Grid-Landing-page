@@ -233,6 +233,11 @@ export function apiPost<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, { method: 'POST', body: JSON.stringify(body) })
 }
 
+/** Carries a body, unlike most DELETEs: every destructive admin action requires a reason for the audit log. */
+export function apiDelete<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, { method: 'DELETE', body: JSON.stringify(body) })
+}
+
 export function apiPatch<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, { method: 'PATCH', body: JSON.stringify(body) })
 }
