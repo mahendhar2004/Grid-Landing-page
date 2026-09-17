@@ -170,6 +170,13 @@ export type LineItemStatus = 'DRAFT' | 'SCHEDULED' | 'ACTIVE' | 'PAUSED' | 'COMP
 export type CreativeReviewStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 export type AdPlacement = 'FEED' | 'SEARCH' | 'MAP'
 /**
+ * How a line item is meant to deliver. Inseparable from its priority — the
+ * schema refuses to let the two disagree, because a "sponsorship" at a
+ * standard priority loses every contested slot it was sold to win and nothing
+ * on any screen looks wrong.
+ */
+export type AdDeliveryType = 'SPONSORSHIP' | 'STANDARD' | 'HOUSE'
+/**
  * An advertiser's line of business — deliberately not "category", which is
  * already a targeting axis on a line item. One of the two decides what Grid
  * refuses to run, and putting both behind one word is how that decision
@@ -293,6 +300,11 @@ export interface LineItem {
   advertiserName: string
   name: string
   status: LineItemStatus
+  deliveryType: AdDeliveryType
+  /** Google Ad Manager's scale, where a **lower number wins**: 4 sponsorship, 6–10 standard, 16 house. */
+  priority: number
+  /** What a sponsorship promises: this percentage of eligible impressions. Null on everything else. */
+  shareOfVoicePercent: number | null
   /** Grid's own stop, which `status` cannot clear. */
   suspendedAt: string | null
   suspendedReason: string | null
@@ -333,5 +345,9 @@ export interface AdSettings {
   enabledPlacements: AdPlacement[]
   /** Lines of business Grid will not run from anybody, whatever an individual creative says. */
   blockedSectors: AdSector[]
+  /** No ads in a hub with fewer live listings than this. 0 is off. */
+  minHubListingsForAds: number
+  /** No ads to an account younger than this many hours. 0 is off. */
+  newUserGraceHours: number
   updatedAt: string
 }

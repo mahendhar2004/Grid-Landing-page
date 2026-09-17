@@ -23,6 +23,8 @@ function settings(overrides: Partial<AdSettingsData> = {}): AdSettingsData {
     feedInterleaveInterval: 8,
     enabledPlacements: ['FEED', 'SEARCH'],
     blockedSectors: ['LENDING', 'GAMBLING', 'CRYPTO', 'ALCOHOL', 'TOBACCO', 'ADULT'],
+    minHubListingsForAds: 0,
+    newUserGraceHours: 0,
     updatedAt: '2026-09-17T10:00:00.000Z',
     ...overrides,
   }
@@ -96,6 +98,8 @@ describe('AdSettings', () => {
     await waitFor(() =>
       expect(updateMock).toHaveBeenCalledWith({
         feedInterleaveInterval: 12,
+        minHubListingsForAds: 0,
+        newUserGraceHours: 0,
         feedEnabled: true,
         searchEnabled: true,
         mapEnabled: false,
@@ -125,6 +129,52 @@ describe('AdSettings', () => {
     fireEvent.click(screen.getByText('Save settings'))
 
     await waitFor(() => expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ searchEnabled: false })))
+  })
+
+  /*
+    Both ship at zero — off. An ad in a feed of six listings takes a slot from
+    the thing people came for, and somebody in their first hour is still
+    deciding whether the app is worth keeping.
+  */
+  it('sends the liquidity floor and the new-account grace period', async () => {
+    await renderScreen()
+
+    fireEvent.change(screen.getByLabelText('Minimum live listings in a hub'), { target: { value: '25' } })
+    fireEvent.change(screen.getByLabelText('New-account grace (hours)'), { target: { value: '24' } })
+    fireEvent.click(screen.getByText('Save settings'))
+
+    await waitFor(() =>
+      expect(updateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ minHubListingsForAds: 25, newUserGraceHours: 24 }),
+      ),
+    )
+  })
+
+  it('refuses to save a grace period past a month, which stops being a grace period', async () => {
+    await renderScreen()
+
+    fireEvent.change(screen.getByLabelText('New-account grace (hours)'), { target: { value: '1000' } })
+    fireEvent.click(screen.getByText('Save settings'))
+
+    expect(updateMock).not.toHaveBeenCalled()
+  })
+
+  /*
+    The form follows the server until somebody touches a field. An earlier
+    version mirrored the settings into state from an effect, which overwrote
+    whatever was being typed every time `settings` changed - including the
+    reload after a save, so a second edit made while the first was in flight
+    vanished without a word.
+  */
+  it('keeps what is being typed when the settings reload underneath it', async () => {
+    await renderScreen()
+    fireEvent.change(screen.getByLabelText('Every N listings'), { target: { value: '20' } })
+
+    // A reload with a different server value must not stomp the edit.
+    getMock.mockResolvedValue(settings({ feedInterleaveInterval: 9 }))
+    fireEvent.click(screen.getByLabelText(/Search/))
+
+    expect((screen.getByLabelText('Every N listings') as HTMLInputElement).value).toBe('20')
   })
 
   it('sends the blocked list as a whole, so unticking one really unblocks it', async () => {

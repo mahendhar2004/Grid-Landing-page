@@ -28,6 +28,9 @@ function lineItem(overrides: Partial<LineItem> = {}): LineItem {
     advertiserName: 'Campus Bookstore',
     name: 'IIT Delhi feed',
     status: 'ACTIVE',
+    deliveryType: 'STANDARD',
+    priority: 8,
+    shareOfVoicePercent: null,
     suspendedAt: null,
     suspendedReason: null,
     placements: ['FEED'],
@@ -184,6 +187,29 @@ describe('AdLineItems', () => {
     ])
 
     expect(rowList().getByText(/cannot serve/)).toBeTruthy()
+  })
+
+  /*
+    Google Ad Manager's scale, where a lower number wins. The row has to say
+    which of the three an ad is, because it is the difference between a
+    guarantee, an ordinary sale and a filler — and it is invisible otherwise.
+  */
+  it('says what a sponsorship promises, not just that it is one', async () => {
+    await renderScreen([lineItem({ deliveryType: 'SPONSORSHIP', priority: 4, shareOfVoicePercent: 25 })])
+
+    expect(rowList().getByText(/sponsorship, 25% of the feed/)).toBeTruthy()
+  })
+
+  it('marks house inventory as filling what is left, rather than showing a bare priority', async () => {
+    await renderScreen([lineItem({ deliveryType: 'HOUSE', priority: 16 })])
+
+    expect(rowList().getByText(/house, fills what is left/)).toBeTruthy()
+  })
+
+  it('shows a standard ad with its priority, since that is what decides between two of them', async () => {
+    await renderScreen([lineItem({ deliveryType: 'STANDARD', priority: 6 })])
+
+    expect(rowList().getByText(/standard \(priority 6\)/)).toBeTruthy()
   })
 
   it('offers nothing to press on an archived ad, which never runs again', async () => {

@@ -2,6 +2,7 @@ import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../lib/api'
 import type {
   AdOrder,
   AdOrdersPage,
+  AdDeliveryType,
   AdPlacement,
   AdSector,
   AdSettings,
@@ -378,6 +379,9 @@ export type UpdateCreativeBody = Partial<Omit<CreateCreativeBody, 'advertiserId'
 export interface CreateLineItemBody {
   orderId: string
   name: string
+  deliveryType: AdDeliveryType
+  priority: number
+  shareOfVoicePercent: number | null
   placements: AdPlacement[]
   category: string | null
   keywords: string[] | null
@@ -521,6 +525,8 @@ export interface UpdateAdSettingsBody {
   searchEnabled?: boolean
   mapEnabled?: boolean
   blockedSectors?: AdSector[]
+  minHubListingsForAds?: number
+  newUserGraceHours?: number
 }
 
 const lineItems = {

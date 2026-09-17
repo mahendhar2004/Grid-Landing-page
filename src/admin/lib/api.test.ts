@@ -251,3 +251,52 @@ describe('rendering data from an API that may be a deploy behind', () => {
     expect(hasCoordinates('23.1793', '79.9865')).toBe(true)
   })
 })
+
+describe('apiGet query building', () => {
+  /*
+    These exist because the routes read every boolean flag with Zod's
+    `z.coerce.boolean()`, which treats *any* non-empty string as true. Sending
+    `?includeArchived=false` would therefore arrive as true - the opposite of
+    what the caller asked for - and the only thing between that and a console
+    that silently shows archived rows is this filter.
+  */
+  it('omits a false flag entirely rather than sending the string "false"', async () => {
+    const { storeTokens, apiGet } = await loadApi()
+    storeTokens('access', 'refresh')
+    mockFetch(okResponse([]))
+
+    await apiGet('/v1/admin/advertisers', { includeArchived: false, limit: 50 })
+
+    expect(captured[0]!.url).toBe(`${API_URL}/v1/admin/advertisers?limit=50`)
+  })
+
+  it('sends a true flag as "true", which is what the route coerces', async () => {
+    const { storeTokens, apiGet } = await loadApi()
+    storeTokens('access', 'refresh')
+    mockFetch(okResponse([]))
+
+    await apiGet('/v1/admin/advertisers', { includeArchived: true })
+
+    expect(captured[0]!.url).toBe(`${API_URL}/v1/admin/advertisers?includeArchived=true`)
+  })
+
+  it('drops undefined and empty values, so an untouched filter adds nothing', async () => {
+    const { storeTokens, apiGet } = await loadApi()
+    storeTokens('access', 'refresh')
+    mockFetch(okResponse([]))
+
+    await apiGet('/v1/admin/advertisers', { search: '', tier: undefined, limit: 20 })
+
+    expect(captured[0]!.url).toBe(`${API_URL}/v1/admin/advertisers?limit=20`)
+  })
+
+  it('escapes a value rather than pasting it into the query string', async () => {
+    const { storeTokens, apiGet } = await loadApi()
+    storeTokens('access', 'refresh')
+    mockFetch(okResponse([]))
+
+    await apiGet('/v1/admin/advertisers', { search: 'a&b=c' })
+
+    expect(captured[0]!.url).toContain('search=a%26b%3Dc')
+  })
+})

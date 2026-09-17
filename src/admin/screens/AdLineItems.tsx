@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { api } from '../api/endpoints'
 import type { CreateLineItemBody } from '../api/endpoints'
-import type { AdPlacement, LineItem, LineItemStatus } from '../api/types'
+import type { AdDeliveryType, AdPlacement, LineItem, LineItemStatus } from '../api/types'
 import { useCursorPagedData } from '../lib/usePagedData'
 import { useAdminAction } from '../lib/useAdminAction'
 import { Badge, Button, EmptyNote, ErrorNote, Field, MoreRow, Panel, ReasonPrompt } from '../components/ui'
@@ -66,13 +66,72 @@ const STATUS_TONE: Readonly<Record<LineItemStatus, 'good' | 'warn' | 'bad' | 'ne
   ARCHIVED: 'neutral',
 }
 
+/**
+ * Google Ad Manager's scale, where a **lower number wins**, and the delivery
+ * type each priority belongs to. They are shown as one choice because they
+ * are one decision — the API and the schema both refuse a pair that
+ * disagrees, and a sponsorship at a standard priority would quietly lose every
+ * slot it was sold to win.
+ */
+const DELIVERY_OPTIONS: ReadonlyArray<{
+  value: string
+  deliveryType: AdDeliveryType
+  priority: number
+  label: string
+  hint: string
+}> = [
+  {
+    value: 'SPONSORSHIP',
+    deliveryType: 'SPONSORSHIP',
+    priority: 4,
+    label: 'Sponsorship — wins first',
+    hint: 'Sold as a share of the feed. “Own 25% at this campus for the month” — the sentence a local business understands and can be invoiced for.',
+  },
+  {
+    value: 'STANDARD_6',
+    deliveryType: 'STANDARD',
+    priority: 6,
+    label: 'Standard, high',
+    hint: 'Direct-sold, beaten only by a sponsorship.',
+  },
+  {
+    value: 'STANDARD_8',
+    deliveryType: 'STANDARD',
+    priority: 8,
+    label: 'Standard',
+    hint: 'The ordinary direct-sold ad.',
+  },
+  {
+    value: 'STANDARD_10',
+    deliveryType: 'STANDARD',
+    priority: 10,
+    label: 'Standard, low',
+    hint: 'Runs behind the other two.',
+  },
+  {
+    value: 'HOUSE',
+    deliveryType: 'HOUSE',
+    priority: 16,
+    label: 'House — fills what is left',
+    hint: "Grid's own promotions and affiliate links. Serves only when nothing sold fills the slot, so it never takes inventory from something paid for.",
+  },
+]
+
 const EMPTY_FORM = {
   orderId: '',
   name: '',
+  delivery: 'STANDARD_8',
+  shareOfVoice: '',
   placements: ['FEED', 'SEARCH'] as AdPlacement[],
   category: '',
   keywords: '',
   creativeId: '',
+}
+
+/** A sponsorship without a usable percentage is not a sponsorship, so the form will not send one. */
+function isValidShare(value: string): boolean {
+  const share = Number(value)
+  return Number.isInteger(share) && share >= 1 && share <= 100
 }
 
 /** A click-through rate is the only number here that says whether an ad is working. */
@@ -136,9 +195,15 @@ export function AdLineItems() {
 
   async function create(event: React.FormEvent) {
     event.preventDefault()
+    const delivery = DELIVERY_OPTIONS.find((entry) => entry.value === form.delivery) ?? DELIVERY_OPTIONS[2]!
     const body: CreateLineItemBody = {
       orderId: form.orderId,
       name: form.name.trim(),
+      deliveryType: delivery.deliveryType,
+      priority: delivery.priority,
+      // Only a sponsorship carries one, and it must — the percentage is what
+      // the sponsorship is.
+      shareOfVoicePercent: delivery.deliveryType === 'SPONSORSHIP' ? Number(form.shareOfVoice) : null,
       placements: form.placements,
       category: form.category || null,
       keywords: form.keywords.trim() ? form.keywords.split(',').map((k) => k.trim()).filter(Boolean) : null,
@@ -205,6 +270,35 @@ export function AdLineItems() {
             </label>
 
             <Field label="Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} placeholder="What this ad is for, internally" />
+
+            <label className="block space-y-1">
+              <span className="text-xs font-medium text-[var(--color-text-muted)]">Delivery</span>
+              <select
+                value={form.delivery}
+                onChange={(e) => setForm({ ...form, delivery: e.target.value })}
+                className="w-full rounded border border-[var(--color-border)] bg-transparent p-2 text-sm text-[var(--color-text)]"
+              >
+                {DELIVERY_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <span className="block text-xs text-[var(--color-text-muted)]">
+                {DELIVERY_OPTIONS.find((option) => option.value === form.delivery)?.hint}
+              </span>
+            </label>
+
+            {form.delivery === 'SPONSORSHIP' ? (
+              <div className="w-40">
+                <Field
+                  label="Share of voice (%)"
+                  value={form.shareOfVoice}
+                  onChange={(v) => setForm({ ...form, shareOfVoice: v })}
+                  placeholder="25"
+                />
+              </div>
+            ) : null}
 
             <fieldset className="space-y-1">
               <legend className="text-xs font-medium text-[var(--color-text-muted)]">Placements</legend>
@@ -274,7 +368,12 @@ export function AdLineItems() {
               variant="primary"
               type="submit"
               onClick={() => undefined}
-              disabled={busy || form.orderId === '' || form.placements.length === 0}
+              disabled={
+                busy ||
+                form.orderId === '' ||
+                form.placements.length === 0 ||
+                (form.delivery === 'SPONSORSHIP' && !isValidShare(form.shareOfVoice))
+              }
             >
               {busy ? 'Creating…' : 'Create ad'}
             </Button>
@@ -336,7 +435,13 @@ export function AdLineItems() {
                       <p className="truncate text-sm font-semibold text-[var(--color-text)]">{item.name}</p>
                     </div>
                     <p className="mt-1 truncate text-xs text-[var(--color-text-muted)]">
-                      {item.advertiserName} · {item.orderName} · {item.placements.join(', ')}
+                      {item.advertiserName} · {item.orderName} ·{' '}
+                      {item.deliveryType === 'SPONSORSHIP'
+                        ? `sponsorship, ${item.shareOfVoicePercent}% of the feed`
+                        : item.deliveryType === 'HOUSE'
+                          ? 'house, fills what is left'
+                          : `standard (priority ${item.priority})`}{' '}
+                      · {item.placements.join(', ')}
                       {item.category ? ` · ${item.category}` : ''}
                       {item.keywords?.length ? ` · ${item.keywords.join(', ')}` : ''}
                     </p>

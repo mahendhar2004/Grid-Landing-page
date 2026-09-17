@@ -221,9 +221,22 @@ async function request<T>(path: string, init: RequestInit = {}, isRetry = false)
   return payload.data as T
 }
 
-export function apiGet<T>(path: string, params: Record<string, string | number | undefined> = {}): Promise<T> {
+export function apiGet<T>(
+  path: string,
+  params: Record<string, string | number | boolean | undefined> = {},
+): Promise<T> {
   const search = Object.entries(params)
-    .filter(([, value]) => value !== undefined && value !== '')
+    /*
+      `false` is dropped, not sent as "false".
+
+      The routes read these with Zod's `z.coerce.boolean()`, which treats any
+      non-empty string as true - so `?includeArchived=false` would arrive as
+      **true**, the exact opposite of what the caller asked for. Every one of
+      those flags is declared `.default(false)` on the route, so absence is
+      already the correct way to say false, and this makes that the contract
+      rather than something each call site has to remember.
+    */
+    .filter(([, value]) => value !== undefined && value !== '' && value !== false)
     .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
     .join('&')
   return request<T>(search ? `${path}?${search}` : path)
@@ -234,8 +247,12 @@ export function apiPost<T>(path: string, body: unknown): Promise<T> {
 }
 
 /** Carries a body, unlike most DELETEs: every destructive admin action requires a reason for the audit log. */
-export function apiDelete<T>(path: string, body: unknown): Promise<T> {
-  return request<T>(path, { method: 'DELETE', body: JSON.stringify(body) })
+/** The body is optional: some deletes name their target entirely in the path, and sending `undefined` as a JSON body would be sending the string "undefined". */
+export function apiDelete<T>(path: string, body?: unknown): Promise<T> {
+  return request<T>(path, {
+    method: 'DELETE',
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  })
 }
 
 export function apiPatch<T>(path: string, body: unknown): Promise<T> {
