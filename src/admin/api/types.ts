@@ -305,6 +305,16 @@ export interface LineItem {
   priority: number
   /** What a sponsorship promises: this percentage of eligible impressions. Null on everything else. */
   shareOfVoicePercent: number | null
+  /** This line item's share of its order, which delivery is billed against. */
+  bookedAmountPaise: number
+  /** Standard delivery's goal. Null on a sponsorship, which promises a share rather than a number. */
+  impressionGoal: number | null
+  /** At most this many views per person per day. Null is uncapped. */
+  frequencyCapPerDay: number | null
+  /** Spread delivery across the day rather than spending it by 9am. */
+  paced: boolean
+  /** Two campaigns sharing a label never appear in one feed render. */
+  competitiveLabel: string | null
   /** Grid's own stop, which `status` cannot clear. */
   suspendedAt: string | null
   suspendedReason: string | null
@@ -389,4 +399,18 @@ export interface AdvertiserLedgerPage {
   balancePaise: number
   entries: LedgerEntry[]
   nextCursor: string | null
+}
+
+/** What a campaign has actually delivered, day by day, against what it was sold. */
+export interface LineItemDeliveryReport {
+  lineItemId: string
+  lineItemName: string
+  advertiserName: string
+  totalImpressions: number
+  totalClicks: number
+  totalSpendPaise: number
+  bookedAmountPaise: number
+  impressionGoal: number | null
+  shareOfVoicePercent: number | null
+  days: { day: string; impressions: number; clicks: number; spendPaise: number }[]
 }

@@ -14,6 +14,7 @@ import type {
   Creative,
   CreativesPage,
   LineItem,
+  LineItemDeliveryReport,
   LineItemsPage,
   AdminReport,
   AdminUser,
@@ -383,6 +384,11 @@ export interface CreateLineItemBody {
   deliveryType: AdDeliveryType
   priority: number
   shareOfVoicePercent: number | null
+  bookedAmountPaise: number
+  impressionGoal: number | null
+  frequencyCapPerDay: number | null
+  paced: boolean
+  competitiveLabel: string | null
   targetHubIds: string[] | null
   targetOrgTypes: OrganizationType[] | null
   placements: AdPlacement[]
@@ -610,6 +616,11 @@ const lineItems = {
 
   attachCreative(id: string, creativeId: string): Promise<LineItem> {
     return apiPost<LineItem>(`/v1/admin/line-items/${id}/creatives`, { creativeId })
+  },
+
+  /** What it has delivered, against what it was sold — the report an advertiser is sent until phase 4 lets them read it themselves. */
+  delivery(id: string, days = 30): Promise<LineItemDeliveryReport> {
+    return apiGet<LineItemDeliveryReport>(`/v1/admin/line-items/${id}/delivery`, { days })
   },
 
   detachCreative(id: string, creativeId: string): Promise<LineItem> {

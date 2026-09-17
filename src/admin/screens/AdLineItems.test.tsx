@@ -7,7 +7,7 @@ import type { LineItem, LineItemsPage } from '../api/types'
 
 vi.mock('../api/endpoints', () => ({
   api: {
-    lineItems: { list: vi.fn(), create: vi.fn(), setStatus: vi.fn(), setSuspension: vi.fn() },
+    lineItems: { list: vi.fn(), create: vi.fn(), setStatus: vi.fn(), setSuspension: vi.fn(), delivery: vi.fn() },
     adOrders: { list: vi.fn() },
     creatives: { list: vi.fn() },
   },
@@ -17,6 +17,7 @@ const listMock = vi.mocked(api.lineItems.list)
 const setStatusMock = vi.mocked(api.lineItems.setStatus)
 const setSuspensionMock = vi.mocked(api.lineItems.setSuspension)
 const ordersListMock = vi.mocked(api.adOrders.list)
+const deliveryMock = vi.mocked(api.lineItems.delivery)
 const creativesListMock = vi.mocked(api.creatives.list)
 
 function lineItem(overrides: Partial<LineItem> = {}): LineItem {
@@ -31,6 +32,11 @@ function lineItem(overrides: Partial<LineItem> = {}): LineItem {
     deliveryType: 'STANDARD',
     priority: 8,
     shareOfVoicePercent: null,
+    bookedAmountPaise: 0,
+    impressionGoal: null,
+    frequencyCapPerDay: null,
+    paced: false,
+    competitiveLabel: null,
     suspendedAt: null,
     suspendedReason: null,
     placements: ['FEED'],
@@ -64,6 +70,18 @@ describe('AdLineItems', () => {
     vi.clearAllMocks()
     ordersListMock.mockResolvedValue({ orders: [], nextCursor: null })
     creativesListMock.mockResolvedValue({ creatives: [], nextCursor: null })
+    deliveryMock.mockResolvedValue({
+      lineItemId: 'li_1',
+      lineItemName: 'IIT Delhi feed',
+      advertiserName: 'Campus Bookstore',
+      totalImpressions: 12_000,
+      totalClicks: 240,
+      totalSpendPaise: 480_000,
+      bookedAmountPaise: 2_000_000,
+      impressionGoal: 50_000,
+      shareOfVoicePercent: null,
+      days: [{ day: '2026-09-16', impressions: 1_000, clicks: 20, spendPaise: 40_000 }],
+    })
     setStatusMock.mockResolvedValue(lineItem())
     setSuspensionMock.mockResolvedValue(lineItem())
   })
@@ -221,5 +239,55 @@ describe('AdLineItems', () => {
     expect(rowList().queryByText('Pause')).toBeNull()
     expect(rowList().queryByText('Archive')).toBeNull()
     expect(rowList().queryByText('Suspend')).toBeNull()
+  })
+
+  describe('the delivery report', () => {
+    /*
+      Shown beside what the campaign was sold, because a delivery number read
+      in a vacuum invites the question the report should have answered.
+    */
+    it('opens in place and shows delivery against what was booked', async () => {
+      await renderScreen([lineItem()])
+
+      fireEvent.click(rowList().getByText('Delivery'))
+
+      await waitFor(() => expect(rowList().getByText(/12,000/)).toBeTruthy())
+      expect(rowList().getByText(/spent of/)).toBeTruthy()
+      // Split across elements by the bold percentage, so matched on the
+      // container's text rather than on one node's.
+      expect(rowList().getByText(/of its/).textContent).toContain('24%')
+    })
+
+    it('explains an empty report rather than showing a blank table', async () => {
+      deliveryMock.mockResolvedValueOnce({
+        lineItemId: 'li_1',
+        lineItemName: 'IIT Delhi feed',
+        advertiserName: 'Campus Bookstore',
+        totalImpressions: 0,
+        totalClicks: 0,
+        totalSpendPaise: 0,
+        bookedAmountPaise: 0,
+        impressionGoal: null,
+        shareOfVoicePercent: null,
+        days: [],
+      })
+      await renderScreen([lineItem()])
+
+      fireEvent.click(rowList().getByText('Delivery'))
+
+      // Rolled up once a night, so a campaign that started today is not
+      // missing - it is simply not summarised yet.
+      await waitFor(() => expect(rowList().getByText(/summarised once a night/)).toBeTruthy())
+    })
+
+    it('closes again', async () => {
+      await renderScreen([lineItem()])
+
+      fireEvent.click(rowList().getByText('Delivery'))
+      await waitFor(() => expect(rowList().getByText('Hide delivery')).toBeTruthy())
+      fireEvent.click(rowList().getByText('Hide delivery'))
+
+      expect(rowList().queryByText(/spent of/)).toBeNull()
+    })
   })
 })

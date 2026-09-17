@@ -2,9 +2,10 @@ import { useState } from 'react'
 
 import { api } from '../api/endpoints'
 import type { CreateLineItemBody } from '../api/endpoints'
-import type { AdDeliveryType, AdPlacement, LineItem, LineItemStatus, OrganizationType } from '../api/types'
+import type { AdDeliveryType, AdPlacement, LineItem, LineItemDeliveryReport, LineItemStatus, OrganizationType } from '../api/types'
 import { useCursorPagedData } from '../lib/usePagedData'
 import { useAdminAction } from '../lib/useAdminAction'
+import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, Field, MoreRow, Panel, ReasonPrompt } from '../components/ui'
 
 /**
@@ -122,6 +123,11 @@ const EMPTY_FORM = {
   name: '',
   delivery: 'STANDARD_8',
   shareOfVoice: '',
+  bookedRupees: '',
+  impressionGoal: '',
+  frequencyCap: '',
+  paced: false,
+  competitiveLabel: '',
   orgTypes: [] as OrganizationType[],
   placements: ['FEED', 'SEARCH'] as AdPlacement[],
   category: '',
@@ -150,6 +156,7 @@ export function AdLineItems() {
   const [suspendedOnly, setSuspendedOnly] = useState(false)
   const [includeArchived, setIncludeArchived] = useState(false)
   const [pending, setPending] = useState<PendingAction | null>(null)
+  const [reportingOn, setReportingOn] = useState<string | null>(null)
 
   const { rows, error: loadError, hasMore, loadingMore, loadMore, reload } = useCursorPagedData(
     async (cursor) => {
@@ -211,6 +218,17 @@ export function AdLineItems() {
       // than as an empty array the API would refuse.
       targetHubIds: null,
       targetOrgTypes: form.orgTypes.length > 0 ? form.orgTypes : null,
+      // Rupees in the form, paise on the wire, like everything else here.
+      bookedAmountPaise: Math.round(Number(form.bookedRupees.trim() || '0') * 100),
+      // A goal belongs to standard delivery; the API refuses it elsewhere.
+      impressionGoal:
+        delivery.deliveryType === 'STANDARD' && form.impressionGoal.trim() !== ''
+          ? Number(form.impressionGoal.trim())
+          : null,
+      frequencyCapPerDay: form.frequencyCap.trim() !== '' ? Number(form.frequencyCap.trim()) : null,
+      // Pacing needs a goal to pace towards, which the schema also enforces.
+      paced: form.paced && delivery.deliveryType === 'STANDARD' && form.impressionGoal.trim() !== '',
+      competitiveLabel: form.competitiveLabel.trim() || null,
       placements: form.placements,
       category: form.category || null,
       keywords: form.keywords.trim() ? form.keywords.split(',').map((k) => k.trim()).filter(Boolean) : null,
@@ -340,6 +358,70 @@ export function AdLineItems() {
                 ))}
               </select>
             </label>
+
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="w-32">
+                <Field
+                  label="Booked (₹)"
+                  value={form.bookedRupees}
+                  onChange={(v) => setForm({ ...form, bookedRupees: v })}
+                  placeholder="20000"
+                />
+              </div>
+              {DELIVERY_OPTIONS.find((option) => option.value === form.delivery)?.deliveryType === 'STANDARD' ? (
+                <div className="w-40">
+                  <Field
+                    label="Impression goal"
+                    value={form.impressionGoal}
+                    onChange={(v) => setForm({ ...form, impressionGoal: v })}
+                    placeholder="50000"
+                  />
+                </div>
+              ) : null}
+              <div className="w-40">
+                <Field
+                  label="Views per person/day"
+                  value={form.frequencyCap}
+                  onChange={(v) => setForm({ ...form, frequencyCap: v })}
+                  placeholder="blank = uncapped"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-[var(--color-text-muted)]">
+              What this ad is billed against. A sponsorship costs its daily share of the period it
+              runs for; standard delivery costs the booked amount divided by its goal, per
+              impression. Nothing booked means it costs nothing.
+            </p>
+
+            {DELIVERY_OPTIONS.find((option) => option.value === form.delivery)?.deliveryType === 'STANDARD' &&
+            form.impressionGoal.trim() !== '' ? (
+              <label className="flex items-start gap-2 text-sm text-[var(--color-text)]">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={form.paced}
+                  onChange={(e) => setForm({ ...form, paced: e.target.checked })}
+                />
+                <span>
+                  Spread delivery across each day
+                  <span className="block text-xs text-[var(--color-text-muted)]">
+                    Otherwise the goal is spent against whoever happens to be awake first.
+                  </span>
+                </span>
+              </label>
+            ) : null}
+
+            <Field
+              label="Competitive label (optional)"
+              value={form.competitiveLabel}
+              onChange={(v) => setForm({ ...form, competitiveLabel: v })}
+              placeholder="coaching / lending / food"
+            />
+            <p className="text-xs text-[var(--color-text-muted)]">
+              Two ads sharing a label never appear in one feed together. A category rather than a
+              named rival, because keeping a list of who competes with whom is a job nobody does
+              twice.
+            </p>
 
             <fieldset className="space-y-1">
               <legend className="text-xs font-medium text-[var(--color-text-muted)]">
@@ -513,6 +595,9 @@ export function AdLineItems() {
 
                   {!archived ? (
                     <div className="flex items-center gap-2">
+                      <Button onClick={() => setReportingOn((current) => (current === item.id ? null : item.id))}>
+                        {reportingOn === item.id ? 'Hide delivery' : 'Delivery'}
+                      </Button>
                       {suspended ? (
                         <Button disabled={busy} onClick={() => void run(() => api.lineItems.setSuspension(item.id, false, null))}>
                           Lift suspension
@@ -542,6 +627,7 @@ export function AdLineItems() {
                       )}
                     </div>
                   ) : null}
+                  {reportingOn === item.id ? <DeliveryReport lineItemId={item.id} /> : null}
                 </li>
               )
             })}
@@ -586,4 +672,86 @@ export function AdLineItems() {
       ) : null}
     </div>
   )
+}
+
+/**
+ * What a campaign actually delivered, day by day.
+ *
+ * Shown beside what it was sold — the booked amount, the goal, the promised
+ * share — because a delivery number read in a vacuum invites the question the
+ * report should have answered. Until phase 4 lets an advertiser read this
+ * themselves, somebody here sends it to them.
+ */
+function DeliveryReport({ lineItemId }: { lineItemId: string }) {
+  const { data: report, error } = useAsyncData<LineItemDeliveryReport>(
+    () => api.lineItems.delivery(lineItemId),
+    [lineItemId],
+  )
+
+  if (error) return <ErrorNote error={error} />
+  if (!report) return <EmptyNote>Loading delivery…</EmptyNote>
+
+  const goalProgress =
+    report.impressionGoal !== null && report.impressionGoal > 0
+      ? Math.round((report.totalImpressions / report.impressionGoal) * 100)
+      : null
+
+  return (
+    <div className="mt-3 w-full space-y-2 rounded-lg border border-[var(--color-border)] p-3">
+      <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-[var(--color-text-muted)]">
+        <span>
+          <strong className="text-[var(--color-text)]">{report.totalImpressions.toLocaleString('en-IN')}</strong> seen
+        </span>
+        <span>
+          <strong className="text-[var(--color-text)]">{report.totalClicks.toLocaleString('en-IN')}</strong> clicked
+        </span>
+        <span>
+          <strong className="text-[var(--color-text)]">{rupeesFromPaise(report.totalSpendPaise)}</strong> spent of{' '}
+          {rupeesFromPaise(report.bookedAmountPaise)} booked
+        </span>
+        {goalProgress !== null ? (
+          <span>
+            <strong className="text-[var(--color-text)]">{goalProgress}%</strong> of its{' '}
+            {report.impressionGoal!.toLocaleString('en-IN')} goal
+          </span>
+        ) : null}
+        {report.shareOfVoicePercent !== null ? (
+          <span>sold {report.shareOfVoicePercent}% of the feed</span>
+        ) : null}
+      </div>
+
+      {report.days.length === 0 ? (
+        <EmptyNote>
+          Nothing rolled up yet. Delivery is summarised once a night, so a campaign that started
+          today appears tomorrow.
+        </EmptyNote>
+      ) : (
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="text-left text-[var(--color-text-muted)]">
+              <th className="py-1 font-medium">Day</th>
+              <th className="py-1 text-right font-medium">Seen</th>
+              <th className="py-1 text-right font-medium">Clicked</th>
+              <th className="py-1 text-right font-medium">Spend</th>
+            </tr>
+          </thead>
+          <tbody>
+            {report.days.map((day) => (
+              <tr key={day.day} className="border-t border-[var(--color-border)]">
+                <td className="py-1">{day.day}</td>
+                <td className="py-1 text-right">{day.impressions.toLocaleString('en-IN')}</td>
+                <td className="py-1 text-right">{day.clicks.toLocaleString('en-IN')}</td>
+                <td className="py-1 text-right">{rupeesFromPaise(day.spendPaise)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  )
+}
+
+/** Paise everywhere on the wire, rupees everywhere a person reads. */
+function rupeesFromPaise(paise: number): string {
+  return `₹${(paise / 100).toLocaleString('en-IN')}`
 }
