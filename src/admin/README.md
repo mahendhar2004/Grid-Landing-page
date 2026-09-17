@@ -22,7 +22,8 @@ src/admin/
   lib/
     api.ts           fetch, auth headers, idempotency, refresh-on-401
     useAsyncData.ts  reads: fetch, reload, stale-response protection
-    usePagedData.ts  reads, paged: the same, plus offset and "is there more"
+    usePagedData.ts  reads, paged by offset: the same, plus "is there more"
+                     and useCursorPagedData for the one route that uses cursors
     useAdminAction.ts writes: busy, error, reload-after-success
     coordinates.ts   Hub pin formatting and validation
   screens/           one file per tab, no API knowledge beyond `api.*`
@@ -55,7 +56,9 @@ site, and the first version of that function silently broke permanent bans.
 
 **5. Reads use `useAsyncData` or `usePagedData`, writes use
 `useAdminAction`.** A list that can exceed one page uses `usePagedData`;
-anything bounded (pricing, tiers, the counts) uses `useAsyncData`. Neither is
+`GET /v1/admin/ad-units` is the one route that pages by **cursor** rather than
+offset, so it uses `useCursorPagedData` instead; anything bounded (pricing,
+tiers, the counts) uses `useAsyncData`. Neither is
 optional. `useAsyncData` carries stale-response protection: every screen has a
 filter, switching it fires a second request, and without a guard the slower
 response wins — on a moderation queue that means acting on the wrong report.

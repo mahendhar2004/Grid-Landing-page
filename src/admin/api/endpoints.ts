@@ -1,5 +1,7 @@
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../lib/api'
 import type {
+  AdUnit,
+  AdUnitsPage,
   AdminOrganization,
   AdminReport,
   AdminUser,
@@ -323,6 +325,45 @@ const users = {
   },
 }
 
+// -------------------------------------------------------- ads
+
+/** Everything an ad unit needs to exist. Matches the route's own required set exactly. */
+export interface CreateAdUnitBody {
+  title: string
+  sponsorName: string
+  imageUrl: string
+  targetUrl: string
+  disclosure: string | null
+  category: string | null
+  keywords: string[] | null
+  minPricePaise: number | null
+  maxPricePaise: number | null
+  priorityWeight: number
+  isActive: boolean
+}
+
+/** Every field optional, because the route patches. Omitting a nullable field leaves it; sending `null` clears it. */
+export type UpdateAdUnitBody = Partial<CreateAdUnitBody>
+
+const adUnits = {
+  /**
+   * Cursor-paged, not offset - unlike every other admin list. That is the
+   * route's own design (Rule 25 cursor pagination), so the console follows it
+   * rather than asking the API to change shape for one screen.
+   */
+  list(cursor: string | null, limit = 50): Promise<AdUnitsPage> {
+    return apiGet<AdUnitsPage>('/v1/admin/ad-units', { ...(cursor ? { cursor } : {}), limit })
+  },
+
+  create(body: CreateAdUnitBody): Promise<AdUnit> {
+    return apiPost<AdUnit>('/v1/admin/ad-units', body)
+  },
+
+  update(id: string, body: UpdateAdUnitBody): Promise<AdUnit> {
+    return apiPatch<AdUnit>(`/v1/admin/ad-units/${id}`, body)
+  },
+}
+
 // -------------------------------------------------------- content
 
 /** Exactly one of the two, because the route refuses both and neither — a union rather than two optional fields. */
@@ -356,6 +397,7 @@ export const api = {
   organizations,
   users,
   content,
+  adUnits,
   pricing,
   tiers,
   audit,

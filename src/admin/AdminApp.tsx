@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { clearTokens, getAccessToken } from './lib/api'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { ActionCentre } from './screens/ActionCentre'
+import { AdUnits } from './screens/AdUnits'
 import { Analytics } from './screens/Analytics'
 import { AuditLog } from './screens/AuditLog'
 import { Organizations } from './screens/Organizations'
@@ -33,6 +34,7 @@ type Tab =
   | 'users'
   | 'organizations'
   | 'pricing'
+  | 'ads'
   | 'tiers'
   | 'analytics'
   | 'audit'
@@ -49,6 +51,9 @@ const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
   { id: 'users', label: 'Users' },
   { id: 'organizations', label: 'Organizations' },
   { id: 'pricing', label: 'Pricing' },
+  // Beside Pricing rather than the queues: this is a revenue screen, not a
+  // moderation one.
+  { id: 'ads', label: 'Ads' },
   { id: 'tiers', label: 'Tiers' },
   { id: 'analytics', label: 'Analytics' },
   { id: 'audit', label: 'Audit log' },
@@ -126,6 +131,7 @@ export function AdminApp() {
           {tab === 'users' ? <Users /> : null}
           {tab === 'organizations' ? <Organizations /> : null}
           {tab === 'pricing' ? <Pricing /> : null}
+          {tab === 'ads' ? <AdUnits /> : null}
           {tab === 'tiers' ? <Tiers /> : null}
           {tab === 'analytics' ? <Analytics /> : null}
           {tab === 'audit' ? <AuditLog /> : null}

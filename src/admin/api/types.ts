@@ -153,3 +153,39 @@ export interface AuthTokens {
   accessToken: string
   refreshToken: string
 }
+
+/**
+ * One affiliate or sponsored ad unit.
+ *
+ * camelCase, because the service maps it rather than handing back a Postgres
+ * row. `docs/grid-v2/ADVERTISING_PLATFORM_PLAN.md` §8 is what this screen is
+ * phase 0 of.
+ */
+export interface AdUnit {
+  id: string
+  title: string
+  sponsorName: string
+  imageUrl: string
+  targetUrl: string
+  /**
+   * A partner programme's own required wording. Amazon demands "As an Amazon
+   * Associate I earn from qualifying purchases" beside the link; most direct
+   * arrangements need nothing, and "Sponsored" on the card covers them.
+   */
+  disclosure: string | null
+  category: string | null
+  keywords: string[] | null
+  minPricePaise: number | null
+  maxPricePaise: number | null
+  priorityWeight: number
+  isActive: boolean
+  impressionCount: number
+  clickCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AdUnitsPage {
+  adUnits: AdUnit[]
+  nextCursor: string | null
+}
