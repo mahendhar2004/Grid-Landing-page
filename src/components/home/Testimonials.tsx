@@ -43,7 +43,14 @@ export default function Testimonials() {
     }
   }, [])
 
-  if (!loaded || reviews.length === 0) return null
+  /*
+    `Array.isArray`, not `reviews.length === 0`. The length check alone let a
+    non-array through - `undefined === 0` is false - and the homepage then
+    threw on `.reduce`, taking the whole page down over a marketing strip.
+    The client that produced that shape is fixed; this is the guard that
+    should have made it a missing section rather than a blank site.
+  */
+  if (!loaded || !Array.isArray(reviews) || reviews.length === 0) return null
 
   // Need enough cards so translateX(-50%) loops seamlessly
   const total = Math.max(10, Math.ceil(10 / reviews.length) * reviews.length * 2)

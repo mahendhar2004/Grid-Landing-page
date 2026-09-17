@@ -39,7 +39,27 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(body?.error?.message ?? `Request failed (${response.status}).`)
   }
 
-  return (await response.json()) as T
+  /*
+    Every backend response is wrapped: `{ success: true, data: T }`
+    (`lib/http.ts#jsonResponse`). This client returned the envelope itself,
+    so `getTestimonials()` handed back an object where the caller expected an
+    array - and `Testimonials.tsx` threw "reduce is not a function" on the
+    homepage for *any* successful response, including an empty one, because
+    `{}.length` is undefined rather than 0 and so slipped past its own guard.
+
+    `src/admin/lib/api.ts` has always unwrapped it. This one did not, and the
+    two clients are separate on purpose (see the header), which is exactly how
+    a difference like this survives.
+  */
+  const body = (await response.json()) as { success?: boolean; data?: T } | null
+  if (body?.success !== true) {
+    // A 200 that is not a success envelope is not something to hand on as
+    // data: it means the response came from somewhere other than the API -
+    // a proxy, a cached error page, a redirect to HTML - and every caller
+    // would fail further away, on a shape it could not explain.
+    throw new Error('The server sent a response this app does not recognise.')
+  }
+  return body.data as T
 }
 
 export interface PublicTestimonial {
