@@ -31,3 +31,92 @@ export function hasUsableCoordinates(latitude: string, longitude: string): boole
     Number.isFinite(Number(longitude))
   )
 }
+
+/** A parsed pin. */
+export interface LatLng {
+  readonly latitude: number
+  readonly longitude: number
+}
+
+/**
+ * One coordinate, in either format a person actually has.
+ *
+ * Google Maps shows a place as `23°10'36.0"N` when you click it and as
+ * `23.176667` when you copy from the URL, and there is no signal about which
+ * one a console wants. Accepting only decimals means converting by hand —
+ * degrees, minutes over sixty, seconds over three thousand six hundred — for
+ * a value where being 665 km wrong is a plausible outcome and looks
+ * plausible on the way in.
+ *
+ * Returns null rather than guessing. A half-understood coordinate is worse
+ * than a rejected one.
+ */
+export function parseCoordinate(input: string): number | null {
+  const text = input.trim()
+  if (text.length === 0) {
+    return null
+  }
+
+  // Degrees / minutes / seconds, with the hemisphere as a letter: the
+  // separators vary (° ' " vs spaces vs primes), so match numbers in order
+  // and take the letter wherever it sits.
+  const hemisphere = /([NSEW])\s*$/i.exec(text) ?? /^\s*([NSEW])/i.exec(text)
+  if (hemisphere) {
+    const numbers = text.match(/\d+(?:\.\d+)?/g)
+    if (!numbers || numbers.length === 0) {
+      return null
+    }
+    const [degrees = '0', minutes = '0', seconds = '0'] = numbers
+    const magnitude = Number(degrees) + Number(minutes) / 60 + Number(seconds) / 3600
+    if (!Number.isFinite(magnitude)) {
+      return null
+    }
+    const letter = hemisphere[1]!.toUpperCase()
+    return letter === 'S' || letter === 'W' ? -magnitude : magnitude
+  }
+
+  const decimal = Number(text)
+  return Number.isFinite(decimal) ? decimal : null
+}
+
+/**
+ * A whole pin pasted as one string — "23°10'36.0\"N 80°01'30.3\"E" or
+ * "23.176667, 80.025083" — because that is the unit people copy.
+ *
+ * Splitting on the hemisphere letters rather than on the comma: a DMS pair
+ * has no comma between the halves, and a decimal pair has no letters, so
+ * neither split works for both.
+ */
+export function parseLatLngPair(input: string): LatLng | null {
+  const text = input.trim()
+  if (text.length === 0) {
+    return null
+  }
+
+  const dmsParts = text.match(/[^NSEW]*[NS]|[^NSEW]*[EW]/gi)
+  const halves =
+    dmsParts && dmsParts.length === 2 ? dmsParts : text.split(/\s*,\s*|\s+/).filter(Boolean)
+  if (halves.length !== 2) {
+    return null
+  }
+
+  const latitude = parseCoordinate(halves[0]!)
+  const longitude = parseCoordinate(halves[1]!)
+  if (latitude === null || longitude === null) {
+    return null
+  }
+  /*
+    Bounds only. This catches the transposition it can - PostGIS stores
+    longitude first, so a pair copied from the database arrives reversed, and
+    any longitude past 90 gives it away as a latitude.
+
+    It cannot catch the rest, and does not pretend to: 80.02°N 23.18°E is the
+    Arctic Ocean, a real coordinate, and nothing in the string says which half
+    was meant to be which. The editor's "check the point you typed" link is
+    what catches that, because a human looking at a map knows instantly.
+  */
+  if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+    return null
+  }
+  return { latitude, longitude }
+}

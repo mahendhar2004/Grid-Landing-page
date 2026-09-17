@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { api } from '../api/endpoints'
 import type { AdminOrganization } from '../api/types'
 import type { ApiError } from '../lib/api'
-import { formatCoordinate, hasUsableCoordinates } from '../lib/coordinates'
+import { formatCoordinate, hasUsableCoordinates, parseLatLngPair } from '../lib/coordinates'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, Field, Panel } from '../components/ui'
 
@@ -53,6 +53,17 @@ export function Organizations() {
     geographic measures from that point: the map pin, "nearby", the browsing
     radius. It was the one Hub field nothing could correct.
   */
+  /**
+   * What the server said it saved, shown after a save.
+   *
+   * A PATCH that changes nothing is a perfectly valid request: it returns
+   * 200 and writes an audit row whose before and after are identical. So a
+   * console that only reports failures cannot distinguish "saved" from
+   * "sent an empty change" - which is exactly how a pin edit appeared to
+   * work and silently did not. Echoing the coordinates the server came back
+   * with makes that visible in the one place it matters.
+   */
+  const [savedNote, setSavedNote] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [edit, setEdit] = useState<EditForm | null>(null)
   const [showForm, setShowForm] = useState(false)
@@ -115,6 +126,7 @@ export function Organizations() {
   async function saveEdit(organization: AdminOrganization) {
     if (!edit) return
     setActionError(null)
+    setSavedNote(null)
     setBusy(true)
     try {
       const latitude = Number(edit.latitude)
@@ -135,7 +147,7 @@ export function Organizations() {
       */
       const hasCoordinates = hasUsableCoordinates(edit.latitude, edit.longitude)
 
-      await api.organizations.update(organization.id, {
+      const saved = await api.organizations.update(organization.id, {
         name: edit.name.trim(),
         type: edit.type,
         // Both or neither: the endpoint refuses one on its own, because a
@@ -143,6 +155,11 @@ export function Organizations() {
         ...(hasCoordinates ? { latitude, longitude } : {}),
         reason: edit.reason.trim(),
       })
+      setSavedNote(
+        typeof saved.hubLatitude === 'number' && typeof saved.hubLongitude === 'number'
+          ? `Saved ${saved.name} — pin now at ${formatCoordinate(saved.hubLatitude, 'lat')}, ${formatCoordinate(saved.hubLongitude, 'lng')}.`
+          : `Saved ${saved.name}.`,
+      )
       setEditingId(null)
       setEdit(null)
       await reload()
@@ -204,6 +221,15 @@ export function Organizations() {
       </div>
 
       <ErrorNote error={error} />
+
+      {/* The server's own answer, not an assumption that the request worked. */}
+      {savedNote ? (
+        <Panel className="p-3">
+          <p className="text-xs text-[var(--color-text)]" data-testid="organizations-saved-note">
+            {savedNote}
+          </p>
+        </Panel>
+      ) : null}
 
       {showForm ? (
         <Panel className="p-5">
@@ -357,6 +383,41 @@ export function Organizations() {
                         </select>
                       </label>
                     </div>
+
+                    {/*
+                      Paste, rather than convert by hand.
+
+                      Google Maps gives `23°10'36.0"N 80°01'30.3"E` when you
+                      click a place, and the fields below take decimals - so
+                      the workflow was degrees, minutes over sixty, seconds
+                      over three thousand six hundred, for a value where
+                      being 665 km wrong looks entirely plausible on the way
+                      in. This takes either form and fills both fields.
+                    */}
+                    <label className="block text-sm">
+                      <span className="mb-1 block font-medium text-[var(--color-text)]">
+                        Paste a pin from Google Maps
+                      </span>
+                      <input
+                        type="text"
+                        placeholder={`23°10'36.0"N 80°01'30.3"E  or  23.176667, 80.025083`}
+                        onChange={(event) => {
+                          const pin = parseLatLngPair(event.target.value)
+                          if (pin) {
+                            setEdit({
+                              ...edit,
+                              latitude: String(pin.latitude),
+                              longitude: String(pin.longitude),
+                            })
+                          }
+                        }}
+                        className="w-full rounded-md border border-[var(--color-border)] bg-[var(--bg-page)] px-3 py-2 text-sm text-[var(--color-text)]"
+                        data-testid="organizations-paste-pin"
+                      />
+                      <span className="mt-1 block text-xs text-[var(--color-text-muted)]">
+                        Fills the two fields below as soon as it recognises a pair. They stay editable.
+                      </span>
+                    </label>
 
                     <div className="grid gap-4 sm:grid-cols-2">
                       <Field
