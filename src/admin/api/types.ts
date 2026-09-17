@@ -169,6 +169,30 @@ export type AdvertiserTier = 'LOCAL' | 'BRAND' | 'HOUSE'
 export type LineItemStatus = 'DRAFT' | 'SCHEDULED' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'ARCHIVED'
 export type CreativeReviewStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 export type AdPlacement = 'FEED' | 'SEARCH' | 'MAP'
+/**
+ * An advertiser's line of business — deliberately not "category", which is
+ * already a targeting axis on a line item. One of the two decides what Grid
+ * refuses to run, and putting both behind one word is how that decision
+ * eventually gets made against the wrong field.
+ */
+export type AdSector =
+  | 'EDUCATION'
+  | 'RETAIL'
+  | 'FOOD_DRINK'
+  | 'ELECTRONICS'
+  | 'FASHION'
+  | 'SERVICES'
+  | 'EVENTS'
+  | 'TRAVEL'
+  | 'HEALTH_FITNESS'
+  | 'JOBS_CAREERS'
+  | 'OTHER'
+  | 'LENDING'
+  | 'GAMBLING'
+  | 'CRYPTO'
+  | 'ALCOHOL'
+  | 'TOBACCO'
+  | 'ADULT'
 
 /** The company an ad belongs to. Everything to do with money or trust hangs off this. */
 export interface Advertiser {
@@ -177,6 +201,8 @@ export interface Advertiser {
   /** Who the invoice is made out to, routinely different from the name on the ad. */
   legalName: string | null
   tier: AdvertiserTier
+  /** Their line of business, which the blocked-sector policy is applied to. */
+  sector: AdSector
   gstNumber: string | null
   billingEmail: string | null
   contactName: string | null
@@ -288,4 +314,24 @@ export interface LineItem {
 export interface LineItemsPage {
   lineItems: LineItem[]
   nextCursor: string | null
+}
+
+/**
+ * The controls Grid holds regardless of who bought what.
+ *
+ * None of these needs a deploy or an app release — they are rows read at serve
+ * time, which is the difference between an ad system somebody can operate at
+ * 2am and one that needs an engineer.
+ */
+export interface AdSettings {
+  /** The global kill switch. When off, no slot anywhere is filled, whatever else is configured. */
+  adsEnabled: boolean
+  disabledReason: string | null
+  disabledAt: string | null
+  /** Listings between ad slots in the feed. The single biggest lever on whether the feed reads as a marketplace or a billboard. */
+  feedInterleaveInterval: number
+  enabledPlacements: AdPlacement[]
+  /** Lines of business Grid will not run from anybody, whatever an individual creative says. */
+  blockedSectors: AdSector[]
+  updatedAt: string
 }

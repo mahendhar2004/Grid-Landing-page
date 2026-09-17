@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { api } from '../api/endpoints'
 import type { CreateAdOrderBody, CreateAdvertiserBody } from '../api/endpoints'
-import type { AdOrder, Advertiser, AdvertiserTier } from '../api/types'
+import type { AdOrder, AdSector, Advertiser, AdvertiserTier } from '../api/types'
 import { useCursorPagedData } from '../lib/usePagedData'
 import { useAdminAction } from '../lib/useAdminAction'
 import { Badge, Button, EmptyNote, ErrorNote, Field, MoreRow, Panel, ReasonPrompt } from '../components/ui'
@@ -27,10 +27,32 @@ const TIERS: ReadonlyArray<{ value: AdvertiserTier; label: string; hint: string 
   { value: 'HOUSE', label: 'House', hint: "Grid's own promotions. No review, because it is ours." },
 ]
 
+/** Ordered so the ones Grid usually refuses are visible rather than buried at the end of a long list. */
+const SECTORS: readonly AdSector[] = [
+  'OTHER',
+  'EDUCATION',
+  'RETAIL',
+  'FOOD_DRINK',
+  'ELECTRONICS',
+  'FASHION',
+  'SERVICES',
+  'EVENTS',
+  'TRAVEL',
+  'HEALTH_FITNESS',
+  'JOBS_CAREERS',
+  'LENDING',
+  'GAMBLING',
+  'CRYPTO',
+  'ALCOHOL',
+  'TOBACCO',
+  'ADULT',
+]
+
 const EMPTY_ADVERTISER = {
   name: '',
   legalName: '',
   tier: 'LOCAL' as AdvertiserTier,
+  sector: 'OTHER' as AdSector,
   gstNumber: '',
   billingEmail: '',
   contactName: '',
@@ -82,6 +104,7 @@ export function Advertisers() {
       // than an empty string that would print as a blank line on an invoice.
       legalName: form.legalName.trim() || null,
       tier: form.tier,
+      sector: form.sector,
       gstNumber: form.gstNumber.trim().toUpperCase() || null,
       billingEmail: form.billingEmail.trim() || null,
       contactName: form.contactName.trim() || null,
@@ -137,6 +160,25 @@ export function Advertisers() {
               </select>
               <span className="block text-xs text-[var(--color-text-muted)]">
                 {TIERS.find((entry) => entry.value === form.tier)?.hint}
+              </span>
+            </label>
+
+            <label className="block space-y-1">
+              <span className="text-xs font-medium text-[var(--color-text-muted)]">Sector</span>
+              <select
+                value={form.sector}
+                onChange={(e) => setForm({ ...form, sector: e.target.value as AdSector })}
+                className="w-full rounded border border-[var(--color-border)] bg-transparent p-2 text-sm text-[var(--color-text)]"
+              >
+                {SECTORS.map((sector) => (
+                  <option key={sector} value={sector}>
+                    {sector.replace(/_/g, ' ').toLowerCase()}
+                  </option>
+                ))}
+              </select>
+              <span className="block text-xs text-[var(--color-text-muted)]">
+                Their line of business. A sector on the blocked list in Ad settings is refused here
+                and stops serving everywhere.
               </span>
             </label>
 
@@ -275,6 +317,7 @@ function AdvertiserRow({
           <div className="flex flex-wrap items-center gap-2">
             {archived ? <Badge>Archived</Badge> : suspended ? <Badge tone="bad">Suspended</Badge> : <Badge tone="good">Open</Badge>}
             <Badge>{advertiser.tier}</Badge>
+            <Badge>{advertiser.sector.replace(/_/g, ' ').toLowerCase()}</Badge>
             <p className="truncate text-sm font-semibold text-[var(--color-text)]">{advertiser.name}</p>
           </div>
           <p className="mt-1 truncate text-xs text-[var(--color-text-muted)]">

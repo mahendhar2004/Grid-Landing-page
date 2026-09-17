@@ -3,6 +3,8 @@ import type {
   AdOrder,
   AdOrdersPage,
   AdPlacement,
+  AdSector,
+  AdSettings,
   AdminOrganization,
   Advertiser,
   AdvertiserTier,
@@ -340,6 +342,7 @@ export interface CreateAdvertiserBody {
   name: string
   legalName: string | null
   tier: AdvertiserTier
+  sector: AdSector
   gstNumber: string | null
   billingEmail: string | null
   contactName: string | null
@@ -491,6 +494,35 @@ const creatives = {
   },
 }
 
+const adSettings = {
+  get(): Promise<AdSettings> {
+    return apiGet<AdSettings>('/v1/admin/ad-settings')
+  },
+
+  update(body: UpdateAdSettingsBody): Promise<AdSettings> {
+    return apiPatch<AdSettings>('/v1/admin/ad-settings', body)
+  },
+
+  /**
+   * The kill switch, deliberately its own call rather than a field on the
+   * patch above. It is the control somebody reaches for in a hurry, it carries
+   * a reason, and it must never flip as a side effect of saving a density
+   * change.
+   */
+  setEnabled(enabled: boolean, reason: string | null): Promise<AdSettings> {
+    return apiPost<AdSettings>('/v1/admin/ad-settings/enabled', enabled ? { enabled } : { enabled, reason })
+  },
+}
+
+/** Every field optional, because the route patches. `blockedSectors` is the whole list, not a delta. */
+export interface UpdateAdSettingsBody {
+  feedInterleaveInterval?: number
+  feedEnabled?: boolean
+  searchEnabled?: boolean
+  mapEnabled?: boolean
+  blockedSectors?: AdSector[]
+}
+
 const lineItems = {
   list(
     cursor: string | null,
@@ -568,6 +600,7 @@ export const api = {
   content,
   advertisers,
   adOrders,
+  adSettings,
   creatives,
   lineItems,
   pricing,

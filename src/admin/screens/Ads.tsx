@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { AdLineItems } from './AdLineItems'
 import { Advertisers } from './Advertisers'
+import { AdSettings } from './AdSettings'
 import { Creatives } from './Creatives'
 
 /**
@@ -16,12 +17,13 @@ import { Creatives } from './Creatives'
  * "what is running right now".
  */
 
-type Section = 'ads' | 'advertisers' | 'creatives'
+type Section = 'ads' | 'advertisers' | 'creatives' | 'settings'
 
 const SECTIONS: ReadonlyArray<{ id: Section; label: string }> = [
   { id: 'ads', label: 'Ads' },
   { id: 'advertisers', label: 'Advertisers' },
   { id: 'creatives', label: 'Creatives' },
+  { id: 'settings', label: 'Settings' },
 ]
 
 export function Ads({ initialSection = 'ads' }: { initialSection?: Section }) {
@@ -55,6 +57,7 @@ export function Ads({ initialSection = 'ads' }: { initialSection?: Section }) {
         creative is a campaign that is not running and nobody has noticed.
       */}
       {section === 'creatives' ? <Creatives initialReviewStatus="PENDING" /> : null}
+      {section === 'settings' ? <AdSettings /> : null}
     </div>
   )
 }
