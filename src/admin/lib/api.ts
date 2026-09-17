@@ -277,8 +277,55 @@ export interface VerifyOtpResponse {
   refreshToken: string
 }
 
+/**
+ * Whether the issued token carries the admin claim.
+ *
+ * **This is not a security check and must never be treated as one.** The
+ * claim is inside a signature this cannot verify, and every admin route
+ * checks it server-side on every request regardless. Reading it here buys
+ * exactly one thing: an honest message.
+ *
+ * Without it, a non-admin signed in perfectly happily and then met
+ * *"User ... is not an admin; GET /v1/admin/reports requires admin access"*
+ * on a screen that had already welcomed them in - which reads as the console
+ * being broken rather than as the account not having access. The worst a
+ * tampered token can achieve against this is showing someone a console shell
+ * that 403s on everything, which is precisely what happens today anyway.
+ */
+function tokenHasAdminClaim(accessToken: string): boolean {
+  try {
+    const payload = accessToken.split('.')[1]
+    if (!payload) {
+      return false
+    }
+    // base64url -> base64, then pad. `atob` rejects the url-safe alphabet.
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=')
+    const claims = JSON.parse(atob(padded)) as { isAdmin?: unknown }
+    return claims.isAdmin === true
+  } catch {
+    // Unparseable. Treated as "no claim" rather than crashing sign-in - the
+    // server is still the thing that decides, and it will say no too.
+    return false
+  }
+}
+
 export async function verifyOtp(email: string, otp: string): Promise<VerifyOtpResponse> {
   const tokens = await apiPost<VerifyOtpResponse>('/v1/auth/verify-otp', { email, otp })
+
+  if (!tokenHasAdminClaim(tokens.accessToken)) {
+    // Refuse the session rather than storing it. Keeping a valid non-admin
+    // token here would leave a signed-in state that can do nothing, which is
+    // a worse thing to hand someone than a clear refusal.
+    clearTokens()
+    throw new ApiError(
+      403,
+      'NOT_AN_ADMIN',
+      'That account does not have console access. Ask an existing admin to add it.',
+      null,
+    )
+  }
+
   storeTokens(tokens.accessToken, tokens.refreshToken)
   return tokens
 }

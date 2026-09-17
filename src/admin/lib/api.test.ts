@@ -175,3 +175,50 @@ describe('a session that has been running a while', () => {
     expect(captured).toHaveLength(3)
   })
 })
+
+describe('who is allowed into the console', () => {
+  /** A JWT is `header.payload.signature`; only the middle part is read here. */
+  function tokenWithClaims(claims: Record<string, unknown>): string {
+    const payload = btoa(JSON.stringify(claims)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+    return `header.${payload}.signature`
+  }
+
+  it('signs an admin in and keeps the session', async () => {
+    const { verifyOtp, getAccessToken } = await loadApi()
+    const token = tokenWithClaims({ userId: 'u1', isAdmin: true })
+    mockFetch(okResponse({ accessToken: token, refreshToken: 'r1' }))
+
+    await verifyOtp('admin@iitd.ac.in', '123456')
+
+    expect(getAccessToken()).toBe(token)
+  })
+
+  it('refuses a non-admin with a reason, rather than letting them in to collect 403s', async () => {
+    const { verifyOtp, getAccessToken } = await loadApi()
+    mockFetch(okResponse({ accessToken: tokenWithClaims({ userId: 'u1', isAdmin: false }), refreshToken: 'r1' }))
+
+    // What used to happen: a cheerful sign-in, then "User ... is not an admin"
+    // on every screen behind it - which reads as broken software.
+    await expect(verifyOtp('someone@iitd.ac.in', '123456')).rejects.toMatchObject({
+      status: 403,
+      code: 'NOT_AN_ADMIN',
+    })
+    // And no session left behind that can do nothing.
+    expect(getAccessToken()).toBeNull()
+  })
+
+  it('treats an unreadable token as no claim rather than crashing sign-in', async () => {
+    const { verifyOtp, getAccessToken } = await loadApi()
+    mockFetch(okResponse({ accessToken: 'not-a-jwt', refreshToken: 'r1' }))
+
+    await expect(verifyOtp('someone@iitd.ac.in', '123456')).rejects.toMatchObject({ code: 'NOT_AN_ADMIN' })
+    expect(getAccessToken()).toBeNull()
+  })
+
+  it('treats a missing isAdmin claim as absent, not as permission', async () => {
+    const { verifyOtp } = await loadApi()
+    mockFetch(okResponse({ accessToken: tokenWithClaims({ userId: 'u1' }), refreshToken: 'r1' }))
+
+    await expect(verifyOtp('someone@iitd.ac.in', '123456')).rejects.toMatchObject({ code: 'NOT_AN_ADMIN' })
+  })
+})

@@ -11,12 +11,20 @@ import { Button, ErrorNote, Field, Panel } from '../components/ui'
  * user row - so being an admin is something an existing account *is*, not a
  * different way of logging in.
  *
- * **This screen never checks whether you are an admin.** It cannot: the claim
- * is inside a signed token the server issues and verifies. A non-admin who
- * signs in here reaches the console shell and then gets 403 on every single
- * request behind it. That is the correct shape - the check belongs on the
- * server, and duplicating it here would only add a second place to get it
- * wrong.
+ * **A non-admin is refused here, with a reason.** The previous version of
+ * this comment claimed the screen *could not* know - that the claim was
+ * "inside a signed token the server issues and verifies" - and concluded
+ * that letting a non-admin in to collect 403s was the correct shape. Both
+ * halves were wrong. The claim is readable: a JWT payload is base64 JSON,
+ * and `isAdmin` is right there in it. And the resulting experience was a
+ * console that signed you in and then failed every request, which reads as
+ * broken software rather than as an account without access.
+ *
+ * So `verifyOtp` refuses the session when the claim is absent. That is a
+ * *message*, not a security boundary - every admin route still checks
+ * server-side on every request, and the worst a tampered token achieves
+ * against this is the console shell that 403s on everything, which is
+ * exactly what used to happen to everyone.
  *
  * **The consent box is real, not a schema formality.** `send-otp` records a
  * consent event against the address it is given, so the console has to have
