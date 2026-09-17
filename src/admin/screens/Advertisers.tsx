@@ -2,9 +2,10 @@ import { useState } from 'react'
 
 import { api } from '../api/endpoints'
 import type { CreateAdOrderBody, CreateAdvertiserBody } from '../api/endpoints'
-import type { AdOrder, AdSector, Advertiser, AdvertiserTier } from '../api/types'
+import type { AdOrder, AdSector, Advertiser, AdvertiserTier, LedgerEntry } from '../api/types'
 import { useCursorPagedData } from '../lib/usePagedData'
 import { useAdminAction } from '../lib/useAdminAction'
+import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, Field, MoreRow, Panel, ReasonPrompt } from '../components/ui'
 
 /**
@@ -335,7 +336,7 @@ function AdvertiserRow({
 
         {/* Dismissive on the left, confirming on the right. */}
         <div className="flex items-center gap-2">
-          <Button onClick={onToggle}>{expanded ? 'Hide orders' : 'Orders'}</Button>
+          <Button onClick={onToggle}>{expanded ? 'Hide' : 'Orders & money'}</Button>
           {!archived ? (
             <>
               <Button disabled={busy} onClick={suspended ? onUnsuspend : onSuspend}>
@@ -349,7 +350,12 @@ function AdvertiserRow({
         </div>
       </div>
 
-      {expanded ? <Orders advertiser={advertiser} onChanged={onOrderCreated} /> : null}
+      {expanded ? (
+        <>
+          <Orders advertiser={advertiser} onChanged={onOrderCreated} />
+          <Ledger advertiser={advertiser} />
+        </>
+      ) : null}
     </li>
   )
 }
@@ -459,6 +465,157 @@ function OrderRow({ order, busy, onArchive }: { order: AdOrder; busy: boolean; o
           </p>
         </ReasonPrompt>
       ) : null}
+    </li>
+  )
+}
+
+/**
+ * The advertiser's prepaid balance and what made it
+ * (`docs/grid-v2/ADVERTISING_PLATFORM_PLAN.md` §7).
+ *
+ * Append-only, and the screen says so, because that is the thing somebody
+ * reaching for an edit needs to know before they go looking for one. A
+ * mistake is corrected by posting an adjustment, which leaves the error and
+ * the fix visible beside each other — which is what an advertiser disputing
+ * an invoice actually needs to see.
+ *
+ * There is no way to type a debit here on purpose. Debits come from delivery,
+ * written in the same transaction as the rollup they are derived from, so a
+ * balance and a reported spend cannot disagree. A hand-typed charge with no
+ * delivery behind it is the one thing an advertiser would be right to dispute.
+ */
+function Ledger({ advertiser }: { advertiser: Advertiser }) {
+  const [form, setForm] = useState({ amountRupees: '', reference: '', description: '' })
+  const [adjusting, setAdjusting] = useState(false)
+
+  const { data: ledger, error: loadError, reload } = useAsyncData(
+    () => api.advertiserLedger.get(advertiser.id, null),
+    [advertiser.id],
+  )
+  const { run, busy, error: actionError } = useAdminAction(reload)
+
+  const rupeeValue = Number(form.amountRupees.trim())
+  // Adjustments may be negative — taking money back off is most of what they
+  // are for — but a credit never is, and zero records nothing either way.
+  const amountValid =
+    Number.isFinite(rupeeValue) && rupeeValue !== 0 && (adjusting || rupeeValue > 0)
+  const canSubmit =
+    amountValid && form.description.trim() !== '' && (adjusting || form.reference.trim() !== '')
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault()
+    if (!canSubmit) return
+    const amountPaise = Math.round(rupeeValue * 100)
+    const succeeded = await run(() =>
+      adjusting
+        ? api.advertiserLedger.adjust(advertiser.id, amountPaise, form.description.trim())
+        : api.advertiserLedger.credit(
+            advertiser.id,
+            amountPaise,
+            form.reference.trim(),
+            form.description.trim(),
+          ),
+    )
+    if (succeeded) setForm({ amountRupees: '', reference: '', description: '' })
+  }
+
+  return (
+    <div className="mt-4 space-y-3 rounded-lg border border-[var(--color-border)] p-3">
+      <ErrorNote error={actionError ?? loadError} />
+
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-sm font-bold text-[var(--color-text)]">Balance</h3>
+        <p className={ledger && ledger.balancePaise <= 0 ? 'text-sm font-bold text-[var(--color-text)]' : 'text-sm'}>
+          {ledger ? rupees(ledger.balancePaise) : '—'}
+        </p>
+      </div>
+      {ledger && ledger.balancePaise <= 0 && advertiser.activeLineItemCount > 0 ? (
+        <p className="text-xs font-semibold text-[var(--color-text)]">
+          Nothing left, and {advertiser.activeLineItemCount} ad
+          {advertiser.activeLineItemCount === 1 ? '' : 's'} still live. They do not know.
+        </p>
+      ) : null}
+
+      {ledger === null ? (
+        <EmptyNote>Loading…</EmptyNote>
+      ) : ledger.entries.length === 0 ? (
+        <EmptyNote>Nothing yet. Credit a payment against the reference it arrived with.</EmptyNote>
+      ) : (
+        <ul className="divide-y divide-[var(--color-border)]">
+          {ledger.entries.map((entry) => (
+            <LedgerRow key={entry.id} entry={entry} />
+          ))}
+        </ul>
+      )}
+
+      {advertiser.archivedAt === null ? (
+        <form onSubmit={submit} className="space-y-2 border-t border-[var(--color-border)] pt-3">
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="w-32">
+              <Field
+                // Named for what it is: an order on the same screen also asks
+                // for an "Amount (₹)", and two of those is one too many.
+                label={adjusting ? 'Adjustment (₹, ±)' : 'Payment (₹)'}
+                value={form.amountRupees}
+                onChange={(value) => setForm({ ...form, amountRupees: value })}
+                placeholder={adjusting ? '-5000' : '20000'}
+              />
+            </div>
+            {!adjusting ? (
+              <div className="w-44">
+                <Field
+                  label="Bank reference"
+                  value={form.reference}
+                  onChange={(value) => setForm({ ...form, reference: value })}
+                  placeholder="UTR / cheque no."
+                />
+              </div>
+            ) : null}
+            <div className="min-w-[14rem] flex-1">
+              <Field
+                label="What this is"
+                value={form.description}
+                onChange={(value) => setForm({ ...form, description: value })}
+                placeholder={adjusting ? 'Refunded the unspent half after they cancelled' : 'NEFT received 17 Sep'}
+              />
+            </div>
+            {/* Dismissive on the left, confirming on the right. */}
+            <Button onClick={() => setAdjusting((current) => !current)}>
+              {adjusting ? 'Credit instead' : 'Adjust instead'}
+            </Button>
+            <Button variant="primary" type="submit" onClick={() => undefined} disabled={busy || !canSubmit}>
+              {busy ? 'Posting…' : adjusting ? 'Post adjustment' : 'Credit payment'}
+            </Button>
+          </div>
+          <p className="text-xs text-[var(--color-text-muted)]">
+            {adjusting
+              ? 'An adjustment is the only way to correct this ledger — entries are never edited or removed, so the correction stays visible beside what it corrects.'
+              : 'The reference is what makes this safe to press twice: the same payment cannot be credited to one advertiser more than once.'}
+          </p>
+        </form>
+      ) : null}
+    </div>
+  )
+}
+
+function LedgerRow({ entry }: { entry: LedgerEntry }) {
+  return (
+    <li className="flex flex-wrap items-center gap-3 py-2">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <Badge tone={entry.amountPaise > 0 ? 'good' : 'neutral'}>{entry.entryType}</Badge>
+          <p className="truncate text-sm text-[var(--color-text)]">{entry.description}</p>
+        </div>
+        <p className="truncate text-xs text-[var(--color-text-muted)]">
+          {new Date(entry.createdAt).toLocaleDateString('en-IN')}
+          {entry.externalReference ? ` · ${entry.externalReference}` : ''}
+          {entry.lineItemName ? ` · ${entry.lineItemName}` : ''}
+        </p>
+      </div>
+      <p className="text-sm font-medium text-[var(--color-text)]">
+        {entry.amountPaise > 0 ? '+' : '−'}
+        {rupees(Math.abs(entry.amountPaise))}
+      </p>
     </li>
   )
 }

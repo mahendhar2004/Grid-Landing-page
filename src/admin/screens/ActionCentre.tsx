@@ -28,9 +28,11 @@ import { useAsyncData } from '../lib/useAsyncData'
  * 4. **Ad creatives awaiting review** — nothing serves until somebody looks,
  *    so a campaign that was paid for is quietly not running. Time-bound
  *    rather than urgent: the cost is ours and an advertiser's, not a user's.
- * 5. **Bug reports** — someone hit something broken and took the trouble to
+ * 5. **Advertisers out of balance** — their ads have stopped, they do not
+ *    know, and the first they would hear of it is the invoice.
+ * 6. **Bug reports** — someone hit something broken and took the trouble to
  *    say so.
- * 6. **Feedback and reviews** — worth reading, no clock.
+ * 7. **Feedback and reviews** — worth reading, no clock.
  *
  * It composes from endpoints that already exist rather than adding a
  * dashboard route to the backend: three parallel calls the console was
@@ -70,7 +72,7 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
       blank the whole page - a dashboard showing nothing because one of five
       numbers is missing is worse than one showing four.
     */
-    const [counts, reports, organizations, pendingCreatives] = await Promise.all([
+    const [counts, reports, organizations, pendingCreatives, exhaustedAdvertisers] = await Promise.all([
       api.triage.counts().catch(() => ({}) as TriageCounts),
       // A glance, not a queue: the first page of each is enough to say how
       // much is waiting, and the tab itself is where you work through it.
@@ -80,6 +82,22 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
         .list(null, { reviewStatus: 'PENDING' }, 100)
         .then((page) => page.creatives)
         .catch(() => [] as Creative[]),
+      // Advertisers whose balance has run out while something is still live.
+      api.advertisers
+        .list(null, {}, 100)
+        .then((page) => page.advertisers.filter((advertiser) => advertiser.activeLineItemCount > 0))
+        .then((live) =>
+          Promise.all(
+            live.map((advertiser) =>
+              api.advertiserLedger
+                .get(advertiser.id, null, 1)
+                .then((ledger) => (ledger.balancePaise <= 0 ? advertiser : null))
+                .catch(() => null),
+            ),
+          ),
+        )
+        .then((results) => results.filter((entry) => entry !== null))
+        .catch(() => []),
     ])
 
     const pendingHubs = organizations.filter((organization) => organization.hubStatus !== 'ACTIVE').length
@@ -117,6 +135,14 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
         count: pendingCreatives.length,
         severity: 'high',
         why: 'Nothing serves until somebody looks. A campaign that was paid for is silently not running, and the advertiser finds out before we do.',
+        tab: 'ads',
+      },
+      {
+        key: 'exhausted',
+        label: 'Advertisers out of balance',
+        count: exhaustedAdvertisers.length,
+        severity: 'high',
+        why: 'Their ads have stopped and they do not know. The first they would hear of it is the invoice, which is the expensive way for anyone to find out.',
         tab: 'ads',
       },
       {

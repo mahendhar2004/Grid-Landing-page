@@ -6,6 +6,7 @@ import type {
   AdPlacement,
   AdSector,
   AdSettings,
+  AdvertiserLedgerPage,
   AdminOrganization,
   Advertiser,
   AdvertiserTier,
@@ -449,6 +450,39 @@ const advertisers = {
   },
 }
 
+const advertiserLedger = {
+  get(advertiserId: string, cursor: string | null, limit = 50): Promise<AdvertiserLedgerPage> {
+    return apiGet<AdvertiserLedgerPage>(`/v1/admin/advertisers/${advertiserId}/ledger`, {
+      ...(cursor ? { cursor } : {}),
+      limit,
+    })
+  },
+
+  /** A payment that arrived, against the reference it arrived with — which is what makes this safe to press twice. */
+  credit(advertiserId: string, amountPaise: number, externalReference: string, description: string) {
+    return apiPost<AdvertiserLedgerPage>(`/v1/admin/advertisers/${advertiserId}/ledger`, {
+      entryType: 'CREDIT',
+      amountPaise,
+      externalReference,
+      description,
+    })
+  },
+
+  /**
+   * Everything a payment reference cannot describe — a goodwill credit, a
+   * write-off, a correction. Signed either way, and the only way a mistake in
+   * this ledger is ever fixed: the table refuses edits outright, so the
+   * correction sits visibly beside what it corrects.
+   */
+  adjust(advertiserId: string, amountPaise: number, description: string) {
+    return apiPost<AdvertiserLedgerPage>(`/v1/admin/advertisers/${advertiserId}/ledger`, {
+      entryType: 'ADJUSTMENT',
+      amountPaise,
+      description,
+    })
+  },
+}
+
 const adOrders = {
   list(cursor: string | null, filters: { advertiserId?: string; includeArchived?: boolean } = {}, limit = 50) {
     return apiGet<AdOrdersPage>('/v1/admin/ad-orders', {
@@ -619,6 +653,7 @@ export const api = {
   advertisers,
   adOrders,
   adSettings,
+  advertiserLedger,
   creatives,
   lineItems,
   pricing,

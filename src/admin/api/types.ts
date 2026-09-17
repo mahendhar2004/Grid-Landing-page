@@ -367,3 +367,26 @@ export interface AdHubOverride {
   reason: string
   updatedAt: string
 }
+
+/** One event in an advertiser's ledger. Append-only: a mistake is corrected by posting an adjustment, never by editing. */
+export interface LedgerEntry {
+  id: string
+  entryType: 'CREDIT' | 'DEBIT' | 'ADJUSTMENT'
+  /** Signed paise — positive is money in, negative is money out. A balance is the sum of these and nothing else. */
+  amountPaise: number
+  description: string
+  externalReference: string | null
+  lineItemId: string | null
+  lineItemName: string | null
+  periodStart: string | null
+  periodEnd: string | null
+  createdAt: string
+}
+
+export interface AdvertiserLedgerPage {
+  advertiserId: string
+  advertiserName: string
+  balancePaise: number
+  entries: LedgerEntry[]
+  nextCursor: string | null
+}
