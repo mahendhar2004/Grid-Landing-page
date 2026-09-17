@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { clearTokens, getAccessToken } from './lib/api'
+import { ActionCentre } from './screens/ActionCentre'
 import { Analytics } from './screens/Analytics'
 import { AuditLog } from './screens/AuditLog'
 import { Organizations } from './screens/Organizations'
@@ -23,9 +24,13 @@ import { Triage } from './screens/Triage'
  * keeps it out of the JavaScript.
  */
 
-type Tab = 'reports' | 'triage' | 'organizations' | 'pricing' | 'tiers' | 'analytics' | 'audit'
+type Tab = 'home' | 'reports' | 'triage' | 'organizations' | 'pricing' | 'tiers' | 'analytics' | 'audit'
 
 const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
+  // First, and the landing tab. The console had no answer to "what do I need
+  // to do?" - you found out by opening seven tabs, which is fine daily and
+  // useless the moment something is urgent.
+  { id: 'home', label: 'What needs you' },
   { id: 'reports', label: 'Reports' },
   { id: 'triage', label: 'Inboxes' },
   { id: 'organizations', label: 'Organizations' },
@@ -37,7 +42,7 @@ const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
 
 export function AdminApp() {
   const [signedIn, setSignedIn] = useState(() => getAccessToken() !== null)
-  const [tab, setTab] = useState<Tab>('reports')
+  const [tab, setTab] = useState<Tab>('home')
 
   /**
    * A 401 anywhere clears the token (see `lib/api.ts`), but the shell has no
@@ -89,6 +94,7 @@ export function AdminApp() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-6">
+        {tab === 'home' ? <ActionCentre onOpenTab={(next) => setTab(next as Tab)} /> : null}
         {tab === 'reports' ? <Reports /> : null}
         {tab === 'triage' ? <Triage /> : null}
         {tab === 'organizations' ? <Organizations /> : null}

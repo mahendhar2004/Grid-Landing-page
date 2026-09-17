@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { ApiError, apiDelete, apiGet, apiPatch, apiPost } from '../lib/api'
+import { formatCoordinate, hasUsableCoordinates } from '../lib/coordinates'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, Field, Panel } from '../components/ui'
 
@@ -140,22 +141,28 @@ export function Organizations() {
     try {
       const latitude = Number(edit.latitude)
       const longitude = Number(edit.longitude)
-      // Blank or unparseable is "not moving it", never 0 - `Number('')` is 0,
-      // and 0,0 is a real coordinate in the Atlantic.
-      const hasCoordinates =
-        edit.latitude.trim().length > 0 &&
-        edit.longitude.trim().length > 0 &&
-        Number.isFinite(latitude) &&
-        Number.isFinite(longitude)
-      const moved =
-        hasCoordinates && (latitude !== organization.hubLatitude || longitude !== organization.hubLongitude)
+      /*
+        Blank or unparseable is "not moving it", never 0 - `Number('')` is 0,
+        and 0,0 is a real coordinate in the Atlantic.
+
+        Note what this does NOT do: compare against the current values.
+
+        It used to, and only sent a field it believed had changed - which
+        produced "Provide at least one of name, type, hubStatus or
+        latitude/longitude to change" for someone who had visibly typed
+        coordinates, because the console had decided on their behalf that
+        they matched and sent nothing at all. The endpoint is idempotent;
+        re-sending a value it already holds costs one comparison on the
+        server and removes that entire class of confusion.
+      */
+      const hasCoordinates = hasUsableCoordinates(edit.latitude, edit.longitude)
 
       await apiPatch(`/v1/admin/organizations/${organization.id}`, {
-        ...(edit.name.trim() !== organization.name ? { name: edit.name.trim() } : {}),
-        ...(edit.type !== organization.type ? { type: edit.type } : {}),
+        name: edit.name.trim(),
+        type: edit.type,
         // Both or neither: the endpoint refuses one on its own, because a
         // new latitude against the old longitude is a Hub nobody chose.
-        ...(moved ? { latitude, longitude } : {}),
+        ...(hasCoordinates ? { latitude, longitude } : {}),
         reason: edit.reason.trim(),
       })
       setEditingId(null)
@@ -321,7 +328,8 @@ export function Organizations() {
                     <>
                       {' · '}
                       <span className="font-mono">
-                        {organization.hubLatitude.toFixed(4)}, {organization.hubLongitude.toFixed(4)}
+                        {formatCoordinate(organization.hubLatitude, 'lat')},{' '}
+                        {formatCoordinate(organization.hubLongitude, 'lng')}
                       </span>
                     </>
                   ) : null}
@@ -374,32 +382,69 @@ export function Organizations() {
 
                     <div className="grid gap-4 sm:grid-cols-2">
                       <Field
-                        label="Latitude"
+                        label="Latitude (−90 to 90)"
                         value={edit.latitude}
                         onChange={(latitude) => setEdit({ ...edit, latitude })}
                         placeholder="23.1793"
+                        hint="Decimal degrees. Positive is north."
                       />
                       <Field
-                        label="Longitude"
+                        label="Longitude (−180 to 180)"
                         value={edit.longitude}
                         onChange={(longitude) => setEdit({ ...edit, longitude })}
                         placeholder="79.9865"
+                        hint="Decimal degrees. Positive is east."
                       />
                     </div>
-                    <p className="text-xs text-[var(--color-text-muted)]">
-                      This is the Hub&apos;s pin on the map, and what &quot;nearby&quot; is measured from. It was
-                      captured from the phone of whoever registered this organisation, so it is often their home
-                      rather than the campus.{' '}
-                      <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${edit.latitude},${edit.longitude}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="underline"
-                      >
-                        Check this point on a map
-                      </a>
-                      .
-                    </p>
+                    <div className="space-y-2 rounded-md border border-[var(--color-border)] p-3">
+                      <p className="text-xs font-semibold text-[var(--color-text)]">Where the pin is now</p>
+                      {typeof organization.hubLatitude === 'number' &&
+                      typeof organization.hubLongitude === 'number' ? (
+                        <p className="font-mono text-xs text-[var(--color-text)]">
+                          {formatCoordinate(organization.hubLatitude, 'lat')},{' '}
+                          {formatCoordinate(organization.hubLongitude, 'lng')}
+                          <span className="ml-2 font-sans text-[var(--color-text-muted)]">
+                            ({organization.hubLatitude}, {organization.hubLongitude})
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="text-xs text-[var(--color-text-muted)]">
+                          Not reported by the API — reload once the backend has deployed.
+                        </p>
+                      )}
+                      <p className="text-xs text-[var(--color-text-muted)]">
+                        Decimal degrees, latitude first — the format Google Maps shows when you right-click a
+                        point. Latitude runs −90 to 90 (north is positive), longitude −180 to 180 (east is
+                        positive). India is roughly 8–37 and 68–97, so two positive numbers in that range is
+                        what a correct pin looks like here.
+                      </p>
+                      <p className="text-xs text-[var(--color-text-muted)]">
+                        This is what the map pin and &quot;nearby&quot; are measured from. It was captured from
+                        the phone of whoever registered this organisation, so it is often their home rather than
+                        the campus.
+                      </p>
+                      <div className="flex flex-wrap gap-3 text-xs">
+                        {typeof organization.hubLatitude === 'number' &&
+                        typeof organization.hubLongitude === 'number' ? (
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${organization.hubLatitude},${organization.hubLongitude}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="underline"
+                          >
+                            See where it is now
+                          </a>
+                        ) : null}
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${edit.latitude},${edit.longitude}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline"
+                        >
+                          Check the point you typed
+                        </a>
+                      </div>
+                    </div>
 
                     <Field
                       label="Reason"
