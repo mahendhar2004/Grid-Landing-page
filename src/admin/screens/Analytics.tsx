@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { apiGet } from '../lib/api'
+import { api } from '../api/endpoints'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Button, EmptyNote, ErrorNote, Panel } from '../components/ui'
 
@@ -360,8 +360,7 @@ export function Analytics() {
 
   const { data, error, reload } = useAsyncData(
     () =>
-      apiGet<Envelope<Growth | Marketplace | Money | Trust>>('/v1/admin/analytics', {
-        dashboard,
+      api.analytics.fetch<Envelope<Growth | Marketplace | Money | Trust>>(dashboard, {
         // The API takes instants. A date input gives a day, and the end of a
         // day is the start of the next - sending `to` bare would silently
         // exclude everything that happened on the day the admin picked.

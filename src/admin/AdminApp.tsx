@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { clearTokens, getAccessToken } from './lib/api'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { ActionCentre } from './screens/ActionCentre'
 import { Analytics } from './screens/Analytics'
 import { AuditLog } from './screens/AuditLog'
@@ -93,15 +94,28 @@ export function AdminApp() {
         </div>
       </header>
 
+      {/*
+        Every screen inside its own boundary, keyed by tab.
+
+        A render error anywhere unmounts the whole React tree, so one bad
+        number used to blank the entire console - and a white page cannot be
+        told apart from a failed deploy, a dropped session, or the API being
+        down. Per-screen, a crash costs that screen: the nav still works and
+        the other six still load. The key also clears a tripped boundary on
+        navigation, so a fixed screen recovers by switching tabs rather than
+        by reloading.
+      */}
       <main className="mx-auto max-w-5xl px-4 py-6">
-        {tab === 'home' ? <ActionCentre onOpenTab={(next) => setTab(next as Tab)} /> : null}
-        {tab === 'reports' ? <Reports /> : null}
-        {tab === 'triage' ? <Triage /> : null}
-        {tab === 'organizations' ? <Organizations /> : null}
-        {tab === 'pricing' ? <Pricing /> : null}
-        {tab === 'tiers' ? <Tiers /> : null}
-        {tab === 'analytics' ? <Analytics /> : null}
-        {tab === 'audit' ? <AuditLog /> : null}
+        <ErrorBoundary resetKey={tab} label={TABS.find((entry) => entry.id === tab)?.label ?? tab}>
+          {tab === 'home' ? <ActionCentre onOpenTab={(next) => setTab(next as Tab)} /> : null}
+          {tab === 'reports' ? <Reports /> : null}
+          {tab === 'triage' ? <Triage /> : null}
+          {tab === 'organizations' ? <Organizations /> : null}
+          {tab === 'pricing' ? <Pricing /> : null}
+          {tab === 'tiers' ? <Tiers /> : null}
+          {tab === 'analytics' ? <Analytics /> : null}
+          {tab === 'audit' ? <AuditLog /> : null}
+        </ErrorBoundary>
       </main>
     </div>
   )

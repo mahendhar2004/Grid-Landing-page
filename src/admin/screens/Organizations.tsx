@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
-import { ApiError, apiDelete, apiGet, apiPatch, apiPost } from '../lib/api'
+import { api } from '../api/endpoints'
+import type { AdminOrganization } from '../api/types'
+import type { ApiError } from '../lib/api'
 import { formatCoordinate, hasUsableCoordinates } from '../lib/coordinates'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, Field, Panel } from '../components/ui'
@@ -23,30 +25,6 @@ import { Badge, Button, EmptyNote, ErrorNote, Field, Panel } from '../components
  * member of the organization - the API does not accept it and this form does
  * not offer it.
  */
-
-interface AdminOrganization {
-  id: string
-  domain: string
-  name: string
-  type: 'ACADEMIC' | 'CORPORATE'
-  hubId: string
-  hubName: string
-  hubStatus: 'PENDING_VISIBILITY' | 'ACTIVE'
-  /**
-   * Where the Hub's pin sits. Captured from the GPS of whoever registered the
-   * organisation, so frequently wrong.
-   *
-   * **Optional, because a deployed API is not a compile-time guarantee.**
-   * These arrived in the same change as the console UI that reads them, and
-   * the console deployed first - so every row called `.toFixed` on
-   * `undefined` and the whole screen crashed. A field the server might not
-   * be sending yet has to be typed as one.
-   */
-  hubLatitude?: number
-  hubLongitude?: number
-  memberCount: number
-  listingCount: number
-}
 
 interface EditForm {
   name: string
@@ -84,7 +62,7 @@ export function Organizations() {
   const [actionError, setActionError] = useState<ApiError | null>(null)
 
   const { data: organizations, error: loadError, reload } = useAsyncData(
-    () => apiGet<AdminOrganization[]>('/v1/admin/organizations', { search, limit: 100 }),
+    () => api.organizations.list(search),
     [search],
   )
   const error = actionError ?? loadError
@@ -94,7 +72,7 @@ export function Organizations() {
     setBusy(true)
     setActionError(null)
     try {
-      await apiPost('/v1/admin/organizations', {
+      await api.organizations.create({
         domain: form.domain.trim().toLowerCase(),
         name: form.name.trim(),
         type: form.type,
@@ -157,7 +135,7 @@ export function Organizations() {
       */
       const hasCoordinates = hasUsableCoordinates(edit.latitude, edit.longitude)
 
-      await apiPatch(`/v1/admin/organizations/${organization.id}`, {
+      await api.organizations.update(organization.id, {
         name: edit.name.trim(),
         type: edit.type,
         // Both or neither: the endpoint refuses one on its own, because a
@@ -194,7 +172,7 @@ export function Organizations() {
     setActionError(null)
     setBusy(true)
     try {
-      await apiDelete(`/v1/admin/organizations/${organization.id}`, { reason: reason.trim() })
+      await api.organizations.remove(organization.id, reason.trim())
       await reload()
     } catch (caught) {
       setActionError(caught as ApiError)
@@ -206,7 +184,7 @@ export function Organizations() {
   async function activate(organization: AdminOrganization) {
     setActionError(null)
     try {
-      await apiPatch(`/v1/admin/organizations/${organization.id}`, {
+      await api.organizations.update(organization.id, {
         hubStatus: 'ACTIVE',
         reason: 'Activated from the console',
       })

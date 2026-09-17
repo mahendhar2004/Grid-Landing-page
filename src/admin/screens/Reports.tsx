@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
-import { ApiError, apiGet, apiPost } from '../lib/api'
+import { api } from '../api/endpoints'
+import type { AdminReport } from '../api/types'
+import type { ApiError } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, Panel, ReasonPrompt } from '../components/ui'
 
@@ -17,21 +19,6 @@ import { Badge, Button, EmptyNote, ErrorNote, Panel, ReasonPrompt } from '../com
  * duplicate report against the same target, so five reports of one listing
  * are one decision rather than five.
  */
-
-interface AdminReport {
-  id: string
-  reporter_email: string
-  target_listing_id: string | null
-  target_user_id: string | null
-  target_request_id: string | null
-  category: string
-  description: string | null
-  status: string
-  target_label: string | null
-  target_owner_id: string | null
-  report_count: number
-  created_at: string
-}
 
 type PendingAction =
   | { kind: 'DISMISS'; report: AdminReport }
@@ -86,7 +73,7 @@ export function Reports() {
   const [actionError, setActionError] = useState<ApiError | null>(null)
 
   const { data: reports, error: loadError, reload } = useAsyncData(
-    () => apiGet<AdminReport[]>('/v1/admin/reports', { status, limit: 100 }),
+    () => api.reports.list(status),
     [status],
   )
   const error = actionError ?? loadError
@@ -97,15 +84,17 @@ export function Reports() {
     setActionError(null)
     try {
       if (pending.kind === 'DISMISS') {
-        await apiPost(`/v1/admin/reports/${pending.report.id}/dismiss`, { reason })
+        await api.reports.dismiss(pending.report.id, reason)
       } else if (pending.kind === 'BAN_USER') {
-        await apiPost(`/v1/admin/reports/${pending.report.id}/action`, {
-          action: 'BAN_USER',
-          banDurationDays: pending.durationDays,
+        // `null` is a permanent ban, not an omission - the union keeps the
+        // two from being confused.
+        await api.reports.act(
+          pending.report.id,
+          { action: 'BAN_USER', banDurationDays: pending.durationDays },
           reason,
-        })
+        )
       } else {
-        await apiPost(`/v1/admin/reports/${pending.report.id}/action`, { action: pending.kind, reason })
+        await api.reports.act(pending.report.id, { action: pending.kind }, reason)
       }
       setPending(null)
       await reload()

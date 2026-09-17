@@ -1,5 +1,6 @@
 import { Badge, EmptyNote, ErrorNote, Panel } from '../components/ui'
-import { apiGet } from '../lib/api'
+import { api } from '../api/endpoints'
+import type { AdminOrganization, AdminReport, TriageCounts } from '../api/types'
 import { useAsyncData } from '../lib/useAsyncData'
 
 /**
@@ -59,24 +60,6 @@ const SEVERITY_LABEL: Record<Severity, string> = {
   low: 'Whenever',
 }
 
-interface TriageCounts {
-  BUG_REPORT?: number
-  FEEDBACK?: number
-  CONTACT_MESSAGE?: number
-  PUBLIC_BUG_REPORT?: number
-  PUBLIC_REVIEW?: number
-}
-
-interface ReportRow {
-  id: string
-}
-
-interface OrganizationRow {
-  id: string
-  name: string
-  hubStatus: 'PENDING_VISIBILITY' | 'ACTIVE'
-}
-
 export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }) {
   const { data: rows, error } = useAsyncData<ActionRow[]>(async () => {
     /*
@@ -85,9 +68,9 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
       numbers is missing is worse than one showing four.
     */
     const [counts, reports, organizations] = await Promise.all([
-      apiGet<TriageCounts>('/v1/admin/triage/counts').catch(() => ({}) as TriageCounts),
-      apiGet<ReportRow[]>('/v1/admin/reports', { status: 'OPEN' }).catch(() => [] as ReportRow[]),
-      apiGet<OrganizationRow[]>('/v1/admin/organizations').catch(() => [] as OrganizationRow[]),
+      api.triage.counts().catch(() => ({}) as TriageCounts),
+      api.reports.list('OPEN').catch(() => [] as AdminReport[]),
+      api.organizations.list().catch(() => [] as AdminOrganization[]),
     ])
 
     const pendingHubs = organizations.filter((organization) => organization.hubStatus !== 'ACTIVE').length

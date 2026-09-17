@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 
-import { ApiError, apiGet, apiPost } from '../lib/api'
+import { api } from '../api/endpoints'
+import type { PricingEntry } from '../api/types'
+import type { ApiError } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Button, EmptyNote, ErrorNote, Panel } from '../components/ui'
 
@@ -19,13 +21,6 @@ import { Button, EmptyNote, ErrorNote, Panel } from '../components/ui'
  * nothing until this screen is used. That is worth saying on the screen rather
  * than leaving someone to discover it.
  */
-
-interface PricingEntry {
-  pricedItem: string
-  orgType: 'ACADEMIC' | 'CORPORATE'
-  basePricePaise: number
-  discountPaise: number
-}
 
 const ITEM_LABELS: Record<string, string> = {
   LISTING_FEE: 'Posting a listing',
@@ -47,7 +42,7 @@ export function Pricing() {
   const [actionError, setActionError] = useState<ApiError | null>(null)
 
   const { data: entries, error: loadError, reload } = useAsyncData(
-    () => apiGet<PricingEntry[]>('/v1/admin/pricing'),
+    () => api.pricing.list(),
     [],
   )
   const error = actionError ?? loadError
@@ -72,15 +67,15 @@ export function Pricing() {
     setSavingKey(key)
     setActionError(null)
     try {
-      await apiPost('/v1/admin/pricing', {
-        pricedItem: entry.pricedItem,
-        orgType: entry.orgType,
+      await api.pricing.upsert(
+        entry.pricedItem,
+        entry.orgType,
         // Rounded, not truncated: 0.1 * 100 is 10.000000000000002 in
         // floating point, and an un-rounded value fails the integer check
         // with a message about types rather than about the price.
-        basePricePaise: Math.round(rupees * 100),
-        discountPaise: entry.discountPaise,
-      })
+        Math.round(rupees * 100),
+        entry.discountPaise,
+      )
       await reload()
     } catch (caught) {
       setActionError(caught as ApiError)

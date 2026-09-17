@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
-import { ApiError, apiGet, apiPost } from '../lib/api'
+import { api } from '../api/endpoints'
+import type { TriageInbox, TriageItem } from '../api/types'
+import type { ApiError } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, Panel, ReasonPrompt } from '../components/ui'
 
@@ -17,7 +19,8 @@ import { Badge, Button, EmptyNote, ErrorNote, Panel, ReasonPrompt } from '../com
  * would make "how much of this is junk" unanswerable.
  */
 
-type Inbox = 'BUG_REPORT' | 'FEEDBACK' | 'CONTACT_MESSAGE' | 'PUBLIC_BUG_REPORT' | 'PUBLIC_REVIEW'
+/** The shared union, aliased so the rest of this file reads as it did. */
+type Inbox = TriageInbox
 
 const INBOX_LABELS: Record<Inbox, string> = {
   BUG_REPORT: 'Bug reports',
@@ -34,14 +37,6 @@ const OPEN_STATUS: Record<Inbox, string> = {
   CONTACT_MESSAGE: 'OPEN',
   PUBLIC_BUG_REPORT: 'OPEN',
   PUBLIC_REVIEW: 'PENDING',
-}
-
-interface TriageItem {
-  id: string
-  status: string
-  created_at: string
-  is_featured?: boolean
-  [column: string]: unknown
 }
 
 type Pending =
@@ -124,8 +119,8 @@ export function Triage() {
       // One await for both, so the badge counts can never disagree with the
       // list they sit above.
       const [items, counts] = await Promise.all([
-        apiGet<TriageItem[]>('/v1/admin/triage', { inbox, limit: 100 }),
-        apiGet<Record<Inbox, number>>('/v1/admin/triage/counts'),
+        api.triage.list(inbox),
+        api.triage.counts(),
       ])
       return { items, counts }
     },
@@ -141,18 +136,9 @@ export function Triage() {
     setActionError(null)
     try {
       if (pending.kind === 'RESOLVE') {
-        await apiPost('/v1/admin/triage/resolve', {
-          inbox,
-          itemId: pending.item.id,
-          isSpam: pending.isSpam,
-          reason,
-        })
+        await api.triage.resolve(inbox, pending.item.id, pending.isSpam, reason)
       } else {
-        await apiPost('/v1/admin/triage/feature-review', {
-          reviewId: pending.item.id,
-          isFeatured: pending.isFeatured,
-          reason,
-        })
+        await api.triage.featureReview(pending.item.id, pending.isFeatured, reason)
       }
       setPending(null)
       await reload()
@@ -171,7 +157,7 @@ export function Triage() {
         {(Object.keys(INBOX_LABELS) as Inbox[]).map((value) => (
           <Button key={value} variant={inbox === value ? 'primary' : 'default'} onClick={() => setInbox(value)}>
             {INBOX_LABELS[value]}
-            {counts && counts[value] > 0 ? ` (${counts[value]})` : ''}
+            {(counts?.[value] ?? 0) > 0 ? ` (${counts?.[value]})` : ''}
           </Button>
         ))}
       </div>

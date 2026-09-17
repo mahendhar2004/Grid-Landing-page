@@ -1,4 +1,4 @@
-import { apiGet } from '../lib/api'
+import { api } from '../api/endpoints'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, EmptyNote, ErrorNote, Panel } from '../components/ui'
 
@@ -14,24 +14,12 @@ import { Badge, EmptyNote, ErrorNote, Panel } from '../components/ui'
  * accountability, it is a diary.
  */
 
-interface AuditEntry {
-  id: string
-  actor_email: string
-  action: string
-  target_type: string
-  target_id: string
-  reason: string | null
-  details: Record<string, unknown>
-  source_ip: string | null
-  created_at: string
-}
-
 /** Anything that took something away reads red, so a scan of the log shows the consequential rows first. */
 const DESTRUCTIVE = /BANNED|REMOVE|SPAM/
 
 export function AuditLog() {
   const { data: entries, error } = useAsyncData(
-    () => apiGet<AuditEntry[]>('/v1/admin/audit-log', { limit: 200 }),
+    () => api.audit.list(),
     [],
   )
 

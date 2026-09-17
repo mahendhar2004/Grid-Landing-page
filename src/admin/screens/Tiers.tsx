@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { ApiError, apiGet, apiPut } from '../lib/api'
+import { api } from '../api/endpoints'
+import type { ApiError } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Button, EmptyNote, ErrorNote, Field, Panel } from '../components/ui'
 
@@ -158,7 +159,7 @@ export function Tiers() {
   const [actionError, setActionError] = useState<ApiError | null>(null)
 
   const { data: entries, error: loadError, reload } = useAsyncData(
-    () => apiGet<TierEntitlements[]>('/v1/admin/tiers'),
+    () => api.tiers.list(),
     [],
   )
   const error = actionError ?? loadError
@@ -179,7 +180,7 @@ export function Tiers() {
     setSavedTier(null)
     setActionError(null)
     try {
-      await apiPut(`/v1/admin/tiers/${entry.tier}`, {
+      await api.tiers.update(entry.tier, {
         monthlyBundledCredits: Number(draft.monthlyBundledCredits),
         monthlyFreeBoosts: Number(draft.monthlyFreeBoosts),
         unlimitedPosting: draft.unlimitedPosting,
