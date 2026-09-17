@@ -31,9 +31,18 @@ interface AdminOrganization {
   hubId: string
   hubName: string
   hubStatus: 'PENDING_VISIBILITY' | 'ACTIVE'
-  /** Where the Hub's pin sits. Captured from the GPS of whoever registered the organisation, so frequently wrong. */
-  hubLatitude: number
-  hubLongitude: number
+  /**
+   * Where the Hub's pin sits. Captured from the GPS of whoever registered the
+   * organisation, so frequently wrong.
+   *
+   * **Optional, because a deployed API is not a compile-time guarantee.**
+   * These arrived in the same change as the console UI that reads them, and
+   * the console deployed first - so every row called `.toFixed` on
+   * `undefined` and the whole screen crashed. A field the server might not
+   * be sending yet has to be typed as one.
+   */
+  hubLatitude?: number
+  hubLongitude?: number
   memberCount: number
   listingCount: number
 }
@@ -116,8 +125,10 @@ export function Organizations() {
       // Strings, because a number input that has been cleared is an empty
       // string and coercing that to 0 would silently move a Hub to the
       // Atlantic.
-      latitude: String(organization.hubLatitude),
-      longitude: String(organization.hubLongitude),
+      // Empty rather than "undefined" when the API has not sent them yet -
+      // a field showing the word undefined invites someone to save it.
+      latitude: typeof organization.hubLatitude === 'number' ? String(organization.hubLatitude) : '',
+      longitude: typeof organization.hubLongitude === 'number' ? String(organization.hubLongitude) : '',
       reason: '',
     })
   }
@@ -129,7 +140,15 @@ export function Organizations() {
     try {
       const latitude = Number(edit.latitude)
       const longitude = Number(edit.longitude)
-      const moved = latitude !== organization.hubLatitude || longitude !== organization.hubLongitude
+      // Blank or unparseable is "not moving it", never 0 - `Number('')` is 0,
+      // and 0,0 is a real coordinate in the Atlantic.
+      const hasCoordinates =
+        edit.latitude.trim().length > 0 &&
+        edit.longitude.trim().length > 0 &&
+        Number.isFinite(latitude) &&
+        Number.isFinite(longitude)
+      const moved =
+        hasCoordinates && (latitude !== organization.hubLatitude || longitude !== organization.hubLongitude)
 
       await apiPatch(`/v1/admin/organizations/${organization.id}`, {
         ...(edit.name.trim() !== organization.name ? { name: edit.name.trim() } : {}),
@@ -297,10 +316,15 @@ export function Organizations() {
                   {organization.hubStatus === 'ACTIVE' ? 'On the map' : 'Hidden'}
                 </Badge>
                 <span className="text-xs text-[var(--color-text-muted)]">
-                  {organization.memberCount} members · {organization.listingCount} listings ·{' '}
-                  <span className="font-mono">
-                    {organization.hubLatitude.toFixed(4)}, {organization.hubLongitude.toFixed(4)}
-                  </span>
+                  {organization.memberCount} members · {organization.listingCount} listings
+                  {typeof organization.hubLatitude === 'number' && typeof organization.hubLongitude === 'number' ? (
+                    <>
+                      {' · '}
+                      <span className="font-mono">
+                        {organization.hubLatitude.toFixed(4)}, {organization.hubLongitude.toFixed(4)}
+                      </span>
+                    </>
+                  ) : null}
                 </span>
                 {organization.hubStatus !== 'ACTIVE' ? (
                   <Button onClick={() => void activate(organization)}>Show on map</Button>

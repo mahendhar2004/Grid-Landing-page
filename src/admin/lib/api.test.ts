@@ -222,3 +222,32 @@ describe('who is allowed into the console', () => {
     await expect(verifyOtp('someone@iitd.ac.in', '123456')).rejects.toMatchObject({ code: 'NOT_AN_ADMIN' })
   })
 })
+
+describe('rendering data from an API that may be a deploy behind', () => {
+  it('formats coordinates only when they are actually numbers', () => {
+    // The crash this guards: the console shipped reading `hubLatitude` in
+    // the same change that added it to the API, and deployed first - so
+    // every row called `.toFixed` on undefined and the screen went blank.
+    const format = (value: unknown) => (typeof value === 'number' ? value.toFixed(4) : null)
+
+    expect(format(23.1793)).toBe('23.1793')
+    expect(format(0)).toBe('0.0000')
+    expect(format(undefined)).toBeNull()
+    expect(format(null)).toBeNull()
+  })
+
+  it('treats a blank coordinate as "not moving it", never as zero', () => {
+    // `Number('')` is 0, and 0,0 is a real coordinate in the Atlantic.
+    const hasCoordinates = (lat: string, lng: string) =>
+      lat.trim().length > 0 &&
+      lng.trim().length > 0 &&
+      Number.isFinite(Number(lat)) &&
+      Number.isFinite(Number(lng))
+
+    expect(hasCoordinates('', '')).toBe(false)
+    expect(hasCoordinates('23.1793', '')).toBe(false)
+    expect(hasCoordinates('  ', '79.9865')).toBe(false)
+    expect(hasCoordinates('abc', '79.9865')).toBe(false)
+    expect(hasCoordinates('23.1793', '79.9865')).toBe(true)
+  })
+})
