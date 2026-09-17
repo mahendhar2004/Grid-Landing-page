@@ -46,6 +46,14 @@ export function storeTokens(accessToken: string, refreshToken: string): void {
   }
 }
 
+function getRefreshToken(): string | null {
+  try {
+    return sessionStorage.getItem(REFRESH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export function clearTokens(): void {
   try {
     sessionStorage.removeItem(ACCESS_TOKEN_KEY);
@@ -104,7 +112,50 @@ function newIdempotencyKey(): string {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+/**
+ * Trade the refresh token for a new access token.
+ *
+ * The refresh token was being *stored* and never used. Access tokens last
+ * 15 minutes (`ACCESS_TOKEN_EXPIRY_MINUTES`), so a quarter of an hour into
+ * any sitting the console started 401ing, cleared the session and dropped
+ * the admin back to the sign-in form mid-task - with a perfectly valid
+ * 30-day refresh token sitting in storage the whole time.
+ *
+ * Returns the new access token, or null when the refresh token is gone or
+ * itself expired - in which case signing in again is genuinely the answer.
+ *
+ * Deliberately not routed through `request` below: that would recurse on its
+ * own 401 handling, and this call has no access token to attach anyway.
+ */
+async function refreshAccessToken(): Promise<string | null> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken || !API_BASE_URL) {
+    return null;
+  }
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Idempotency-Key': newIdempotencyKey() },
+      body: JSON.stringify({ refreshToken }),
+    });
+    const payload = (await response.json().catch(() => null)) as ApiEnvelope<{
+      accessToken: string
+      refreshToken: string
+    }> | null;
+    const tokens = payload?.success === true ? payload.data : undefined;
+    if (!response.ok || !tokens) {
+      return null;
+    }
+    // The backend rotates the refresh token, so both have to be stored or the
+    // next refresh presents one that has already been spent.
+    storeTokens(tokens.accessToken, tokens.refreshToken);
+    return tokens.accessToken;
+  } catch {
+    return null;
+  }
+}
+
+async function request<T>(path: string, init: RequestInit = {}, isRetry = false): Promise<T> {
   if (!API_BASE_URL) {
     throw new ApiError(0, 'CONFIG_MISSING', 'VITE_API_URL is not set for this build.', null)
   }
@@ -144,10 +195,19 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const payload = (await response.json().catch(() => null)) as ApiEnvelope<T> | null
 
   if (!response.ok || !payload?.success) {
+    if (response.status === 401 && !isRetry) {
+      // Expired, most likely, rather than revoked - so try the refresh token
+      // before throwing the admin out. Once only: `isRetry` stops a
+      // genuinely dead session from looping.
+      const refreshed = await refreshAccessToken()
+      if (refreshed) {
+        return request<T>(path, init, true)
+      }
+    }
     if (response.status === 401) {
-      // The token is gone or expired. Clearing it here rather than at the
-      // call site means every screen gets the same behaviour without
-      // remembering to ask for it.
+      // Refresh failed or this was already the retry. Clearing here rather
+      // than at the call site means every screen gets the same behaviour
+      // without remembering to ask for it.
       clearTokens()
     }
     throw new ApiError(
@@ -182,9 +242,34 @@ export function apiPut<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, { method: 'PUT', body: JSON.stringify(body) })
 }
 
-/** Sends the six-digit code. Unauthenticated - it is how a session starts. */
+/**
+ * Sends the six-digit code. Unauthenticated - it is how a session starts.
+ *
+ * `POST /v1/auth/send-otp` requires four fields, and this sent one. Against
+ * the real backend every admin sign-in failed with *"role: Invalid option...
+ * consentAccepted: Invalid input: expected true; ageConfirmed: Invalid input:
+ * expected true"* - the schema rejecting the request before any of it ran.
+ *
+ * **The two literals are not a formality to satisfy.** The endpoint calls
+ * `recordConsent(email, sourceIp, ageConfirmed)`, so sending `true` writes a
+ * consent record against that address. Asserting it from a console that had
+ * never shown the documents would be recording a consent that did not happen,
+ * which is worse than the broken sign-in. `SignIn.tsx` presents the same gate
+ * the app does, and only then is `true` a true statement.
+ *
+ * **`role` is only read when an account is created** (`pendingRole` reaches
+ * `users.create` and nothing else), so for an admin - who by definition
+ * already has an account - it has no effect. `EMPLOYEE` is sent rather than
+ * `STUDENT` because in the one case where it would be used, someone signing
+ * into the operations console is staff.
+ */
 export function sendOtp(email: string): Promise<unknown> {
-  return apiPost('/v1/auth/send-otp', { email })
+  return apiPost('/v1/auth/send-otp', {
+    email,
+    role: 'EMPLOYEE',
+    consentAccepted: true,
+    ageConfirmed: true,
+  })
 }
 
 export interface VerifyOtpResponse {

@@ -17,6 +17,13 @@ import { Button, ErrorNote, Field, Panel } from '../components/ui'
  * request behind it. That is the correct shape - the check belongs on the
  * server, and duplicating it here would only add a second place to get it
  * wrong.
+ *
+ * **The consent box is real, not a schema formality.** `send-otp` records a
+ * consent event against the address it is given, so the console has to have
+ * actually shown the documents before it claims one. It sent none of these
+ * fields at all until 17 Sep 2026, which is why every sign-in against the
+ * real backend failed on `role`, `consentAccepted` and `ageConfirmed` at
+ * once.
  */
 export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
   const [step, setStep] = useState<'email' | 'otp'>('email')
@@ -24,6 +31,16 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
   const [otp, setOtp] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<ApiError | null>(null)
+  /*
+    Not a formality to get past the schema.
+
+    `POST /v1/auth/send-otp` calls `recordConsent` with whatever is sent, so
+    ticking this writes a consent record against the address. Sending `true`
+    from a console that had never shown the documents would be recording a
+    consent that did not happen - so the box is here, unticked, and the
+    request cannot be made without it.
+  */
+  const [agreed, setAgreed] = useState(false)
 
   async function handleSendOtp(event: React.FormEvent) {
     event.preventDefault()
@@ -64,8 +81,30 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
         {step === 'email' ? (
           <form onSubmit={handleSendOtp} className="space-y-4">
             <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.edu" />
+
+            <label className="flex cursor-pointer items-start gap-2 text-xs text-[var(--color-text-muted)]">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(event) => setAgreed(event.target.checked)}
+                className="mt-0.5"
+                data-testid="admin-signin-consent"
+              />
+              <span>
+                I am 18 or over and accept the{' '}
+                <a href="/privacy" target="_blank" rel="noreferrer" className="underline">
+                  Privacy Policy
+                </a>{' '}
+                and{' '}
+                <a href="/terms" target="_blank" rel="noreferrer" className="underline">
+                  Terms of Service
+                </a>
+                .
+              </span>
+            </label>
+
             <ErrorNote error={error} />
-            <Button type="submit" variant="primary" disabled={busy || email.trim().length === 0}>
+            <Button type="submit" variant="primary" disabled={busy || !agreed || email.trim().length === 0}>
               {busy ? 'Sending…' : 'Send code'}
             </Button>
           </form>
