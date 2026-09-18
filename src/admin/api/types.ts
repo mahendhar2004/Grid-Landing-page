@@ -30,18 +30,41 @@ export interface AdminOrganization {
   domain: string
   name: string
   type: OrganizationType
-  hubId: string
-  hubName: string
-  hubStatus: HubStatus
   /**
-   * Optional because a deployed API is not a compile-time guarantee: these
-   * arrived in the same change as the UI reading them, the console deployed
-   * first, and every row called `.toFixed` on undefined.
+   * How many places it occupies (BR-069). There is no "the" Hub on this row
+   * any more: Google has a dozen offices, each with its own pin, status and
+   * counts, and a single set of them on the organisation was one office's
+   * numbers labelled as everybody's. `api.organizations.places.list` has them.
+   *
+   * Optional because a deployed API is not a compile-time guarantee: this
+   * arrived in the same change as the UI reading it, and the console deploys
+   * first.
    */
-  hubLatitude?: number
-  hubLongitude?: number
+  placeCount?: number
+  /** How many of those are still hidden from the map — the console's waiting queue. */
+  pendingPlaceCount?: number
+  /** Summed across every place. */
+  memberCount: number
+  /** Summed across every place. */
+  listingCount: number
+}
+
+/**
+ * One place an organisation occupies.
+ *
+ * Every field is that place's own. Its status decides whether *it* shows on
+ * the map, its pin is what "nearby" measures from for the people who joined
+ * there, and its counts are its own members and listings.
+ */
+export interface AdminPlace {
+  id: string
+  name: string
+  status: HubStatus
+  latitude: number
+  longitude: number
   memberCount: number
   listingCount: number
+  createdAt: string
 }
 
 /**

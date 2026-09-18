@@ -14,8 +14,9 @@ vi.mock('../api/endpoints', () => ({
       setHubOverride: vi.fn(),
       clearHubOverride: vi.fn(),
     },
-    // The campus picker reads the list the console already fetches elsewhere.
-    organizations: { list: vi.fn() },
+    // The campus picker narrows by organisation first, then fetches that
+    // organisation's places.
+    organizations: { list: vi.fn(), places: { list: vi.fn() } },
   },
 }))
 
@@ -25,6 +26,7 @@ const setEnabledMock = vi.mocked(api.adSettings.setEnabled)
 const setHubOverrideMock = vi.mocked(api.adSettings.setHubOverride)
 const clearHubOverrideMock = vi.mocked(api.adSettings.clearHubOverride)
 const organizationsMock = vi.mocked(api.organizations.list)
+const placesMock = vi.mocked(api.organizations.places.list)
 
 function settings(overrides: Partial<AdSettingsData> = {}): AdSettingsData {
   return {
@@ -61,11 +63,22 @@ describe('AdSettings', () => {
         domain: 'iitd.ac.in',
         name: 'IIT Delhi',
         type: 'ACADEMIC',
-        hubId: 'hub_1',
-        hubName: 'Main campus',
-        hubStatus: 'ACTIVE',
+        placeCount: 2,
+        pendingPlaceCount: 0,
         memberCount: 400,
         listingCount: 120,
+      },
+    ] as never)
+    placesMock.mockResolvedValue([
+      {
+        id: 'hub_1',
+        name: 'Main campus',
+        status: 'ACTIVE',
+        latitude: 28.5449,
+        longitude: 77.1928,
+        memberCount: 400,
+        listingCount: 120,
+        createdAt: '2026-01-01T00:00:00.000Z',
       },
     ] as never)
   })
@@ -274,10 +287,31 @@ describe('AdSettings, campuses with their own answer', () => {
     expect(screen.getByText('The campus asked us not to')).toBeTruthy()
   })
 
+  /**
+   * Two selects, because an organisation occupies many places (BR-069): the
+   * organisation narrows the list, and the place is what the override is
+   * actually about.
+   */
+  async function chooseCampus() {
+    fireEvent.change(screen.getByLabelText('Organisation'), { target: { value: 'org_1' } })
+    // Regex: the option reads "Main campus (120 listings)" - the listing
+    // count is the thing this decision usually turns on.
+    await waitFor(() => expect(screen.getByText(/Main campus/)).toBeTruthy())
+    fireEvent.change(screen.getByLabelText('Campus'), { target: { value: 'hub_1' } })
+  }
+
+  it('cannot choose a campus before an organisation', async () => {
+    await render_()
+
+    // A flat list would be every office of every company; the second select
+    // stays inert until the first narrows it.
+    expect(screen.getByLabelText<HTMLSelectElement>('Campus').disabled).toBe(true)
+  })
+
   it('requires a reason before a campus can be given its own answer', async () => {
     await render_()
 
-    fireEvent.change(screen.getByLabelText('Campus'), { target: { value: 'hub_1' } })
+    await chooseCampus()
     fireEvent.click(screen.getByText('Set'))
 
     expect(setHubOverrideMock).not.toHaveBeenCalled()
@@ -286,7 +320,7 @@ describe('AdSettings, campuses with their own answer', () => {
   it('sends the campus, the direction and the reason together', async () => {
     await render_()
 
-    fireEvent.change(screen.getByLabelText('Campus'), { target: { value: 'hub_1' } })
+    await chooseCampus()
     fireEvent.click(screen.getByLabelText('Run ads here'))
     fireEvent.change(screen.getByLabelText('Why this campus'), {
       target: { value: 'Pilot for the Diwali fortnight' },

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { api } from '../api/endpoints'
-import type { AdPlacement, AdSector, AdSettings as AdSettingsData } from '../api/types'
+import type { AdminPlace, AdPlacement, AdSector, AdSettings as AdSettingsData } from '../api/types'
 import { useAsyncData } from '../lib/useAsyncData'
 import { useAdminAction } from '../lib/useAdminAction'
 import { Badge, Button, EmptyNote, ErrorNote, Field, Panel, ReasonPrompt } from '../components/ui'
@@ -80,13 +80,30 @@ export function AdSettings() {
   const [blockedEdits, setBlockedEdits] = useState<AdSector[] | null>(null)
   const [confirmingKill, setConfirmingKill] = useState(false)
   const [newOverride, setNewOverride] = useState({ hubId: '', adsEnabled: false, reason: '' })
+  /*
+    Which organisation's places are in the second select.
+
+    Two selects rather than one, because an organisation occupies many places
+    (BR-069) and a single flat list would be every office of every company. The
+    decision here is about one building - a pilot at one campus - so the
+    organisation narrows it and the place is what is actually chosen.
+  */
+  const [overrideOrganizationId, setOverrideOrganizationId] = useState('')
 
   /*
-    The campus list comes from the Organizations endpoint the console already
-    calls - it carries the hub id, its name and its live listing count, which
-    is usually the thing this decision actually turns on.
+    The organisation list comes from the endpoint the console already calls.
+    The places of whichever one is chosen are fetched on demand: loading every
+    place of every organisation up front is a request per organisation for a
+    list that is thrown away the moment one is picked.
   */
   const { data: organizations } = useAsyncData(() => api.organizations.list(undefined, 200, 0), [])
+  const { data: places } = useAsyncData(
+    () =>
+      overrideOrganizationId === ''
+        ? Promise.resolve<AdminPlace[]>([])
+        : api.organizations.places.list(overrideOrganizationId),
+    [overrideOrganizationId],
+  )
 
   const decided = new Set((settings?.hubOverrides ?? []).map((override) => override.hubId))
 
@@ -340,23 +357,49 @@ export function AdSettings() {
           className="space-y-2 border-t border-[var(--color-border)] pt-3"
         >
           <label className="block space-y-1">
-            <span className="text-xs font-medium text-[var(--color-text-muted)]">Campus</span>
+            <span className="text-xs font-medium text-[var(--color-text-muted)]">Organisation</span>
             <select
               // Explicit, because the wrapping label also contains the hint
               // below: without this the control's accessible name is the
               // heading and the hint run together, which is what a screen
               // reader would announce.
+              aria-label="Organisation"
+              value={overrideOrganizationId}
+              onChange={(e) => {
+                setOverrideOrganizationId(e.target.value)
+                // The place belonged to the organisation that was chosen
+                // before, so keeping it would save an override against a
+                // campus the admin is no longer looking at.
+                setNewOverride({ ...newOverride, hubId: '' })
+              }}
+              className="w-full rounded border border-[var(--color-border)] bg-transparent p-2 text-sm text-[var(--color-text)]"
+            >
+              <option value="">Choose an organisation…</option>
+              {(organizations ?? []).map((organization) => (
+                <option key={organization.id} value={organization.id}>
+                  {organization.name} ({organization.placeCount ?? 1} places)
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block space-y-1">
+            <span className="text-xs font-medium text-[var(--color-text-muted)]">Campus</span>
+            <select
               aria-label="Campus"
               value={newOverride.hubId}
+              disabled={overrideOrganizationId === ''}
               onChange={(e) => setNewOverride({ ...newOverride, hubId: e.target.value })}
               className="w-full rounded border border-[var(--color-border)] bg-transparent p-2 text-sm text-[var(--color-text)]"
             >
-              <option value="">Choose a campus…</option>
-              {(organizations ?? [])
-                .filter((organization) => !decided.has(organization.hubId))
-                .map((organization) => (
-                  <option key={organization.hubId} value={organization.hubId}>
-                    {organization.name} — {organization.hubName} ({organization.listingCount} listings)
+              <option value="">
+                {overrideOrganizationId === '' ? 'Choose an organisation first…' : 'Choose a campus…'}
+              </option>
+              {(places ?? [])
+                .filter((place) => !decided.has(place.id))
+                .map((place) => (
+                  <option key={place.id} value={place.id}>
+                    {place.name} ({place.listingCount} listings)
                   </option>
                 ))}
             </select>

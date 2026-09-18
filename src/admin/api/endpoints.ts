@@ -8,6 +8,7 @@ import type {
   AdSettings,
   AdvertiserLedgerPage,
   AdminOrganization,
+  AdminPlace,
   Advertiser,
   AdvertiserTier,
   AdvertisersPage,
@@ -214,8 +215,13 @@ export interface CreateOrganizationBody {
 export interface UpdateOrganizationBody {
   name?: string
   type?: OrganizationType
-  hubStatus?: 'ACTIVE' | 'PENDING_VISIBILITY'
-  /** Both or neither — the endpoint refuses one alone, because a new latitude against an old longitude is a Hub nobody chose. */
+  reason: string
+}
+
+export interface UpdatePlaceBody {
+  name?: string
+  status?: 'ACTIVE' | 'PENDING_VISIBILITY'
+  /** Both or neither — the endpoint refuses one alone, because a new latitude against an old longitude is a place nobody chose. */
   latitude?: number
   longitude?: number
   reason: string
@@ -237,6 +243,27 @@ const organizations = {
   /** Refused by the server while members, listings or requests are attached — it never cascades. */
   remove(organizationId: string, reason: string): Promise<unknown> {
     return apiDelete(`/v1/admin/organizations/${organizationId}`, { reason })
+  },
+
+  /**
+   * The places an organisation occupies (BR-069).
+   *
+   * A separate call rather than fields on the list row: an organisation is one
+   * row there however many offices it has, and its places are fetched when an
+   * admin opens it. The pin and the map visibility live here because both are
+   * facts about a building — hiding one campus says nothing about the others.
+   */
+  places: {
+    list(organizationId: string): Promise<AdminPlace[]> {
+      return apiGet<AdminPlace[]>(`/v1/admin/organizations/${organizationId}/places`)
+    },
+
+    update(organizationId: string, placeId: string, body: UpdatePlaceBody): Promise<AdminPlace> {
+      return apiPatch<AdminPlace>(
+        `/v1/admin/organizations/${organizationId}/places/${placeId}`,
+        body,
+      )
+    },
   },
 
   /**

@@ -100,7 +100,13 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
         .catch(() => []),
     ])
 
-    const pendingHubs = organizations.filter((organization) => organization.hubStatus !== 'ACTIVE').length
+    // Places, not organisations. An organisation occupies many (BR-069), and
+    // one with a live campus and four waiting ones would otherwise count as
+    // nothing waiting at all.
+    const pendingPlaces = organizations.reduce(
+      (total, organization) => total + (organization.pendingPlaceCount ?? 0),
+      0,
+    )
     const bugs = (counts.BUG_REPORT ?? 0) + (counts.PUBLIC_BUG_REPORT ?? 0)
     const soft = (counts.FEEDBACK ?? 0) + (counts.PUBLIC_REVIEW ?? 0)
 
@@ -123,10 +129,10 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
       },
       {
         key: 'hubs',
-        label: 'Hubs awaiting visibility',
-        count: pendingHubs,
+        label: 'Places awaiting visibility',
+        count: pendingPlaces,
         severity: 'high',
-        why: 'A registered organisation nobody can find. Every hour is a campus looking at an empty map.',
+        why: 'A registered place nobody can find. Every hour is a campus looking at an empty map.',
         tab: 'organizations',
       },
       {

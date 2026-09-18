@@ -27,9 +27,8 @@ const ORGANIZATION: AdminOrganization = {
   domain: 'iitd.ac.in',
   name: 'IIT Delhi',
   type: 'ACADEMIC',
-  hubId: 'hub_iitd',
-  hubName: 'IIT Delhi Hub',
-  hubStatus: 'ACTIVE',
+  placeCount: 1,
+  pendingPlaceCount: 0,
   memberCount: 900,
   listingCount: 40,
 }
