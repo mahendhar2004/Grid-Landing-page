@@ -306,14 +306,21 @@ const organizations = {
       return apiPost('/v1/admin/organizations/review/confirm', { domain, reason })
     },
 
+    /**
+     * `targetHubId` is required by the server, not defaulted (Grid BR-076):
+     * nothing about "this domain belongs to Foo College" says which campus,
+     * and this moves every member of the domain.
+     */
     correct(
       domain: string,
       targetOrganizationId: string,
+      targetHubId: string,
       reason: string,
     ): Promise<CorrectDomainResult> {
       return apiPost<CorrectDomainResult>('/v1/admin/organizations/review/correct', {
         domain,
         targetOrganizationId,
+        targetHubId,
         reason,
       })
     },

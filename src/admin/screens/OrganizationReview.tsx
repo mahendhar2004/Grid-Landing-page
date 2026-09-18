@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { api } from '../api/endpoints'
-import type { AdminOrganization, PendingReview } from '../api/types'
+import type { AdminOrganization, AdminPlace, PendingReview } from '../api/types'
 import type { ApiError } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, Panel, ReasonPrompt } from '../components/ui'
@@ -33,7 +33,21 @@ const PAGE_SIZE = 25
 
 type Decision =
   | { kind: 'confirm'; review: PendingReview }
-  | { kind: 'correct'; review: PendingReview; target: AdminOrganization }
+  | {
+      kind: 'correct'
+      review: PendingReview
+      target: AdminOrganization
+      /**
+       * The target's places, and which one was chosen (Grid BR-076).
+       *
+       * Prefilled with the oldest — the place the organisation grew from, and
+       * the likeliest answer — but never sent unasked when there is more than
+       * one: this moves every member of the domain, and an organisation with
+       * a Delhi and a Sonipat campus has two very different right answers.
+       */
+      places: AdminPlace[]
+      targetHubId: string
+    }
 
 export function OrganizationReview() {
   const { data, error, reload } = useAsyncData<PendingReview[]>(() => api.organizations.review.list(PAGE_SIZE), [])
@@ -54,6 +68,7 @@ export function OrganizationReview() {
         const moved = await api.organizations.review.correct(
           decision.review.domain,
           decision.target.id,
+          decision.targetHubId,
           reason,
         )
         // An admin who has just moved forty people should be told they moved
@@ -134,7 +149,16 @@ export function OrganizationReview() {
             </Button>
             <CorrectPicker
               review={review}
-              onPick={(target) => setDecision({ kind: 'correct', review, target })}
+              onPick={(target, places) =>
+                setDecision({
+                  kind: 'correct',
+                  review,
+                  target,
+                  places,
+                  // The oldest, which is the place the organisation grew from.
+                  targetHubId: places[0]?.id ?? '',
+                })
+              }
             />
           </div>
         </Panel>
@@ -156,11 +180,41 @@ export function OrganizationReview() {
           }}
         >
           {decision.kind === 'correct' ? (
-            <p className="mb-3 text-sm text-[var(--color-text-muted)]">
-              {decision.review.membersThroughDomain === 1 ? 'The member' : 'The members'} who joined
-              through this domain move too, along with whatever they still have listed. Anything
-              they already sold or fulfilled stays where it happened.
-            </p>
+            <>
+              <p className="mb-3 text-sm text-[var(--color-text-muted)]">
+                {decision.review.membersThroughDomain === 1 ? 'The member' : 'The members'} who
+                joined through this domain move too, along with whatever they still have listed.
+                Anything they already sold or fulfilled stays where it happened.
+              </p>
+              {decision.places.length > 1 ? (
+                <fieldset className="mb-3 space-y-1" data-testid="review-correct-places">
+                  <legend className="mb-1 text-xs font-semibold text-[var(--color-text)]">
+                    Which place?
+                  </legend>
+                  <p className="mb-2 text-xs text-[var(--color-text-muted)]">
+                    {decision.target.name} occupies {decision.places.length} places, and nothing
+                    about the domain says which one these members are at.
+                  </p>
+                  {decision.places.map((place) => (
+                    <label key={place.id} className="flex items-center gap-2 text-sm text-[var(--color-text)]">
+                      <input
+                        type="radio"
+                        name="correct-place"
+                        value={place.id}
+                        checked={decision.targetHubId === place.id}
+                        onChange={() => setDecision({ ...decision, targetHubId: place.id })}
+                      />
+                      <span>
+                        {place.name}
+                        <span className="ml-2 text-xs text-[var(--color-text-muted)]">
+                          {place.memberCount} member{place.memberCount === 1 ? '' : 's'}
+                        </span>
+                      </span>
+                    </label>
+                  ))}
+                </fieldset>
+              ) : null}
+            </>
           ) : null}
         </ReasonPrompt>
       ) : null}
@@ -180,12 +234,27 @@ function CorrectPicker({
   onPick,
 }: {
   review: PendingReview
-  onPick: (organization: AdminOrganization) => void
+  onPick: (organization: AdminOrganization, places: AdminPlace[]) => void
 }) {
   const [open, setOpen] = useState(false)
   const [term, setTerm] = useState('')
   const [results, setResults] = useState<AdminOrganization[]>([])
   const [searching, setSearching] = useState(false)
+  const [picking, setPicking] = useState<string | null>(null)
+
+  /**
+   * The places are fetched when an organisation is picked, not for every row of
+   * the search results: most searches end in one pick, and asking for the
+   * places of ten organisations to show one list would be nine wasted calls.
+   */
+  async function pick(organization: AdminOrganization) {
+    setPicking(organization.id)
+    try {
+      onPick(organization, await api.organizations.places.list(organization.id))
+    } finally {
+      setPicking(null)
+    }
+  }
 
   async function search() {
     setSearching(true)
@@ -230,7 +299,8 @@ function CorrectPicker({
           key={organization.id}
           type="button"
           data-testid={`review-correct-option-${organization.id}`}
-          onClick={() => onPick(organization)}
+          disabled={picking !== null}
+          onClick={() => void pick(organization)}
           className="block w-full rounded-lg border border-[var(--color-border)] px-3 py-2 text-left text-sm text-[var(--color-text)] hover:border-[var(--color-primary)]"
         >
           {organization.name}

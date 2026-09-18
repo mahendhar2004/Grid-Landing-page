@@ -3,12 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { OrganizationReview } from './OrganizationReview'
 import { api } from '../api/endpoints'
-import type { AdminOrganization, PendingReview } from '../api/types'
+import type { AdminOrganization, AdminPlace, PendingReview } from '../api/types'
 
 vi.mock('../api/endpoints', () => ({
   api: {
     organizations: {
       list: vi.fn(),
+      places: { list: vi.fn() },
       review: { list: vi.fn(), confirm: vi.fn(), correct: vi.fn() },
     },
   },
@@ -18,6 +19,21 @@ const listMock = vi.mocked(api.organizations.review.list)
 const confirmMock = vi.mocked(api.organizations.review.confirm)
 const correctMock = vi.mocked(api.organizations.review.correct)
 const organizationsListMock = vi.mocked(api.organizations.list)
+const placesListMock = vi.mocked(api.organizations.places.list)
+
+function place(overrides: Partial<AdminPlace> = {}): AdminPlace {
+  return {
+    id: 'hub_foo_main',
+    name: 'Foo College',
+    status: 'ACTIVE',
+    latitude: 28.5449,
+    longitude: 77.1928,
+    memberCount: 61,
+    listingCount: 9,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    ...overrides,
+  }
+}
 
 function review(overrides: Partial<PendingReview> = {}): PendingReview {
   return {
@@ -61,6 +77,7 @@ describe('OrganizationReview', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     organizationsListMock.mockResolvedValue([organization()])
+    placesListMock.mockResolvedValue([place()])
     confirmMock.mockResolvedValue(undefined)
     correctMock.mockResolvedValue({ membersMoved: 3, listingsMoved: 2, requestsMoved: 1 })
   })
@@ -108,17 +125,71 @@ describe('OrganizationReview', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Search' }))
     await waitFor(() => expect(screen.getByTestId('review-correct-option-org_foo')).toBeTruthy())
     fireEvent.click(screen.getByTestId('review-correct-option-org_foo'))
+    // The places are fetched on the pick, so the prompt appears a tick later.
+    await waitFor(() => expect(screen.getByRole('textbox', { name: /reason/i })).toBeTruthy())
     fireEvent.change(screen.getByRole('textbox', { name: /reason/i }), {
       target: { value: 'Wrong pick.' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Move it' }))
 
-    await waitFor(() => expect(correctMock).toHaveBeenCalledWith('amazon.in', 'org_foo', 'Wrong pick.'))
+    await waitFor(() =>
+      expect(correctMock).toHaveBeenCalledWith('amazon.in', 'org_foo', 'hub_foo_main', 'Wrong pick.'),
+    )
     // An admin who has just moved three people should be told they moved three
     // people, not left to infer it from the row disappearing.
     await waitFor(() =>
       expect(screen.getByText(/3 members, 2 listings, 1 request\./)).toBeTruthy(),
     )
+  })
+
+  it('asks which campus when the organisation occupies several, and prefills the oldest', async () => {
+    // Nothing about "this domain belongs to Foo College" says which campus, and
+    // this moves every member of the domain (Grid BR-076).
+    placesListMock.mockResolvedValue([
+      place(),
+      place({ id: 'hub_foo_sonipat', name: 'Foo College — Sonipat', memberCount: 4 }),
+    ])
+    await renderReview()
+
+    fireEvent.click(screen.getByRole('button', { name: 'It belongs somewhere else' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Search' }))
+    await waitFor(() => expect(screen.getByTestId('review-correct-option-org_foo')).toBeTruthy())
+    fireEvent.click(screen.getByTestId('review-correct-option-org_foo'))
+
+    await waitFor(() => expect(screen.getByTestId('review-correct-places')).toBeTruthy())
+    // Prefilled with the oldest - the place the organisation grew from, and the
+    // likeliest answer - but visible and changeable.
+    const [oldest, sonipat] = screen.getAllByRole<HTMLInputElement>('radio')
+    expect(oldest!.value).toBe('hub_foo_main')
+    expect(oldest!.checked).toBe(true)
+    expect(sonipat!.checked).toBe(false)
+
+    fireEvent.click(sonipat!)
+    fireEvent.change(screen.getByRole('textbox', { name: /reason/i }), {
+      target: { value: 'It is the Sonipat campus.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Move it' }))
+
+    await waitFor(() =>
+      expect(correctMock).toHaveBeenCalledWith(
+        'amazon.in',
+        'org_foo',
+        'hub_foo_sonipat',
+        'It is the Sonipat campus.',
+      ),
+    )
+  })
+
+  it('does not ask which campus when there is only one', async () => {
+    await renderReview()
+
+    fireEvent.click(screen.getByRole('button', { name: 'It belongs somewhere else' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Search' }))
+    await waitFor(() => expect(screen.getByTestId('review-correct-option-org_foo')).toBeTruthy())
+    fireEvent.click(screen.getByTestId('review-correct-option-org_foo'))
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Move it' })).toBeTruthy())
+    expect(screen.queryByTestId('review-correct-places')).toBeNull()
   })
 
   it('never offers to correct a domain to where it already is', async () => {
