@@ -6,6 +6,7 @@ import { ActionCentre } from './screens/ActionCentre'
 import { Ads } from './screens/Ads'
 import { Analytics } from './screens/Analytics'
 import { AuditLog } from './screens/AuditLog'
+import { OrganizationReview } from './screens/OrganizationReview'
 import { Organizations } from './screens/Organizations'
 import { Pricing } from './screens/Pricing'
 import { Reports } from './screens/Reports'
@@ -33,6 +34,7 @@ type Tab =
   | 'triage'
   | 'users'
   | 'organizations'
+  | 'organization-review'
   | 'pricing'
   | 'ads'
   | 'tiers'
@@ -50,6 +52,9 @@ const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
   // decision - and the only one that works when nobody has reported anyone.
   { id: 'users', label: 'Users' },
   { id: 'organizations', label: 'Organizations' },
+  // Beside Organizations, because it is the same subject seen from the other
+  // end: this is where a domain that picked the wrong one gets moved.
+  { id: 'organization-review', label: 'Domain review' },
   { id: 'pricing', label: 'Pricing' },
   // Beside Pricing rather than the queues: this is a revenue screen, not a
   // moderation one.
@@ -130,6 +135,7 @@ export function AdminApp() {
           {tab === 'triage' ? <Triage /> : null}
           {tab === 'users' ? <Users /> : null}
           {tab === 'organizations' ? <Organizations /> : null}
+          {tab === 'organization-review' ? <OrganizationReview /> : null}
           {tab === 'pricing' ? <Pricing /> : null}
           {tab === 'ads' ? <Ads /> : null}
           {tab === 'tiers' ? <Tiers /> : null}

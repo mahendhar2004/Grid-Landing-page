@@ -20,7 +20,10 @@ import type {
   AdminUser,
   AuditEntry,
   AuthTokens,
+  CorrectDomainResult,
+  OrganizationDomain,
   OrganizationType,
+  PendingReview,
   PricingEntry,
   TierEntitlements,
   TriageCounts,
@@ -234,6 +237,59 @@ const organizations = {
   /** Refused by the server while members, listings or requests are attached — it never cascades. */
   remove(organizationId: string, reason: string): Promise<unknown> {
     return apiDelete(`/v1/admin/organizations/${organizationId}`, { reason })
+  },
+
+  /**
+   * The domains an organisation is reached by (BR-053, BR-066).
+   *
+   * Detach is a POST rather than a DELETE because the domain travels in the
+   * body: a domain is not a path segment, and a DELETE with a body is a
+   * request some intermediaries drop.
+   */
+  domains: {
+    list(organizationId: string): Promise<OrganizationDomain[]> {
+      return apiGet<OrganizationDomain[]>(`/v1/admin/organizations/${organizationId}/domains`)
+    },
+
+    attach(organizationId: string, domain: string, reason: string): Promise<OrganizationDomain> {
+      return apiPost<OrganizationDomain>(`/v1/admin/organizations/${organizationId}/domains`, {
+        domain,
+        reason,
+      })
+    },
+
+    detach(organizationId: string, domain: string, reason: string): Promise<unknown> {
+      return apiPost(`/v1/admin/organizations/${organizationId}/domains/detach`, { domain, reason })
+    },
+  },
+
+  /**
+   * The review queue (BR-064, BR-065).
+   *
+   * Two answers only: let it stand, or move it to the right place. There is no
+   * reject — a verified address proves the member belongs to *some*
+   * organisation, and the realistic failure is a wrong pick from a list.
+   */
+  review: {
+    list(limit: number): Promise<PendingReview[]> {
+      return apiGet<PendingReview[]>('/v1/admin/organizations/review', { limit })
+    },
+
+    confirm(domain: string, reason: string): Promise<unknown> {
+      return apiPost('/v1/admin/organizations/review/confirm', { domain, reason })
+    },
+
+    correct(
+      domain: string,
+      targetOrganizationId: string,
+      reason: string,
+    ): Promise<CorrectDomainResult> {
+      return apiPost<CorrectDomainResult>('/v1/admin/organizations/review/correct', {
+        domain,
+        targetOrganizationId,
+        reason,
+      })
+    },
   },
 }
 

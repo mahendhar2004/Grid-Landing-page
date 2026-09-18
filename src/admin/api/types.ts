@@ -44,6 +44,49 @@ export interface AdminOrganization {
   listingCount: number
 }
 
+/**
+ * A domain that did not resolve on its own, waiting for somebody to say whether
+ * it belongs where it claims (docs/grid-v2/BRD.md BR-064).
+ *
+ * Not a gate. By the time a row appears here its members have verified an
+ * address, joined, and are posting - the queue exists so a wrong pick gets
+ * corrected, not so a right one gets permission.
+ */
+export interface PendingReview {
+  domain: string
+  /** `DIRECTORY` is a member's own unverified assertion; `NEW_ORGANISATION` is an institution nobody had heard of yet. Most of the answer is here. */
+  verifiedVia: string
+  addedAt: string
+  /** How many arrived through this exact domain, and would move with it. */
+  membersThroughDomain: number
+  organization: {
+    id: string
+    name: string
+    shortName: string | null
+    type: OrganizationType
+    memberCount: number
+    /** What else this organisation is reached by. "Is amazon.in Amazon?" is answerable; the same question with nothing beside it is not. */
+    otherDomains: string[]
+  }
+}
+
+export interface CorrectDomainResult {
+  membersMoved: number
+  listingsMoved: number
+  requestsMoved: number
+}
+
+/** One of the domains an organisation is reached by. */
+export interface OrganizationDomain {
+  domain: string
+  isPrimary: boolean
+  verifiedVia: string
+  reviewState: string
+  addedAt: string
+  /** What makes releasing it a decision rather than a click. */
+  memberCount: number
+}
+
 export interface AdminReport {
   id: string
   reporter_email: string

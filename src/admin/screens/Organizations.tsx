@@ -5,7 +5,9 @@ import type { AdminOrganization } from '../api/types'
 import type { ApiError } from '../lib/api'
 import { formatCoordinate, hasUsableCoordinates, parseLatLngPair } from '../lib/coordinates'
 import { usePagedData } from '../lib/usePagedData'
-import { Badge, Button, EmptyNote, ErrorNote, Field, MoreRow, Panel } from '../components/ui'
+import { Badge, Button, EmptyNote, ErrorNote, Field, MoreRow, Panel, ReasonPrompt } from '../components/ui'
+import type { OrganizationDomain } from '../api/types'
+import { useAsyncData } from '../lib/useAsyncData'
 
 /**
  * Adding a college or company by hand.
@@ -67,6 +69,14 @@ export function Organizations() {
    */
   const [savedNote, setSavedNote] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  /**
+   * Which organisation's domains are open.
+   *
+   * Collapsed by default and one at a time: an organisation holds one domain in
+   * the ordinary case, and a list that is almost always one row is noise on
+   * every other row of the table.
+   */
+  const [domainsForId, setDomainsForId] = useState<string | null>(null)
   const [edit, setEdit] = useState<EditForm | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
@@ -347,6 +357,13 @@ export function Organizations() {
                 <Button onClick={() => (editingId === organization.id ? setEditingId(null) : beginEdit(organization))}>
                   {editingId === organization.id ? 'Close' : 'Edit'}
                 </Button>
+                <Button
+                  onClick={() =>
+                    setDomainsForId((current) => (current === organization.id ? null : organization.id))
+                  }
+                >
+                  {domainsForId === organization.id ? 'Hide domains' : 'Domains'}
+                </Button>
                 {/*
                   Offered even when it will be refused, deliberately. The
                   server decides, and its refusal names the counts - which is
@@ -356,6 +373,10 @@ export function Organizations() {
                 <Button variant="danger" disabled={busy} onClick={() => void remove(organization)}>
                   Delete
                 </Button>
+
+                {domainsForId === organization.id ? (
+                  <OrganizationDomains organizationId={organization.id} />
+                ) : null}
 
                 {editingId === organization.id && edit ? (
                   <form
@@ -512,6 +533,137 @@ export function Organizations() {
           onLoadMore={loadMore}
         />
       </Panel>
+    </div>
+  )
+}
+
+/**
+ * Every domain an organisation is reached by, and the two things an admin can
+ * do about them (docs/grid-v2/BRD.md BR-066).
+ *
+ * Most domains arrive on their own. This is for the rest: an acquisition that
+ * brought a second one, a brand that was retired, one a review corrected away.
+ *
+ * The member count beside each domain is what makes releasing it a decision.
+ * The server refuses a release while anyone still holds an address there and
+ * says how many - offered anyway rather than hidden, for the same reason
+ * Delete is: a refusal that names the count is more useful than a control that
+ * silently is not there.
+ */
+function OrganizationDomains({ organizationId }: { organizationId: string }) {
+  const { data, error, reload } = useAsyncData<OrganizationDomain[]>(
+    () => api.organizations.domains.list(organizationId),
+    [organizationId],
+  )
+  const [adding, setAdding] = useState(false)
+  const [newDomain, setNewDomain] = useState('')
+  const [detaching, setDetaching] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [actionError, setActionError] = useState<ApiError | null>(null)
+
+  async function attach(reason: string) {
+    setBusy(true)
+    setActionError(null)
+    try {
+      await api.organizations.domains.attach(organizationId, newDomain.trim(), reason)
+      setAdding(false)
+      setNewDomain('')
+      await reload()
+    } catch (caught) {
+      setActionError(caught as ApiError)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function detach(domain: string, reason: string) {
+    setBusy(true)
+    setActionError(null)
+    try {
+      await api.organizations.domains.detach(organizationId, domain, reason)
+      setDetaching(null)
+      await reload()
+    } catch (caught) {
+      setActionError(caught as ApiError)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="w-full space-y-2 border-t border-[var(--color-border)] pt-4" data-testid="organization-domains">
+      <ErrorNote error={error} />
+      <ErrorNote error={actionError} />
+
+      <ul className="space-y-1">
+        {(data ?? []).map((entry) => (
+          <li key={entry.domain} className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="font-mono text-[var(--color-text)]">{entry.domain}</span>
+            {entry.isPrimary ? <Badge tone="good">Primary</Badge> : null}
+            <Badge>{entry.verifiedVia}</Badge>
+            {entry.reviewState === 'PENDING' ? <Badge tone="warn">Awaiting review</Badge> : null}
+            <span className="text-xs text-[var(--color-text-muted)]">
+              {entry.memberCount === 1 ? '1 member' : `${entry.memberCount} members`}
+            </span>
+            {entry.isPrimary ? null : (
+              <Button variant="danger" onClick={() => setDetaching(entry.domain)}>
+                Release
+              </Button>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <form
+        className="flex flex-wrap gap-2"
+        onSubmit={(event) => {
+          event.preventDefault()
+          if (newDomain.trim().length > 0) setAdding(true)
+        }}
+      >
+        <input
+          data-testid="domain-attach-input"
+          value={newDomain}
+          onChange={(event) => setNewDomain(event.target.value)}
+          placeholder="another-domain.ac.in"
+          className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--bg-page)] px-3 py-2 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+        />
+        <Button type="submit">Attach</Button>
+      </form>
+
+      {adding ? (
+        <ReasonPrompt
+          title={`Attach ${newDomain.trim()}`}
+          confirmLabel="Attach it"
+          variant="primary"
+          busy={busy}
+          onCancel={() => setAdding(false)}
+          onConfirm={(reason) => {
+            void attach(reason)
+          }}
+        >
+          <p className="mb-3 text-sm text-[var(--color-text-muted)]">
+            Everyone with an address at this domain will be able to join this organisation.
+          </p>
+        </ReasonPrompt>
+      ) : null}
+
+      {detaching ? (
+        <ReasonPrompt
+          title={`Release ${detaching}`}
+          confirmLabel="Release it"
+          variant="danger"
+          busy={busy}
+          onCancel={() => setDetaching(null)}
+          onConfirm={(reason) => {
+            void detach(detaching, reason)
+          }}
+        >
+          <p className="mb-3 text-sm text-[var(--color-text-muted)]">
+            Refused while anyone still signs in through it — move them through review first.
+          </p>
+        </ReasonPrompt>
+      ) : null}
     </div>
   )
 }
