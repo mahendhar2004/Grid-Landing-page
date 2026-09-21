@@ -57,8 +57,8 @@ site, and the first version of that function silently broke permanent bans.
 **5. Reads use `useAsyncData` or `usePagedData`, writes use
 `useAdminAction`.** A list that can exceed one page uses `usePagedData`;
 `GET /v1/admin/ad-units` is the one route that pages by **cursor** rather than
-offset, so it uses `useCursorPagedData` instead; anything bounded (pricing,
-tiers, the counts) uses `useAsyncData`. Neither is
+offset, so it uses `useCursorPagedData` instead; anything bounded
+(monetization, the counts) uses `useAsyncData`. Neither is
 optional. `useAsyncData` carries stale-response protection: every screen has a
 filter, switching it fires a second request, and without a guard the slower
 response wins — on a moderation queue that means acting on the wrong report.

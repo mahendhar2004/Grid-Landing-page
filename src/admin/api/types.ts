@@ -17,7 +17,6 @@
 
 export type OrganizationType = 'ACADEMIC' | 'CORPORATE'
 export type HubStatus = 'PENDING_VISIBILITY' | 'ACTIVE'
-export type Tier = 'FREE' | 'PLUS' | 'PRO'
 export type TriageInbox =
   | 'BUG_REPORT'
   | 'FEEDBACK'
@@ -197,22 +196,87 @@ export interface TriageItem {
 
 export type TriageCounts = Partial<Record<TriageInbox, number>>
 
-export interface PricingEntry {
-  pricedItem: string
+/**
+ * Monetization, as `GET /v1/admin/monetization` returns it.
+ *
+ * **Two tables replaced by one document, on purpose.** The console used to
+ * fetch `/v1/admin/pricing` and `/v1/admin/tiers` into two hand-written
+ * shapes, each with a field per entitlement — so a new paid feature meant a
+ * type change, a form field and a deploy here before anybody could configure
+ * it. The server now builds this from its feature registry, which means a
+ * feature added there appears on the screen with no change in this repo at
+ * all. Nothing below names a feature or a plan.
+ *
+ * `featureKey`, `model` and `status` are strings rather than unions for the
+ * same reason: a value the console has never heard of has to render, not fail
+ * to type-check.
+ */
+
+/** How a feature is paid for, which is what decides the control it gets. */
+export type FeatureModel = 'PER_USE' | 'PERK' | 'SETTING' | 'GRANT'
+
+/** `DRAFT` is configured but unbuyable; `RETIRED` keeps existing subscribers and is sold to nobody new. */
+export type PlanStatus = 'DRAFT' | 'AVAILABLE' | 'RETIRED'
+
+/** What one use of a feature costs members of one kind of organisation. */
+export interface FeaturePrice {
+  orgType: OrganizationType
+  /** False means free for everyone regardless of the price beside it — the flag that makes a feature paid. */
+  isPaid: boolean
+  basePricePaise: number
+  discountPaise: number
+}
+
+export interface AdminFeature {
+  key: string
+  label: string
+  explain: string
+  model: FeatureModel
+  /** What one unit is ("boost", "listing"), for copy. Null wherever counting means nothing. */
+  unit: string | null
+  /** The file and function that charges for it, so a paid feature nobody enforces is visible as such. */
+  enforcedAt: string | null
+  pricing: FeaturePrice[]
+}
+
+/** One cell of the plan x feature matrix. An absent cell is how the matrix spells "no". */
+export interface PlanFeature {
+  featureKey: string
+  included: boolean
+  /** How many per cycle. Null with `included` means unlimited. */
+  includedQuantity: number | null
+  discountPercent: number
+  /** A `SETTING`'s value on this plan. */
+  settingValue: number | null
+  /** What a `GRANT` hands out each cycle. */
+  grantPaise: number | null
+}
+
+export interface PlanPrice {
   orgType: OrganizationType
   basePricePaise: number
   discountPaise: number
-  finalPricePaise: number
 }
 
-export interface TierEntitlements {
-  tier: Tier
-  monthlyBundledCredits: number
-  monthlyFreeBoosts: number
-  unlimitedPosting: boolean
-  crossOrgDiscountPercent: number
-  prioritySearch: boolean
+export interface AdminPlan {
+  id: string
+  key: string
+  name: string
   badgeLabel: string | null
+  sortOrder: number
+  isDefault: boolean
+  status: PlanStatus
+  iosProductId: string | null
+  androidProductId: string | null
+  /** Why this plan cannot be sold yet, in a sentence, or null when it can. The stores are the constraint no configuration removes. */
+  blockedReason: string | null
+  pricing: PlanPrice[]
+  features: PlanFeature[]
+}
+
+export interface AdminMonetizationView {
+  features: AdminFeature[]
+  plans: AdminPlan[]
 }
 
 export interface AuthTokens {

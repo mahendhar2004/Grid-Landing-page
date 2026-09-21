@@ -259,7 +259,7 @@ export function apiPatch<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, { method: 'PATCH', body: JSON.stringify(body) })
 }
 
-/** A full replacement, not a merge - `PUT /v1/admin/tiers/{tier}` requires every entitlement in the body, and omitting one is a validation error rather than "leave that field alone". */
+/** A full replacement, not a merge - `PUT /v1/admin/monetization/plan-features` stores the cell it is given, so a field left out is a field set to nothing rather than one left alone. */
 export function apiPut<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, { method: 'PUT', body: JSON.stringify(body) })
 }

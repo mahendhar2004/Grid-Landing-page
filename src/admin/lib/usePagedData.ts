@@ -15,7 +15,7 @@ const SEPARATOR = '\u0000'
  * nothing was reading it.
  *
  * `useAsyncData` stays the right tool for a screen whose data is one bounded
- * fetch (pricing, tiers, the counts). This is its paged sibling, and it keeps
+ * fetch (monetization, the counts). This is its paged sibling, and it keeps
  * the same two properties that one exists for:
  *
  * - **Stale-response protection.** Changing a filter fires a new first page

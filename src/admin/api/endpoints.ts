@@ -24,9 +24,8 @@ import type {
   CorrectDomainResult,
   OrganizationDomain,
   OrganizationType,
+  AdminMonetizationView,
   PendingReview,
-  PricingEntry,
-  TierEntitlements,
   TriageCounts,
   TriageInbox,
   TriageItem,
@@ -327,31 +326,62 @@ const organizations = {
   },
 }
 
-// --------------------------------------------------- money & tiers
+// ---------------------------------------------------- monetization
 
-const pricing = {
-  list(): Promise<PricingEntry[]> {
-    return apiGet<PricingEntry[]>('/v1/admin/pricing')
-  },
-
-  upsert(
-    pricedItem: string,
-    orgType: OrganizationType,
-    basePricePaise: number,
-    discountPaise: number,
-  ): Promise<unknown> {
-    return apiPost('/v1/admin/pricing', { pricedItem, orgType, basePricePaise, discountPaise })
-  },
+/** What one use of a feature costs, per kind of organisation. Every field required: the route replaces the row rather than merging into it. */
+export interface SetFeaturePriceBody {
+  featureKey: string
+  orgType: OrganizationType
+  /** The flag that makes a feature paid. Turning it on with nothing to charge is refused server-side, because "paid, free" reads as free to every member. */
+  isPaid: boolean
+  basePricePaise: number
+  discountPaise: number
 }
 
-const tiers = {
-  list(): Promise<TierEntitlements[]> {
-    return apiGet<TierEntitlements[]>('/v1/admin/tiers')
+/**
+ * One cell of the plan x feature matrix.
+ *
+ * Every field is required and nullable rather than optional, for the reason
+ * `ReportDecision` above is a union: "leave the grant alone" and "this plan
+ * grants nothing" are different intentions, and an optional field spells them
+ * the same way. The route replaces the cell, so the caller states all of it.
+ *
+ * Which fields may be non-null depends on the feature's own model, and the
+ * server checks that: a quantity on a perk is a configuration that cannot mean
+ * anything, and a refused save beats a benefit that silently does nothing.
+ */
+export interface SetPlanFeatureBody {
+  planKey: string
+  featureKey: string
+  included: boolean
+  /** Null with `included` means unlimited, which is not the same as zero. */
+  includedQuantity: number | null
+  discountPercent: number
+  settingValue: number | null
+  grantPaise: number | null
+}
+
+/**
+ * The two endpoints that replaced four.
+ *
+ * `/v1/admin/pricing` and `/v1/admin/tiers` are gone: the tier route took a
+ * fixed body with a field per entitlement, so adding a feature meant a schema
+ * change, a console form field and a deploy of both. These write one cell at a
+ * time against a view the server builds from its feature registry, so a new
+ * feature needs neither.
+ */
+const monetization = {
+  /** Every feature and every plan in one call — the whole screen's data. */
+  get(): Promise<AdminMonetizationView> {
+    return apiGet<AdminMonetizationView>('/v1/admin/monetization')
   },
 
-  /** A full replacement, not a merge: the route requires every entitlement, and omitting one is a validation error rather than "leave it alone". */
-  update(tier: string, entitlements: Omit<TierEntitlements, 'tier'>): Promise<unknown> {
-    return apiPut(`/v1/admin/tiers/${tier}`, entitlements)
+  setFeaturePrice(body: SetFeaturePriceBody): Promise<unknown> {
+    return apiPut('/v1/admin/monetization/features', body)
+  },
+
+  setPlanFeature(body: SetPlanFeatureBody): Promise<unknown> {
+    return apiPut('/v1/admin/monetization/plan-features', body)
   },
 }
 
@@ -757,8 +787,7 @@ export const api = {
   advertiserLedger,
   creatives,
   lineItems,
-  pricing,
-  tiers,
+  monetization,
   audit,
   analytics,
 }

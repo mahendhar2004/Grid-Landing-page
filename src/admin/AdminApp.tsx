@@ -6,12 +6,11 @@ import { ActionCentre } from './screens/ActionCentre'
 import { Ads } from './screens/Ads'
 import { Analytics } from './screens/Analytics'
 import { AuditLog } from './screens/AuditLog'
+import { Monetization } from './screens/Monetization'
 import { OrganizationReview } from './screens/OrganizationReview'
 import { Organizations } from './screens/Organizations'
-import { Pricing } from './screens/Pricing'
 import { Reports } from './screens/Reports'
 import { SignIn } from './screens/SignIn'
-import { Tiers } from './screens/Tiers'
 import { Triage } from './screens/Triage'
 import { Users } from './screens/Users'
 
@@ -35,9 +34,8 @@ type Tab =
   | 'users'
   | 'organizations'
   | 'organization-review'
-  | 'pricing'
+  | 'monetization'
   | 'ads'
-  | 'tiers'
   | 'analytics'
   | 'audit'
 
@@ -55,11 +53,13 @@ const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
   // Beside Organizations, because it is the same subject seen from the other
   // end: this is where a domain that picked the wrong one gets moved.
   { id: 'organization-review', label: 'Domain review' },
-  { id: 'pricing', label: 'Pricing' },
-  // Beside Pricing rather than the queues: this is a revenue screen, not a
+  // One tab, not the two it replaces: what a feature costs and what a plan
+  // includes are the same decision seen from either end, and keeping them apart
+  // is how a plan came to include a benefit nothing charged for.
+  { id: 'monetization', label: 'Monetization' },
+  // Beside it rather than the queues: this is a revenue screen, not a
   // moderation one.
   { id: 'ads', label: 'Ads' },
-  { id: 'tiers', label: 'Tiers' },
   { id: 'analytics', label: 'Analytics' },
   { id: 'audit', label: 'Audit log' },
 ]
@@ -136,9 +136,8 @@ export function AdminApp() {
           {tab === 'users' ? <Users /> : null}
           {tab === 'organizations' ? <Organizations /> : null}
           {tab === 'organization-review' ? <OrganizationReview /> : null}
-          {tab === 'pricing' ? <Pricing /> : null}
+          {tab === 'monetization' ? <Monetization /> : null}
           {tab === 'ads' ? <Ads /> : null}
-          {tab === 'tiers' ? <Tiers /> : null}
           {tab === 'analytics' ? <Analytics /> : null}
           {tab === 'audit' ? <AuditLog /> : null}
         </ErrorBoundary>
