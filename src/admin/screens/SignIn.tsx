@@ -108,7 +108,18 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
           <div className="space-y-4">
             {clientId ? (
               <>
-                <div className="flex justify-center" ref={googleSlot} data-testid="admin-signin-google" />
+                {/* `color-scheme: light` on purpose. Google draws its button in an iframe, and a
+                    browser only keeps an iframe transparent when its colour scheme
+                    matches the page around it; on the dark console the page is dark,
+                    so the iframe went opaque white and showed as a white box behind
+                    the pill. Pinning this box to light keeps the iframe transparent in
+                    both themes, and the button still follows the theme (see `theme`). */}
+                <div
+                  className="flex justify-center"
+                  style={{ colorScheme: 'light' }}
+                  ref={googleSlot}
+                  data-testid="admin-signin-google"
+                />
                 <div className="flex items-center gap-3 text-xs text-[var(--c-faint)]" aria-hidden="true">
                   <span className="h-px flex-1 bg-[var(--c-line)]" />
                   or use an email code
