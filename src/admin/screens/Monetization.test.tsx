@@ -63,6 +63,11 @@ async function renderScreen(data: AdminMonetizationView = view()) {
   // Waits on the fetch resolving rather than on any particular feature: this
   // screen is rendered from whatever the server sends, and a test that names a
   // feature to wait for would be a test that knows the registry.
+  //
+  // "No loading text" alone is true before the first render commits, which made
+  // this return early and the tests fail one run in three; a list item only
+  // exists once the data has rendered.
+  await screen.findAllByRole('listitem')
   await waitFor(() => expect(screen.queryAllByText('Loading…')).toHaveLength(0))
 }
 
