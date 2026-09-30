@@ -2,12 +2,12 @@ import { Link, useSearchParams } from 'react-router-dom'
 
 /*
   Must move whenever the text below does. `CURRENT_PRIVACY_POLICY_VERSION` in
-  the app is 1.4 as of this change; the two are kept in step by release
+  the app is 1.5 as of this change; the two are kept in step by release
   discipline rather than by the type system, because the site can be
   redeployed without an app release and the consent record stores what the
   app believed was current.
 */
-const lastUpdated = 'September 17, 2026'
+const lastUpdated = 'September 30, 2026'
 
 export default function PrivacyPolicyPage() {
   const [searchParams] = useSearchParams()
@@ -186,9 +186,11 @@ export default function PrivacyPolicyPage() {
 
           <Section title="11. Data Retention">
             <p>We retain your account data for as long as your account is active. Deleted conversations are removed from your view but may be retained temporarily in our systems. Delisted listings remain in our database for record-keeping but are not displayed to other users.</p>
-            <p className="mt-3">When you delete your account, your personal data is removed, active and pending listings are anonymised, sold or expired listings are de-identified, pending referrals are expired, and your wallet and transaction history are deleted. An audit log entry is retained for fraud prevention and legal compliance.</p>
-            <p className="mt-3">Transaction records may be retained for up to seven years where required for tax and financial compliance.</p>
-            <p className="mt-3">We store the timestamp of your Terms acceptance for legal compliance. This record is deleted along with your account.</p>
+            <p className="mt-3">When you delete your account, everything that identifies or reaches you is removed: your name, photo, phone number, hostel, the address and device you signed up from, your saved items, searches, preferences and notifications, the photos on your listings and offers and in your chats, any phone number, note or map position you put in pickup details, and any feedback or bug reports you sent us. Active and pending listings are anonymised, sold or expired listings are de-identified, and pending referrals are expired. Copies of your data that you downloaded from Grid are deleted too, and any that were not deleted are removed automatically seven days after they are made. An audit log entry is retained for fraud prevention and legal compliance.</p>
+            <p className="mt-3">Messages you sent stay in the conversations of the people you sent them to, shown as coming from &quot;Deleted User&quot; and moved to their Archived list, because they are those people&apos;s record of the conversation.</p>
+            <p className="mt-3">Your wallet is closed when you delete your account. Records of payments and credits are kept, without your name or contact details, for up to seven years where tax or financial law requires it, and are then deleted.</p>
+            <p className="mt-3">We keep a record that you accepted the Terms and this Privacy Policy: which version, when, whether you confirmed you are 18 or over, and the email address and IP address you accepted from. It is proof of your consent, which the law may require us to be able to show, so it is kept separately from your account and stays after you delete it.</p>
+            <p className="mt-3">Some things are kept for a fixed time whether or not you have an account. Your notification history is deleted after 90 days. A message sent through our contact form, a review or a bug report submitted on our website has the email address and IP address removed after 30 days and is deleted after 12 months; a review we have published on this site stays for as long as it is published.</p>
           </Section>
 
           <Section title="12. Children's Privacy">
