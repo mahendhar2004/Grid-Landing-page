@@ -34,11 +34,20 @@ export function AdminApp() {
   const tab = known ? view : 'home'
 
   useEffect(() => {
+    // Signed in only while the session is inside its 24 hours. Rechecked on
+    // focus, every half-minute (so a console left open notices it has expired),
+    // and when another tab signs out or in.
     function recheck() {
       setSignedIn(getAccessToken() !== null)
     }
+    const timer = window.setInterval(recheck, 30_000)
     window.addEventListener('focus', recheck)
-    return () => window.removeEventListener('focus', recheck)
+    window.addEventListener('storage', recheck)
+    return () => {
+      window.clearInterval(timer)
+      window.removeEventListener('focus', recheck)
+      window.removeEventListener('storage', recheck)
+    }
   }, [])
 
   useEffect(() => {

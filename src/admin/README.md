@@ -42,6 +42,7 @@ screens/               one file per screen, composed from the above
 - **Add a screen**: one entry in `nav.ts`, one file in `screens/`, composed from
   the components above. Add a filter: one entry in the screen's `DEFAULTS`, one
   `Dropdown`, one server parameter.
+- **The session lasts 24 hours** from sign-in and survives a refresh, a new tab and a browser restart (`lib/session.ts`: tokens in `localStorage` beside the sign-in time, deleted when the day is up or on sign-out, in every tab). Renewing the 15-minute access token does not extend the day. It is the console's own limit, not a security boundary: the server checks the admin claim on every request.
 - **Sign-in** asks for an email or a Google account and nothing else. There is no
   age or consent tick box: the server is told the request is from the console
   (`audience: ADMIN_CONSOLE`), sends a code only to an address on the

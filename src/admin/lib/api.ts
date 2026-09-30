@@ -15,53 +15,11 @@
 /** Set per environment at build time. No default that would silently point staging at production. */
 const API_BASE_URL: string = import.meta.env['VITE_API_URL'] ?? '';
 
-/**
- * Where the tokens live.
- *
- * `sessionStorage`, not `localStorage`: an admin session should not outlive
- * the tab. The console can ban users and change prices, and a token that
- * survives closing the browser on a shared or borrowed machine is a longer
- * window than that access deserves. The cost is re-authenticating once per
- * session, which for a tool used in deliberate sittings is the right trade.
- */
-const ACCESS_TOKEN_KEY = 'grid-console-access-token';
-const REFRESH_TOKEN_KEY = 'grid-console-refresh-token';
+import { clearTokens, getAccessToken, getRefreshToken, storeTokens } from './session'
 
-export function getAccessToken(): string | null {
-  try {
-    return sessionStorage.getItem(ACCESS_TOKEN_KEY);
-  } catch {
-    // Private mode, or storage blocked. Treated as signed out rather than
-    // crashing the whole console on a storage read.
-    return null;
-  }
-}
-
-export function storeTokens(accessToken: string, refreshToken: string): void {
-  try {
-    sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-  } catch {
-    // Nothing to do: the session simply will not survive a reload.
-  }
-}
-
-function getRefreshToken(): string | null {
-  try {
-    return sessionStorage.getItem(REFRESH_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-export function clearTokens(): void {
-  try {
-    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
-  } catch {
-    // Already gone, or storage unavailable.
-  }
-}
+// The session (tokens and their 24-hour limit) lives in `session.ts`;
+// re-exported so screens keep one import for everything about the API.
+export { clearTokens, getAccessToken, storeTokens }
 
 /**
  * An API failure, carrying enough to act on.
@@ -343,7 +301,7 @@ export async function verifyOtp(email: string, otp: string): Promise<VerifyOtpRe
     )
   }
 
-  storeTokens(tokens.accessToken, tokens.refreshToken)
+  storeTokens(tokens.accessToken, tokens.refreshToken, true)
   return tokens
 }
 
@@ -381,6 +339,6 @@ export async function signInWithGoogle(idToken: string): Promise<VerifyOtpRespon
     throw new ApiError(403, 'NOT_AN_ADMIN', 'That account does not have console access. Ask an existing admin to add it.', null)
   }
 
-  storeTokens(result.accessToken, result.refreshToken)
+  storeTokens(result.accessToken, result.refreshToken, true)
   return { accessToken: result.accessToken, refreshToken: result.refreshToken }
 }
