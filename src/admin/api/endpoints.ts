@@ -121,6 +121,7 @@ const reports = {
     limit: number,
     offset: number,
   ): Promise<AdminReport[]> {
+    checkPage('reports', limit)
     return apiGet<AdminReport[]>('/v1/admin/reports', {
       status,
       ...(category ? { category } : {}),
@@ -176,6 +177,7 @@ const triage = {
     limit: number,
     offset: number,
   ): Promise<TriageItem[]> {
+    checkPage('triage', limit)
     return apiGet<TriageItem[]>('/v1/admin/triage', {
       inbox,
       ...(status ? { status } : {}),
@@ -298,6 +300,7 @@ const organizations = {
    */
   review: {
     list(limit: number): Promise<PendingReview[]> {
+      checkPage('domainReview', limit)
       return apiGet<PendingReview[]>('/v1/admin/organizations/review', { limit })
     },
 
@@ -399,6 +402,7 @@ const audit = {
     limit: number,
     offset: number,
   ): Promise<AuditEntry[]> {
+    checkPage('auditLog', limit)
     return apiGet<AuditEntry[]>('/v1/admin/audit-log', { ...filters, limit, offset })
   },
 }
@@ -445,6 +449,7 @@ const users = {
     limit: number,
     offset: number,
   ): Promise<AdminUser[]> {
+    checkPage('users', limit)
     return apiGet<AdminUser[]>('/v1/admin/users', {
       search: filters.search,
       ...(filters.banned === null ? {} : { banned: String(filters.banned) }),
@@ -563,13 +568,26 @@ export type CreativeReviewDecision =
  * the console follows it rather than asking the API to change shape.
  */
 /**
- * The most each list route will return in one page (its own `limit` schema).
+ * The most each list route will return in one page (its own `limit` schema; keep
+ * this in step with the `limit` in each admin list handler in the backend).
  * A request over it is a 400, and a caller that swallows the error reports an
  * empty list as an empty queue - which is how the Action Centre showed "nothing
  * waiting" for ad creatives that were. The methods below refuse an impossible
  * limit loudly, at the call site, instead of letting the server do it.
  */
-export const MAX_PAGE = { advertisers: 50, creatives: 50, organizations: 100 } as const
+export const MAX_PAGE = {
+  advertisers: 50,
+  creatives: 50,
+  organizations: 100,
+  reports: 100,
+  triage: 100,
+  domainReview: 50,
+  auditLog: 200,
+  users: 100,
+  ledger: 100,
+  adOrders: 50,
+  lineItems: 50,
+} as const
 
 function checkPage(route: keyof typeof MAX_PAGE, limit: number): void {
   if (limit > MAX_PAGE[route]) {
@@ -610,6 +628,7 @@ const advertisers = {
 
 const advertiserLedger = {
   get(advertiserId: string, cursor: string | null, limit = 50): Promise<AdvertiserLedgerPage> {
+    checkPage('ledger', limit)
     return apiGet<AdvertiserLedgerPage>(`/v1/admin/advertisers/${advertiserId}/ledger`, {
       ...(cursor ? { cursor } : {}),
       limit,
@@ -643,6 +662,7 @@ const advertiserLedger = {
 
 const adOrders = {
   list(cursor: string | null, filters: { advertiserId?: string; includeArchived?: boolean } = {}, limit = 50) {
+    checkPage('adOrders', limit)
     return apiGet<AdOrdersPage>('/v1/admin/ad-orders', {
       ...(cursor ? { cursor } : {}),
       ...(filters.advertiserId ? { advertiserId: filters.advertiserId } : {}),
@@ -740,6 +760,7 @@ const lineItems = {
     filters: { advertiserId?: string; orderId?: string; status?: string; suspendedOnly?: boolean; includeArchived?: boolean } = {},
     limit = 50,
   ) {
+    checkPage('lineItems', limit)
     return apiGet<LineItemsPage>('/v1/admin/line-items', {
       ...(cursor ? { cursor } : {}),
       ...(filters.advertiserId ? { advertiserId: filters.advertiserId } : {}),

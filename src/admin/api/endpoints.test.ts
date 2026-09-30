@@ -53,4 +53,18 @@ describe('page sizes the routes allow', () => {
     expect(() => api.creatives.list(null, {}, MAX_PAGE.creatives + 1)).toThrow(/at most 50/)
     expect(() => api.organizations.list(undefined, MAX_PAGE.organizations + 1, 0)).toThrow(/at most 100/)
   })
+
+  it('guards every list, and lets a page of exactly the maximum through to the network', () => {
+    // A request of exactly the limit is valid and reaches `fetch` (which is not
+    // stubbed here, so it fails there and not in the guard).
+    const over = MAX_PAGE.auditLog + 1
+    expect(() => api.audit.list({}, over, 0)).toThrow(/at most 200/)
+    expect(() => api.users.list({ banned: null }, MAX_PAGE.users + 1, 0)).toThrow(/at most 100/)
+    expect(() => api.reports.list('OPEN', null, MAX_PAGE.reports + 1, 0)).toThrow(/at most 100/)
+    expect(() => api.triage.list('BUG_REPORT', null, MAX_PAGE.triage + 1, 0)).toThrow(/at most 100/)
+    expect(() => api.adOrders.list(null, {}, MAX_PAGE.adOrders + 1)).toThrow(/at most 50/)
+    expect(() => api.lineItems.list(null, {}, MAX_PAGE.lineItems + 1)).toThrow(/at most 50/)
+    expect(() => api.advertiserLedger.get('id', null, MAX_PAGE.ledger + 1)).toThrow(/at most 100/)
+    expect(() => api.organizations.review.list(MAX_PAGE.domainReview + 1)).toThrow(/at most 50/)
+  })
 })
