@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { api } from '../api/endpoints'
 import type { AdminPlace, AdPlacement, AdSector, AdSettings as AdSettingsData } from '../api/types'
+import { fetchAllByOffset } from '../lib/fetchAll'
 import { useAsyncData } from '../lib/useAsyncData'
 import { useAdminAction } from '../lib/useAdminAction'
 import { Badge, Button, EmptyNote, ErrorNote, Field, Panel, ReasonPrompt } from '../components/ui'
@@ -96,7 +97,7 @@ export function AdSettings() {
     place of every organisation up front is a request per organisation for a
     list that is thrown away the moment one is picked.
   */
-  const { data: organizations } = useAsyncData(() => api.organizations.list(undefined, 200, 0), [])
+  const { data: organizations } = useAsyncData(() => fetchAllByOffset((offset) => api.organizations.list(undefined, 100, offset), 100), [])
   const { data: places } = useAsyncData(
     () =>
       overrideOrganizationId === ''

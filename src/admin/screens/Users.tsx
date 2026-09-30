@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { api } from '../api/endpoints'
 import type { AdminUser } from '../api/types'
 import { useAdminAction } from '../lib/useAdminAction'
+import { fetchAllByOffset } from '../lib/fetchAll'
 import { useAsyncData } from '../lib/useAsyncData'
 import { useFilters } from '../lib/useFilters'
 import { usePagedData } from '../lib/usePagedData'
@@ -84,9 +85,9 @@ export function Users() {
   const search = q.trim()
   const [pending, setPending] = useState<Pending | null>(null)
 
-  // The organisations to choose from. One request for the first hundred: enough
-  // to pick from by typing in the dropdown's own search box.
-  const orgs = useAsyncData(() => api.organizations.list(undefined, 100, 0), [])
+  // Every organisation to choose from (pages of 100, the route's maximum), so the
+  // dropdown's own search box finds any of them.
+  const orgs = useAsyncData(() => fetchAllByOffset((offset) => api.organizations.list(undefined, 100, offset), 100), [])
   const orgOptions: ReadonlyArray<Option> = [
     { value: 'all', label: 'All organisations' },
     ...(orgs.data ?? []).map((o) => ({ value: o.id, label: o.name })),

@@ -227,6 +227,7 @@ export interface UpdatePlaceBody {
 
 const organizations = {
   list(search: string | undefined, limit: number, offset: number): Promise<AdminOrganization[]> {
+    checkPage('organizations', limit)
     return apiGet<AdminOrganization[]>('/v1/admin/organizations', { search, limit, offset })
   },
 
@@ -561,8 +562,24 @@ export type CreativeReviewDecision =
  * admin list. That is the routes' own design (Rule 25 cursor pagination), so
  * the console follows it rather than asking the API to change shape.
  */
+/**
+ * The most each list route will return in one page (its own `limit` schema).
+ * A request over it is a 400, and a caller that swallows the error reports an
+ * empty list as an empty queue - which is how the Action Centre showed "nothing
+ * waiting" for ad creatives that were. The methods below refuse an impossible
+ * limit loudly, at the call site, instead of letting the server do it.
+ */
+export const MAX_PAGE = { advertisers: 50, creatives: 50, organizations: 100 } as const
+
+function checkPage(route: keyof typeof MAX_PAGE, limit: number): void {
+  if (limit > MAX_PAGE[route]) {
+    throw new Error(`The ${route} route returns at most ${MAX_PAGE[route]} per page; asked for ${limit}. Page through it (lib/fetchAll.ts).`)
+  }
+}
+
 const advertisers = {
   list(cursor: string | null, filters: { search?: string; tier?: string; includeArchived?: boolean; suspendedOnly?: boolean } = {}, limit = 50) {
+    checkPage('advertisers', limit)
     return apiGet<AdvertisersPage>('/v1/admin/advertisers', {
       ...(cursor ? { cursor } : {}),
       ...(filters.search ? { search: filters.search } : {}),
@@ -649,6 +666,7 @@ const adOrders = {
 
 const creatives = {
   list(cursor: string | null, filters: { advertiserId?: string; reviewStatus?: string; includeArchived?: boolean } = {}, limit = 50) {
+    checkPage('creatives', limit)
     return apiGet<CreativesPage>('/v1/admin/creatives', {
       ...(cursor ? { cursor } : {}),
       ...(filters.advertiserId ? { advertiserId: filters.advertiserId } : {}),

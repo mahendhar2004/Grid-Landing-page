@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { triageStatusValue } from './endpoints'
+import { MAX_PAGE, api, triageStatusValue } from './endpoints'
 import type { TriageInbox } from './types'
 
 describe('triageStatusValue', () => {
@@ -42,5 +42,15 @@ describe('triageStatusValue', () => {
     for (const inbox of INBOXES) {
       expect(triageStatusValue(inbox, 'RESOLVED')).toBeTruthy()
     }
+  })
+})
+
+describe('page sizes the routes allow', () => {
+  it('refuses, at the call site, a page bigger than the route will return', () => {
+    // The server answers such a request with a 400 "limit: Too big", and the
+    // Action Centre turned that into "nothing waiting".
+    expect(() => api.advertisers.list(null, {}, MAX_PAGE.advertisers + 1)).toThrow(/at most 50/)
+    expect(() => api.creatives.list(null, {}, MAX_PAGE.creatives + 1)).toThrow(/at most 50/)
+    expect(() => api.organizations.list(undefined, MAX_PAGE.organizations + 1, 0)).toThrow(/at most 100/)
   })
 })
