@@ -201,7 +201,7 @@ function BarList({
                 <span className="truncate text-sm text-[var(--color-text)]">{row.label}</span>
                 <span className="shrink-0 text-sm font-semibold text-[var(--color-text)]">{show(row.value)}</span>
               </div>
-              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/5">
+              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--c-hover)]">
                 <div
                   className="h-full rounded-full bg-[var(--color-primary)]"
                   style={{ width: `${Math.max(2, (row.value / max) * 100)}%` }}

@@ -1,8 +1,8 @@
-import { useState } from 'react'
-
 import { api } from '../api/endpoints'
 import { usePagedData } from '../lib/usePagedData'
-import { Badge, Button, EmptyNote, ErrorNote, Field, MoreRow, Panel } from '../components/ui'
+import { useFilters } from '../lib/useFilters'
+import { Dropdown, FilterChips, SearchBox, Toolbar } from '../components/filters'
+import { Badge, EmptyNote, ErrorNote, MoreRow, PageHeader, Panel } from '../components/ui'
 
 /**
  * Every admin action, newest first.
@@ -33,8 +33,8 @@ const PAGE_SIZE = 100
  * than a guess at a spelling. "Anything" is first because browsing the whole
  * log is the common case and narrowing is the deliberate one.
  */
-const TARGET_TYPES: ReadonlyArray<{ value: string | undefined; label: string }> = [
-  { value: undefined, label: 'Anything' },
+const TARGET_TYPES: ReadonlyArray<{ value: string; label: string }> = [
+  { value: 'all', label: 'Anything' },
   { value: 'USER', label: 'Users' },
   { value: 'LISTING', label: 'Listings' },
   { value: 'REQUEST', label: 'Requests' },
@@ -42,9 +42,12 @@ const TARGET_TYPES: ReadonlyArray<{ value: string | undefined; label: string }> 
   { value: 'REPORT', label: 'Reports' },
 ]
 
+const AUDIT_FILTER_DEFAULTS = { type: 'all', target: '' }
+
 export function AuditLog() {
-  const [targetType, setTargetType] = useState<string | undefined>(undefined)
-  const [targetId, setTargetId] = useState('')
+  const filters = useFilters('audit', AUDIT_FILTER_DEFAULTS)
+  const targetType = filters.values.type === 'all' ? undefined : filters.values.type
+  const targetId = filters.values.target
 
   const { rows: entries, error, hasMore, loadingMore, loadMore } = usePagedData(
     (offset) =>
@@ -60,35 +63,33 @@ export function AuditLog() {
     PAGE_SIZE,
   )
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-bold text-[var(--color-text)]">Audit log</h1>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-          Written with the action it records. Nothing here can be edited or removed.
-        </p>
-      </div>
+  const chips = filters.active.map((key) => ({
+    key,
+    label: key === 'type' ? `Type ${TARGET_TYPES.find((entry) => entry.value === filters.values.type)?.label ?? ''}` : `Target ${targetId.trim()}`,
+  }))
 
-      <div className="flex flex-wrap gap-1">
-        {TARGET_TYPES.map((entry) => (
-          <Button
-            key={entry.label}
-            variant={targetType === entry.value ? 'primary' : 'default'}
-            onClick={() => setTargetType(entry.value)}
-          >
-            {entry.label}
-          </Button>
-        ))}
-      </div>
+  return (
+    <div className="space-y-5">
+      <PageHeader title="Audit log" subtitle="Written with the action it records. Nothing here can be edited or removed." />
 
       {/* An id, pasted. The question this screen gets opened with is almost
           always about one specific thing. */}
-      <Field
-        label="Target id"
-        value={targetId}
-        onChange={setTargetId}
-        placeholder="Paste an id to see only what was done to it"
-      />
+      <Toolbar count={entries === null ? undefined : `${entries.length}${hasMore ? '+' : ''} shown`}>
+        <SearchBox
+          value={targetId}
+          onChange={(value) => filters.set('target', value)}
+          placeholder="Paste an id to see only what was done to it"
+        />
+        <Dropdown
+          label="Type"
+          value={filters.values.type}
+          allValue="all"
+          options={TARGET_TYPES}
+          onChange={(value) => filters.set('type', value)}
+        />
+      </Toolbar>
+
+      <FilterChips chips={chips} onRemove={(key) => filters.clear(key as 'type' | 'target')} onClearAll={() => filters.clear('*')} />
 
       <ErrorNote error={error} />
 
@@ -129,7 +130,7 @@ export function AuditLog() {
                 {Object.keys(entry.details).length > 0 ? (
                   <details className="mt-2">
                     <summary className="cursor-pointer text-xs text-[var(--color-text-muted)]">Details</summary>
-                    <pre className="mt-1 overflow-x-auto rounded bg-black/30 p-2 text-xs text-[var(--color-text-muted)]">
+                    <pre className="mt-1 overflow-x-auto rounded bg-[var(--c-scrim)] p-2 text-xs text-[var(--color-text-muted)]">
                       {JSON.stringify(entry.details, null, 2)}
                     </pre>
                   </details>

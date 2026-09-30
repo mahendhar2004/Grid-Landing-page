@@ -72,10 +72,9 @@ const auth = {
       // for an admin. EMPLOYEE because in the one case it would be used,
       // console staff are not students.
       role: 'EMPLOYEE',
-      // The endpoint records a consent event from these, which is why
-      // SignIn shows the documents rather than just sending `true`.
-      consentAccepted: true,
-      ageConfirmed: true,
+      // Who is asking. The server then needs no consent or age attestation
+      // (see `lib/api.ts#sendOtp`) and only sends a code to an administrator.
+      audience: 'ADMIN_CONSOLE',
     })
   },
 
@@ -425,16 +424,32 @@ export interface BanInput {
 }
 
 const users = {
-  /** `banned` is a tri-state: `null` is everyone, and the two present values are the two halves. "No filter" is not "not banned". */
+  /**
+   * The member directory. Every filter is applied by the server, so a page of
+   * fifty is fifty of the *matching* members and "load more" pages through the
+   * same filtered set.
+   *
+   * `banned` is a tri-state: `null` is everyone, and the two present values are
+   * the two halves. "No filter" is not "not banned". `reported` follows the same
+   * rule.
+   */
   list(
-    search: string | undefined,
-    banned: boolean | null,
+    filters: {
+      readonly search?: string | undefined
+      readonly banned: boolean | null
+      readonly organizationId?: string | undefined
+      readonly reported?: boolean | undefined
+      readonly sort?: 'newest' | 'oldest' | 'reports' | 'listings' | 'name' | undefined
+    },
     limit: number,
     offset: number,
   ): Promise<AdminUser[]> {
     return apiGet<AdminUser[]>('/v1/admin/users', {
-      search,
-      ...(banned === null ? {} : { banned: String(banned) }),
+      search: filters.search,
+      ...(filters.banned === null ? {} : { banned: String(filters.banned) }),
+      organizationId: filters.organizationId,
+      ...(filters.reported === undefined ? {} : { reported: String(filters.reported) }),
+      sort: filters.sort,
       limit,
       offset,
     })

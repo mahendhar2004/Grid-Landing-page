@@ -406,14 +406,14 @@ export function Monetization() {
       <h1 className="text-lg font-bold text-[var(--color-text)]">Monetization</h1>
 
       {nothingIsPaid ? (
-        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
+        <div className="rounded-lg border border-[var(--c-attn)]/40 bg-[var(--c-attn-soft)] px-3 py-2 text-sm text-[var(--c-attn-ink)]">
           Nothing is marked paid, so no feature earns anything however many people use Grid. Prices below are
           stored but not charged until a feature is marked paid.
         </div>
       ) : null}
 
       {worthlessPlans.length > 0 ? (
-        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
+        <div className="rounded-lg border border-[var(--c-attn)]/40 bg-[var(--c-attn-soft)] px-3 py-2 text-sm text-[var(--c-attn-ink)]">
           {worthlessPlans.join(' and ')} currently {worthlessPlans.length > 1 ? 'give' : 'gives'} exactly what
           {defaultPlan ? ` ${defaultPlan.name}` : ' the free plan'} gives, so subscribing buys nothing. Do not
           activate the subscription products in the stores until this differs.
@@ -500,9 +500,9 @@ export function Monetization() {
                         </Button>
 
                         {problem !== null ? (
-                          <p className="w-full text-xs text-red-300">{problem}</p>
+                          <p className="w-full text-xs text-[var(--c-danger)]">{problem}</p>
                         ) : savedKey === key ? (
-                          <p className="w-full text-xs text-emerald-300">Saved.</p>
+                          <p className="w-full text-xs text-[var(--c-ok)]">Saved.</p>
                         ) : changed ? (
                           <p className="w-full text-xs text-[var(--color-text-muted)]">
                             Will store {paiseFromRupees(draft.rupees)} paise, {paiseFromRupees(draft.discountRupees)} paise off.
@@ -548,7 +548,7 @@ export function Monetization() {
               </div>
 
               {plan.blockedReason ? (
-                <p className="mb-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+                <p className="mb-3 rounded-lg border border-[var(--c-attn)]/40 bg-[var(--c-attn-soft)] px-3 py-2 text-xs text-[var(--c-attn-ink)]">
                   {plan.blockedReason}
                 </p>
               ) : null}
@@ -633,9 +633,9 @@ export function Monetization() {
                       </Button>
 
                       {problem !== null ? (
-                        <p className="w-full text-xs text-red-300">{problem}</p>
+                        <p className="w-full text-xs text-[var(--c-danger)]">{problem}</p>
                       ) : savedKey === key ? (
-                        <p className="w-full text-xs text-emerald-300">Saved.</p>
+                        <p className="w-full text-xs text-[var(--c-ok)]">Saved.</p>
                       ) : draft.included && feature.model === 'PER_USE' && draft.quantity.trim() === '' ? (
                         <p className="w-full text-xs text-[var(--color-text-muted)]">
                           Unlimited — this plan never pays for {feature.label.toLowerCase()}.

@@ -1,54 +1,66 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import { ApiError, sendOtp, verifyOtp } from '../lib/api'
-import { Button, ErrorNote, Field, Panel } from '../components/ui'
+import { ApiError, sendOtp, signInWithGoogle, verifyOtp } from '../lib/api'
+import { googleClientId, renderGoogleButton } from '../lib/googleIdentity'
+import { useTheme } from '../lib/theme'
+import { Button, ErrorNote, Field } from '../components/ui'
+import { Icon } from '../components/icons'
 
 /**
- * Sign in with the same email OTP the app uses.
+ * Sign in with Google, or with the same email code the app uses.
  *
  * There is no separate admin credential, deliberately. A second password
  * store is a second thing to leak, and the admin claim already lives on the
  * user row - so being an admin is something an existing account *is*, not a
  * different way of logging in.
  *
- * **A non-admin is refused here, with a reason.** The previous version of
- * this comment claimed the screen *could not* know - that the claim was
- * "inside a signed token the server issues and verifies" - and concluded
- * that letting a non-admin in to collect 403s was the correct shape. Both
- * halves were wrong. The claim is readable: a JWT payload is base64 JSON,
- * and `isAdmin` is right there in it. And the resulting experience was a
- * console that signed you in and then failed every request, which reads as
- * broken software rather than as an account without access.
+ * **There is no age or consent tick box here.** It used to be, because the
+ * app's sign-in records an 18+ attestation and a consent event against the
+ * address. Ticking it to open an operations tool is not a member accepting the
+ * Terms, so the console now says who is asking (`audience: ADMIN_CONSOLE`) and
+ * the server sends a code only to an address on the administrator allowlist,
+ * recording no consent, and answering the same way for anyone else so it cannot
+ * be used to list the administrators.
  *
- * So `verifyOtp` refuses the session when the claim is absent. That is a
- * *message*, not a security boundary - every admin route still checks
- * server-side on every request, and the worst a tampered token achieves
- * against this is the console shell that 403s on everything, which is
- * exactly what used to happen to everyone.
- *
- * **The consent box is real, not a schema formality.** `send-otp` records a
- * consent event against the address it is given, so the console has to have
- * actually shown the documents before it claims one. It sent none of these
- * fields at all until 17 Sep 2026, which is why every sign-in against the
- * real backend failed on `role`, `consentAccepted` and `ageConfirmed` at
- * once.
+ * **A non-admin is refused here, with a reason.** `verifyOtp` refuses the
+ * session when the token lacks the admin claim. That is a *message*, not a
+ * security boundary - every admin route still checks server-side on every
+ * request.
  */
 export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
   const [step, setStep] = useState<'email' | 'otp'>('email')
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<ApiError | null>(null)
-  /*
-    Not a formality to get past the schema.
+  const [error, setError] = useState<ApiError | Error | null>(null)
+  const { theme } = useTheme()
 
-    `POST /v1/auth/send-otp` calls `recordConsent` with whatever is sent, so
-    ticking this writes a consent record against the address. Sending `true`
-    from a console that had never shown the documents would be recording a
-    consent that did not happen - so the box is here, unticked, and the
-    request cannot be made without it.
-  */
-  const [agreed, setAgreed] = useState(false)
+  const clientId = googleClientId()
+  const googleSlot = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!clientId || step !== 'email' || !googleSlot.current) return
+    let cancelled = false
+    renderGoogleButton(
+      googleSlot.current,
+      clientId,
+      (idToken) => {
+        if (cancelled) return
+        setBusy(true)
+        setError(null)
+        signInWithGoogle(idToken)
+          .then(onSignedIn)
+          .catch((caught: unknown) => setError(caught as ApiError))
+          .finally(() => setBusy(false))
+      },
+      theme === 'dark' ? 'filled_black' : 'outline',
+    ).catch((caught: unknown) => {
+      if (!cancelled) setError(caught as Error)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [clientId, step, theme, onSignedIn])
 
   async function handleSendOtp(event: React.FormEvent) {
     event.preventDefault()
@@ -79,43 +91,44 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--bg-page)] p-4">
-      <Panel className="w-full max-w-sm p-6">
-        <h1 className="text-lg font-bold text-[var(--color-text)]">Grid Console</h1>
-        <p className="mb-5 mt-1 text-sm text-[var(--color-text-muted)]">
-          {step === 'email' ? 'Sign in with your Grid account.' : `Enter the code sent to ${email}.`}
+    <div className="relative grid min-h-screen place-items-center bg-[var(--c-bg)] p-4">
+      <main className="w-full max-w-[420px] rounded-[var(--r-card)] border border-[var(--c-line)] bg-[var(--c-surface)] p-8 shadow-[var(--c-shadow-lg)]">
+        <div className="mb-8 flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--c-attn)] text-[#0f2a2e]">
+            <Icon name="home" size={20} />
+          </span>
+          <span className="font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--c-text)]">Grid Console</span>
+        </div>
+
+        <h1 className="font-[family-name:var(--font-display)] text-[28px] font-semibold leading-tight tracking-tight text-[var(--c-text)]">
+          {step === 'email' ? 'Welcome back' : 'Check your email'}
+        </h1>
+        <p className="mb-6 mt-2 text-sm text-[var(--c-muted)]">
+          {step === 'email' ? 'Sign in to run Grid.' : `Enter the six-digit code we sent to ${email}.`}
         </p>
 
         {step === 'email' ? (
-          <form onSubmit={handleSendOtp} className="space-y-4">
-            <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.edu" />
-
-            <label className="flex cursor-pointer items-start gap-2 text-xs text-[var(--color-text-muted)]">
-              <input
-                type="checkbox"
-                checked={agreed}
-                onChange={(event) => setAgreed(event.target.checked)}
-                className="mt-0.5"
-                data-testid="admin-signin-consent"
-              />
-              <span>
-                I am 18 or over and accept the{' '}
-                <a href="/privacy" target="_blank" rel="noreferrer" className="underline">
-                  Privacy Policy
-                </a>{' '}
-                and{' '}
-                <a href="/terms" target="_blank" rel="noreferrer" className="underline">
-                  Terms of Service
-                </a>
-                .
-              </span>
-            </label>
-
-            <ErrorNote error={error} />
-            <Button type="submit" variant="primary" disabled={busy || !agreed || email.trim().length === 0}>
-              {busy ? 'Sending…' : 'Send code'}
-            </Button>
-          </form>
+          <div className="space-y-4">
+            {clientId ? (
+              <>
+                <div className="flex justify-center" ref={googleSlot} data-testid="admin-signin-google" />
+                <div className="flex items-center gap-3 text-xs text-[var(--c-faint)]" aria-hidden="true">
+                  <span className="h-px flex-1 bg-[var(--c-line)]" />
+                  or use an email code
+                  <span className="h-px flex-1 bg-[var(--c-line)]" />
+                </div>
+              </>
+            ) : null}
+            <form onSubmit={handleSendOtp} className="space-y-4">
+              <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@yourorganisation.com" />
+              <ErrorNote error={error} />
+              <div className="flex">
+                <Button type="submit" variant="primary" disabled={busy || email.trim().length === 0}>
+                  {busy ? 'Sending…' : 'Send code'}
+                </Button>
+              </div>
+            </form>
+          </div>
         ) : (
           <form onSubmit={handleVerify} className="space-y-4">
             <Field
@@ -123,7 +136,7 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
               value={otp}
               onChange={setOtp}
               placeholder="000000"
-              hint="Codes expire quickly - request a new one if it fails."
+              hint="Codes expire quickly. Request a new one if it fails."
             />
             <ErrorNote error={error} />
             <div className="flex gap-2">
@@ -142,7 +155,7 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
             </div>
           </form>
         )}
-      </Panel>
+      </main>
     </div>
   )
 }

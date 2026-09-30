@@ -8,6 +8,46 @@ failure, named next to it.
 **Read this before adding a page, a filter or an endpoint.** There is one way
 to do each, and it is short.
 
+## The design system ("Atlas")
+
+The look is built in layers, and a screen only ever touches the top one. **Do
+not write a colour, a radius or a font in a screen.**
+
+```
+design/tokens.css      colours, radii, type, density - light and dark, once
+components/icons.tsx   the icon set; Icon is the only way to draw one
+components/ui.tsx      primitives: Panel, Section, PageHeader, Button, IconButton,
+                       Segmented, Avatar, Field, Badge, Stat, ErrorNote, EmptyNote,
+                       ReasonPrompt, MoreRow
+components/filters.tsx the filter bar: Toolbar, SearchBox, Dropdown, FilterChips
+components/shell.tsx   the frame: Sidebar, UtilityBar, CommandPalette, Canvas
+nav.ts                 every screen once: address, name, icon, group
+lib/theme.ts           light / dark, remembered
+lib/route.ts           the address is the state: #users?org=<id>&status=banned
+lib/useFilters.ts      one screen's filters, kept in the address
+screens/               one file per screen, composed from the above
+```
+
+- **Everything is rounded**: cards `--r-card`, inner rows `--r-inner`, controls
+  and badges pills. Change the feel in `tokens.css`, nowhere else.
+- **Light and dark are the same markup.** Components read `var(--c-*)` only;
+  `admin.html` sets `data-theme` before React runs (stored choice, else the
+  system's) and `useTheme` flips it.
+- **Filtering is one mechanism.** A list screen calls `useFilters(view, DEFAULTS)`
+  and draws `Toolbar` + `Dropdown`s + `FilterChips`. Values live in the address,
+  so a filtered view is bookmarkable and the back button works. Prefer filters
+  the server applies (Members: organisation, standing, reports, sort), so a page
+  of fifty is fifty *matching* rows; never filter a paged list in the browser, it
+  filters only the pages already loaded.
+- **Add a screen**: one entry in `nav.ts`, one file in `screens/`, composed from
+  the components above. Add a filter: one entry in the screen's `DEFAULTS`, one
+  `Dropdown`, one server parameter.
+- **Sign-in** asks for an email or a Google account and nothing else. There is no
+  age or consent tick box: the server is told the request is from the console
+  (`audience: ADMIN_CONSOLE`), sends a code only to an address on the
+  administrator allowlist, and records no consent. The Google button appears when
+  `VITE_GOOGLE_CLIENT_ID` is set at build time.
+
 ## The shape
 
 ```

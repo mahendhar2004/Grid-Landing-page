@@ -1,0 +1,165 @@
+/*
+ * Grid Console - design tokens ("Atlas").
+ *
+ * The whole look of the console is this file: colours, radii, type and
+ * density, as CSS variables. Components read these and never a literal, so a
+ * change of look is an edit here and not a hunt through screens.
+ *
+ * Light and dark are two values of the same names. `admin.html` sets
+ * <html data-console data-theme="light|dark"> before React runs (the stored
+ * choice, else the system's), and `useTheme` flips it.
+ *
+ * The first block also re-points the marketing site's variable names
+ * (`--color-primary`, `--color-surface` ...) so anything written against those
+ * takes the console's look without being rewritten.
+ */
+
+html[data-console] {
+  /* type */
+  --font-ui: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'DM Sans', system-ui, sans-serif;
+  --font-family-sans: var(--font-ui);
+
+  /* shape: everything is rounded; controls are pills */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-2xl: 32px;
+  --r-pill: 999px;
+  --r-card: 26px;
+  --r-inner: 18px;
+  --r-control: 999px;
+
+  /* density */
+  --control-h: 42px;
+  --row-h: 64px;
+  --page-max: 1180px;
+  --sidebar-w: 248px;
+  --side-inset: 14px;
+  --side-radius: 28px;
+  color-scheme: light;
+}
+
+html[data-console][data-theme='light'] {
+  --c-bg: #e9efee;
+  --c-surface: #ffffff;
+  --c-surface-2: #eef3f2;
+  --c-hover: #f5f9f8;
+  --c-line: #dce6e4;
+  --c-line-strong: #c7d6d3;
+  --c-text: #0f2a2e;
+  --c-muted: #587075;
+  --c-faint: #93a8ab;
+  --c-brand: #0f6b70;
+  --c-brand-soft: #ddf0ee;
+  --c-primary: #0f2a2e;
+  --c-primary-hover: #1a4249;
+  --c-on-primary: #ffffff;
+  --c-attn: #f2a93b;
+  --c-attn-soft: #fff0d3;
+  --c-attn-ink: #8a5a00;
+  --c-ok: #127a54;
+  --c-ok-soft: #ddf3e9;
+  --c-danger: #c2402f;
+  --c-danger-soft: #fbe7e3;
+  --c-focus: #0f6b70;
+  --c-scrim: rgba(15, 42, 46, 0.4);
+  --c-shadow: 0 1px 2px rgba(15, 42, 46, 0.05);
+  --c-shadow-lg: 0 26px 60px -14px rgba(15, 42, 46, 0.35);
+  --c-nav-bg: #0f2a2e;
+  --c-nav-text: #a9c2c3;
+  --c-nav-strong: #ffffff;
+  --c-nav-muted: #6f9092;
+  --c-nav-line: #1e3d42;
+  --c-nav-hover: #173840;
+  --c-nav-active: #1e4a50;
+  --c-map-bg: #f2f7f6;
+  --c-map-dot: #ccdbd8;
+}
+
+html[data-console][data-theme='dark'] {
+  color-scheme: dark;
+  --c-bg: #081417;
+  --c-surface: #10252a;
+  --c-surface-2: #173138;
+  --c-hover: #143037;
+  --c-line: #1e3a40;
+  --c-line-strong: #2b4b52;
+  --c-text: #e7f2f1;
+  --c-muted: #93b2b4;
+  --c-faint: #607f83;
+  --c-brand: #5cd0c8;
+  --c-brand-soft: rgba(92, 208, 200, 0.14);
+  --c-primary: #5cd0c8;
+  --c-primary-hover: #7bddd6;
+  --c-on-primary: #04211f;
+  --c-attn: #f5b24a;
+  --c-attn-soft: rgba(245, 178, 74, 0.15);
+  --c-attn-ink: #ffc978;
+  --c-ok: #56e0a2;
+  --c-ok-soft: rgba(86, 224, 162, 0.14);
+  --c-danger: #ff8273;
+  --c-danger-soft: rgba(255, 130, 115, 0.14);
+  --c-focus: #5cd0c8;
+  --c-scrim: rgba(2, 9, 10, 0.64);
+  --c-shadow: none;
+  --c-shadow-lg: 0 30px 80px -12px rgba(0, 0, 0, 0.7);
+  --c-nav-bg: #0d2024;
+  --c-nav-text: #93b2b4;
+  --c-nav-strong: #ffffff;
+  --c-nav-muted: #607f83;
+  --c-nav-line: #1e3a40;
+  --c-nav-hover: #143037;
+  --c-nav-active: #1b4248;
+  --c-map-bg: #0c1e22;
+  --c-map-dot: #1b373c;
+}
+
+/* The marketing site's names, re-pointed, so existing markup adopts the look. */
+html[data-console] {
+  --bg-page: var(--c-bg);
+  --color-background: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-border: var(--c-line);
+  --color-text: var(--c-text);
+  --color-text-muted: var(--c-muted);
+  --color-muted: var(--c-surface-2);
+  --color-primary: var(--c-primary);
+  --color-primary-soft: var(--c-brand-soft);
+}
+
+html[data-console] body {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-ui);
+}
+
+html[data-console] :focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-console] * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Screens that still write their own heading get the console's: display face,
+   one size, tight tracking. Unlayered, so it wins over the utility classes. */
+html[data-console] h1 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+html[data-console] h2 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+html[data-console] table th {
+  font-weight: 500;
+}

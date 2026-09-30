@@ -267,30 +267,25 @@ export function apiPut<T>(path: string, body: unknown): Promise<T> {
 /**
  * Sends the six-digit code. Unauthenticated - it is how a session starts.
  *
- * `POST /v1/auth/send-otp` requires four fields, and this sent one. Against
- * the real backend every admin sign-in failed with *"role: Invalid option...
- * consentAccepted: Invalid input: expected true; ageConfirmed: Invalid input:
- * expected true"* - the schema rejecting the request before any of it ran.
+ * **No consent and no age attestation are sent, and that is the point.** The
+ * app's sign-in records a consent event and an 18+ attestation for the address,
+ * so the console used to show the same tick box to open an operations tool -
+ * which is not a member accepting the Terms, and recorded a consent that was not
+ * really being given. `audience: 'ADMIN_CONSOLE'` tells the server who is
+ * asking; it then sends a code only if the address is on the administrator
+ * allowlist (and answers identically, sending nothing, if it is not, so the
+ * endpoint cannot be used to find out who the administrators are).
  *
- * **The two literals are not a formality to satisfy.** The endpoint calls
- * `recordConsent(email, sourceIp, ageConfirmed)`, so sending `true` writes a
- * consent record against that address. Asserting it from a console that had
- * never shown the documents would be recording a consent that did not happen,
- * which is worse than the broken sign-in. `SignIn.tsx` presents the same gate
- * the app does, and only then is `true` a true statement.
- *
- * **`role` is only read when an account is created** (`pendingRole` reaches
- * `users.create` and nothing else), so for an admin - who by definition
- * already has an account - it has no effect. `EMPLOYEE` is sent rather than
- * `STUDENT` because in the one case where it would be used, someone signing
- * into the operations console is staff.
+ * **`role` is only read when an account is created**, so for an admin - who by
+ * definition already has an account - it has no effect. `EMPLOYEE` is sent
+ * because in the one case where it would be used, someone signing into the
+ * operations console is staff.
  */
 export function sendOtp(email: string): Promise<unknown> {
   return apiPost('/v1/auth/send-otp', {
     email,
     role: 'EMPLOYEE',
-    consentAccepted: true,
-    ageConfirmed: true,
+    audience: 'ADMIN_CONSOLE',
   })
 }
 
@@ -350,4 +345,42 @@ export async function verifyOtp(email: string, otp: string): Promise<VerifyOtpRe
 
   storeTokens(tokens.accessToken, tokens.refreshToken)
   return tokens
+}
+
+/** What `POST /v1/auth/google` answers: a session, or "that address's organisation is not on Grid yet". */
+type GoogleSignInResponse =
+  | ({ outcome: 'SIGNED_IN' } & VerifyOtpResponse)
+  | { outcome: 'NEW_DOMAIN'; email: string; domain: string }
+
+/**
+ * Signs in with a Google ID token from Google Identity Services.
+ *
+ * The server verifies the token's signature, audience and that Google hosts
+ * the address, and for the console it also requires the address to be on the
+ * administrator allowlist; a Google account that is not one is refused there
+ * with a 403, before any account work. Like `verifyOtp`, a session without the
+ * admin claim is refused here with a message rather than stored.
+ */
+export async function signInWithGoogle(idToken: string): Promise<VerifyOtpResponse> {
+  const result = await apiPost<GoogleSignInResponse>('/v1/auth/google', {
+    idToken,
+    role: 'EMPLOYEE',
+    audience: 'ADMIN_CONSOLE',
+  })
+
+  if (result.outcome !== 'SIGNED_IN') {
+    throw new ApiError(
+      403,
+      'NOT_AN_ADMIN',
+      `${result.domain} is not on Grid yet, so that account cannot have console access.`,
+      null,
+    )
+  }
+  if (!tokenHasAdminClaim(result.accessToken)) {
+    clearTokens()
+    throw new ApiError(403, 'NOT_AN_ADMIN', 'That account does not have console access. Ask an existing admin to add it.', null)
+  }
+
+  storeTokens(result.accessToken, result.refreshToken)
+  return { accessToken: result.accessToken, refreshToken: result.refreshToken }
 }

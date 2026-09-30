@@ -73,31 +73,32 @@ function mockFetch(...responses: Response[]) {
 }
 
 describe('sendOtp', () => {
-  it('sends every field the endpoint requires, not just the email', async () => {
+  it('says who is asking, and sends no consent or age attestation the console never collected', async () => {
     const { sendOtp } = await loadApi()
     mockFetch(okResponse({ sent: true }))
 
     await sendOtp('admin@iitd.ac.in')
 
-    // The exact four. Omitting any of them is a 400 before the handler runs.
+    // The console is an operations tool for people who already run Grid. The
+    // app's sign-in records a consent event and an 18+ attestation from
+    // `consentAccepted`/`ageConfirmed`; the console used to send `true` for
+    // both behind a tick box, which recorded a consent that was not being
+    // given. The server decides from `audience` and the admin allowlist.
     expect(captured[0]!.body).toEqual({
       email: 'admin@iitd.ac.in',
       role: 'EMPLOYEE',
-      consentAccepted: true,
-      ageConfirmed: true,
+      audience: 'ADMIN_CONSOLE',
     })
   })
 
-  it('sends the consent literals as true, since the endpoint records a consent event from them', async () => {
+  it('never puts consentAccepted or ageConfirmed in the request at all', async () => {
     const { sendOtp } = await loadApi()
     mockFetch(okResponse({ sent: true }))
 
     await sendOtp('admin@iitd.ac.in')
 
-    // `recordConsent(email, sourceIp, ageConfirmed)` runs on the strength of
-    // these, which is why the form has to actually show the documents.
-    expect(captured[0]!.body['consentAccepted']).toBe(true)
-    expect(captured[0]!.body['ageConfirmed']).toBe(true)
+    expect('consentAccepted' in captured[0]!.body).toBe(false)
+    expect('ageConfirmed' in captured[0]!.body).toBe(false)
   })
 
   it('carries an idempotency key, which the backend rejects the request without', async () => {
@@ -298,5 +299,49 @@ describe('apiGet query building', () => {
     await apiGet('/v1/admin/advertisers', { search: 'a&b=c' })
 
     expect(captured[0]!.url).toContain('search=a%26b%3Dc')
+  })
+})
+
+function tokenWith(claims: Record<string, unknown>): string {
+  const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64url')
+  return `${encode({ alg: 'none' })}.${encode(claims)}.sig`
+}
+
+describe('signInWithGoogle', () => {
+  it('sends the Google token with the console audience and no consent, and keeps the session of an admin', async () => {
+    const { signInWithGoogle, getAccessToken } = await loadApi()
+    const accessToken = tokenWith({ isAdmin: true })
+    mockFetch(okResponse({ outcome: 'SIGNED_IN', accessToken, refreshToken: 'r1' }))
+
+    await signInWithGoogle('google-id-token')
+
+    expect(captured[0]!.url).toBe(`${API_URL}/v1/auth/google`)
+    expect(captured[0]!.body).toEqual({ idToken: 'google-id-token', role: 'EMPLOYEE', audience: 'ADMIN_CONSOLE' })
+    expect(getAccessToken()).toBe(accessToken)
+  })
+
+  it('refuses a session without the admin claim and stores nothing', async () => {
+    const { signInWithGoogle, getAccessToken } = await loadApi()
+    mockFetch(okResponse({ outcome: 'SIGNED_IN', accessToken: tokenWith({ isAdmin: false }), refreshToken: 'r1' }))
+
+    await expect(signInWithGoogle('t')).rejects.toMatchObject({ code: 'NOT_AN_ADMIN' })
+
+    expect(getAccessToken()).toBeNull()
+  })
+
+  it('explains an organisation that is not on Grid yet instead of pretending to sign in', async () => {
+    const { signInWithGoogle, getAccessToken } = await loadApi()
+    mockFetch(okResponse({ outcome: 'NEW_DOMAIN', email: 'a@new.example', domain: 'new.example' }))
+
+    await expect(signInWithGoogle('t')).rejects.toMatchObject({ code: 'NOT_AN_ADMIN', message: expect.stringContaining('new.example') })
+
+    expect(getAccessToken()).toBeNull()
+  })
+
+  it('surfaces the server\'s refusal of a Google account that is not an administrator', async () => {
+    const { signInWithGoogle } = await loadApi()
+    mockFetch(errorResponse(403, 'ADMIN_ACCESS_REQUIRED'))
+
+    await expect(signInWithGoogle('t')).rejects.toMatchObject({ status: 403, code: 'ADMIN_ACCESS_REQUIRED' })
   })
 })

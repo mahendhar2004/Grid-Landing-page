@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 
 import { AdminApp } from './AdminApp'
 import '../index.css'
+import './design/tokens.css'
 
 /**
  * The console's own entry point.

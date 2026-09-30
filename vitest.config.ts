@@ -15,6 +15,11 @@ export default defineConfig({
       // Hooks need a renderer, which needs a DOM.
       ['src/admin/lib/*Action*', 'jsdom'],
       ['src/admin/lib/*Paged*', 'jsdom'],
+      // The address, filters and theme read `window` and `document`.
+      ['src/admin/lib/route*', 'jsdom'],
+      ['src/admin/lib/useFilters*', 'jsdom'],
+      ['src/admin/lib/theme*', 'jsdom'],
+      ['src/admin/lib/googleIdentity*', 'jsdom'],
     ],
     environment: 'node',
   },

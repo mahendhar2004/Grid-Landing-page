@@ -1,4 +1,4 @@
-import { Badge, EmptyNote, ErrorNote, Panel } from '../components/ui'
+import { Badge, EmptyNote, ErrorNote, PageHeader, Panel, Stat } from '../components/ui'
 import { api } from '../api/endpoints'
 import type { AdminOrganization, AdminReport, Creative, TriageCounts } from '../api/types'
 import { useAsyncData } from '../lib/useAsyncData'
@@ -184,37 +184,47 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
   const waiting = rows.filter((row) => row.count > 0)
   const total = waiting.reduce((sum, row) => sum + row.count, 0)
 
+
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-bold text-[var(--color-text)]">What needs you</h1>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-          {total === 0
+    <div className="space-y-5">
+      <PageHeader
+        title="What needs you"
+        subtitle={
+          total === 0
             ? 'Nothing is waiting. Every queue is empty.'
-            : `${total} ${total === 1 ? 'item' : 'items'} waiting, most urgent first.`}
-        </p>
-      </div>
+            : `${total} ${total === 1 ? 'item' : 'items'} waiting, most urgent first.`
+        }
+      />
+
+      {/* The three biggest queues as numbers, so the state of the day is one look. */}
+      {waiting.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-3">
+          {waiting.slice(0, 3).map((row) => (
+            <Stat key={row.key} label={row.label} value={String(row.count)} note={SEVERITY_LABEL[row.severity]} />
+          ))}
+        </div>
+      ) : null}
 
       <Panel>
         {waiting.length === 0 ? (
           <EmptyNote>All clear.</EmptyNote>
         ) : (
-          <ul className="divide-y divide-[var(--color-border)]">
+          <ul className="grid gap-0.5 p-2">
             {waiting.map((row) => (
               <li key={row.key}>
                 <button
                   onClick={() => onOpenTab(row.tab)}
-                  className="flex w-full items-start gap-3 p-4 text-left hover:bg-white/5"
+                  className="flex w-full items-start gap-4 rounded-[var(--r-inner)] px-4 py-4 text-left transition hover:bg-[var(--c-hover)]"
                   data-testid={`action-${row.key}`}
                 >
-                  <span className="min-w-[2.5rem] text-xl font-bold tabular-nums text-[var(--color-text)]">
+                  <span className="min-w-[2.5rem] font-[family-name:var(--font-display)] text-2xl font-semibold tabular-nums text-[var(--c-text)]">
                     {row.count}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-[var(--color-text)]">{row.label}</span>
+                    <span className="block text-sm font-semibold text-[var(--c-text)]">{row.label}</span>
                     {/* The reason, on the row. A severity colour with no
                         argument behind it is decoration. */}
-                    <span className="mt-0.5 block text-xs text-[var(--color-text-muted)]">{row.why}</span>
+                    <span className="mt-0.5 block text-xs text-[var(--c-muted)]">{row.why}</span>
                   </span>
                   <Badge tone={SEVERITY_TONE[row.severity]}>{SEVERITY_LABEL[row.severity]}</Badge>
                 </button>
@@ -230,8 +240,8 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
         shows problems cannot distinguish "clear" from "not loaded".
       */}
       {waiting.length < rows.length ? (
-        <Panel className="p-4">
-          <p className="text-xs text-[var(--color-text-muted)]">
+        <Panel className="px-6 py-4">
+          <p className="text-xs text-[var(--c-muted)]">
             Clear:{' '}
             {rows
               .filter((row) => row.count === 0)

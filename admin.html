@@ -15,16 +15,27 @@
       robots.txt.
     -->
     <meta name="robots" content="noindex, nofollow, noarchive" />
-    <meta name="theme-color" content="#0F0D16" />
+    <meta name="theme-color" content="#0F2A2E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
     <title>Grid Console</title>
   </head>
   <body>
     <script>
-      // The console is dark-only - it is a tool, used for long stretches,
-      // and the marketing site's light theme is wrong for a data table.
-      // Set before React so there is no flash.
-      document.documentElement.classList.add('dark');
-      document.documentElement.style.colorScheme = 'dark';
+      // Light or dark, decided before React runs so there is no flash: the
+      // choice the person made last time, else the system's. `data-console`
+      // switches on the console's design tokens (src/admin/design/tokens.css);
+      // the `dark` class is kept for anything still written against it.
+      (function () {
+        var stored = null;
+        try { stored = localStorage.getItem('grid-console-theme'); } catch (e) { /* not remembered */ }
+        var dark = stored ? stored === 'dark' : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var root = document.documentElement;
+        root.setAttribute('data-console', '');
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+        root.classList.toggle('dark', dark);
+      })();
     </script>
     <div id="admin-root"></div>
     <script type="module" src="/src/admin/main.tsx"></script>

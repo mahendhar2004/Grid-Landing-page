@@ -154,6 +154,9 @@ export interface AdminUser {
   displayName: string | null
   role: string
   orgDomain: string
+  /** The organisation they belong to, for the directory's filter and column. */
+  organizationId: string
+  organizationName: string
   isAdmin: boolean
   isBanned: boolean
   /**

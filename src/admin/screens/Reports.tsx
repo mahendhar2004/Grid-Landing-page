@@ -5,7 +5,9 @@ import type { ReportCategory } from '../api/endpoints'
 import type { AdminReport } from '../api/types'
 import { usePagedData } from '../lib/usePagedData'
 import { useAdminAction } from '../lib/useAdminAction'
-import { Badge, Button, EmptyNote, ErrorNote, MoreRow, Panel, ReasonPrompt } from '../components/ui'
+import { useFilters } from '../lib/useFilters'
+import { Dropdown, FilterChips, Toolbar } from '../components/filters'
+import { Badge, Button, EmptyNote, ErrorNote, MoreRow, PageHeader, Panel, ReasonPrompt, Segmented } from '../components/ui'
 
 /**
  * The moderation queue - the screen this console exists for.
@@ -34,6 +36,8 @@ type PendingAction =
 const PAGE_SIZE = 50
 
 /** `null` is every category, which is a different question from any one of them. */
+const REPORT_FILTER_DEFAULTS = { status: 'OPEN', category: 'all' }
+
 const CATEGORIES: ReadonlyArray<{ value: ReportCategory | null; label: string }> = [
   { value: null, label: 'All' },
   { value: 'SCAM', label: 'Scam' },
@@ -85,8 +89,11 @@ function slaState(createdAt: string): { label: string; tone: 'neutral' | 'warn' 
 }
 
 export function Reports() {
-  const [status, setStatus] = useState<'OPEN' | 'ACTIONED' | 'DISMISSED'>('OPEN')
-  const [category, setCategory] = useState<ReportCategory | null>(null)
+  // Status and category live in the address (`#reports?status=DISMISSED`), like
+  // every list's filters.
+  const filters = useFilters('reports', REPORT_FILTER_DEFAULTS)
+  const status = filters.values.status as 'OPEN' | 'ACTIONED' | 'DISMISSED'
+  const category = filters.values.category === 'all' ? null : (filters.values.category as ReportCategory)
   const [pending, setPending] = useState<PendingAction | null>(null)
 
   const { rows: reports, error: loadError, hasMore, loadingMore, loadMore, reload } = usePagedData(
@@ -144,31 +151,40 @@ export function Reports() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold text-[var(--color-text)]">Reports</h1>
-        <div className="flex gap-1">
-          {(['OPEN', 'ACTIONED', 'DISMISSED'] as const).map((value) => (
-            <Button key={value} variant={status === value ? 'primary' : 'default'} onClick={() => setStatus(value)}>
-              {value[0] + value.slice(1).toLowerCase()}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        title="Reports"
+        subtitle="Acting on one closes every report about the same thing. Scams and prohibited items are worth working before wrong descriptions."
+      />
 
-      {/* Category, not just status. Scams and prohibited items deserve to be
-          worked before wrong descriptions, and until now they were
-          interleaved with them. The route has always accepted this. */}
-      <div className="flex flex-wrap gap-1">
-        {CATEGORIES.map((entry) => (
-          <Button
-            key={entry.label}
-            variant={category === entry.value ? 'primary' : 'default'}
-            onClick={() => setCategory(entry.value)}
-          >
-            {entry.label}
-          </Button>
-        ))}
-      </div>
+      {/* Category, not just status: the route has always accepted it, and until
+          this was a filter the worst reports were interleaved with the mildest. */}
+      <Toolbar count={reports === null ? undefined : `${reports.length}${hasMore ? '+' : ''} shown`}>
+        <Segmented
+          label="Status"
+          value={status}
+          onChange={(value) => filters.set('status', value)}
+          items={[
+            { value: 'OPEN', label: 'Open' },
+            { value: 'ACTIONED', label: 'Actioned' },
+            { value: 'DISMISSED', label: 'Dismissed' },
+          ]}
+        />
+        <Dropdown
+          label="Category"
+          value={filters.values.category}
+          allValue="all"
+          options={CATEGORIES.map((entry) => ({ value: entry.value ?? 'all', label: entry.label }))}
+          onChange={(value) => filters.set('category', value)}
+        />
+      </Toolbar>
+
+      <FilterChips
+        chips={filters.active
+          .filter((key) => key === 'category')
+          .map((key) => ({ key, label: `Category ${CATEGORIES.find((entry) => (entry.value ?? 'all') === filters.values.category)?.label ?? ''}` }))}
+        onRemove={(key) => filters.clear(key as 'category')}
+        onClearAll={() => filters.clear('*')}
+      />
 
       <ErrorNote error={error} />
 

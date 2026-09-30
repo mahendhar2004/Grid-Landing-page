@@ -5,7 +5,9 @@ import type { AdminOrganization, AdminPlace } from '../api/types'
 import type { ApiError } from '../lib/api'
 import { formatCoordinate, hasUsableCoordinates, parseLatLngPair } from '../lib/coordinates'
 import { usePagedData } from '../lib/usePagedData'
-import { Badge, Button, EmptyNote, ErrorNote, Field, MoreRow, Panel, ReasonPrompt } from '../components/ui'
+import { SearchBox, Toolbar } from '../components/filters'
+import { navigate } from '../lib/route'
+import { Badge, Button, EmptyNote, ErrorNote, Field, MoreRow, PageHeader, Panel, ReasonPrompt } from '../components/ui'
 import type { OrganizationDomain } from '../api/types'
 import { useAsyncData } from '../lib/useAsyncData'
 
@@ -197,12 +199,15 @@ export function Organizations() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-lg font-bold text-[var(--color-text)]">Organizations</h1>
-        <Button variant="primary" onClick={() => setShowForm((open) => !open)}>
-          {showForm ? 'Cancel' : 'Add organization'}
-        </Button>
-      </div>
+      <PageHeader
+        title="Organizations"
+        subtitle="Choose an organization to see its members, or edit its places and domains."
+        actions={
+          <Button variant="primary" onClick={() => setShowForm((open) => !open)}>
+            {showForm ? 'Cancel' : 'Add organization'}
+          </Button>
+        }
+      />
 
       <ErrorNote error={error} />
 
@@ -291,7 +296,9 @@ export function Organizations() {
         </Panel>
       ) : null}
 
-      <Field label="Search" value={search} onChange={setSearch} placeholder="Name or domain" />
+      <Toolbar count={organizations === null ? undefined : `${organizations.length}${hasMore ? '+' : ''} shown`}>
+        <SearchBox value={search} onChange={setSearch} placeholder="Search name or domain" />
+      </Toolbar>
 
       <Panel>
         {organizations === null ? (
@@ -325,6 +332,7 @@ export function Organizations() {
                   {organization.placeCount === 1 ? '1 place' : `${organization.placeCount ?? 1} places`} ·{' '}
                   {organization.memberCount} members · {organization.listingCount} listings
                 </span>
+                <Button onClick={() => navigate('users', { org: organization.id })}>Members</Button>
                 <Button onClick={() => (editingId === organization.id ? setEditingId(null) : beginEdit(organization))}>
                   {editingId === organization.id ? 'Close' : 'Edit'}
                 </Button>

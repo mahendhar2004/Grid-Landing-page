@@ -8,12 +8,14 @@ import type { AdminUser } from '../api/types'
 vi.mock('../api/endpoints', () => ({
   api: {
     users: { list: vi.fn(), ban: vi.fn(), unban: vi.fn() },
+    organizations: { list: vi.fn() },
   },
 }))
 
 const listMock = vi.mocked(api.users.list)
 const banMock = vi.mocked(api.users.ban)
 const unbanMock = vi.mocked(api.users.unban)
+const orgsMock = vi.mocked(api.organizations.list)
 
 function user(overrides: Partial<AdminUser> = {}): AdminUser {
   return {
@@ -22,6 +24,8 @@ function user(overrides: Partial<AdminUser> = {}): AdminUser {
     displayName: 'Asha',
     role: 'STUDENT',
     orgDomain: 'iitd.ac.in',
+    organizationId: 'org_iitd',
+    organizationName: 'IIT Delhi',
     isAdmin: false,
     isBanned: false,
     bannedUntil: null,
@@ -43,6 +47,12 @@ describe('Users', () => {
     vi.clearAllMocks()
     banMock.mockResolvedValue(undefined)
     unbanMock.mockResolvedValue(undefined)
+    orgsMock.mockResolvedValue([
+      { id: 'org_iitd', name: 'IIT Delhi' },
+      { id: 'org_bits', name: 'BITS Hyderabad' },
+    ] as never)
+    // Filters live in the address; start every test with none.
+    window.location.hash = ''
   })
 
   // `globals: true` is not set, so Testing Library's auto-cleanup is not
@@ -110,27 +120,94 @@ describe('Users', () => {
     await waitFor(() => expect(unbanMock).toHaveBeenCalledWith('usr_1', 'Appeal upheld'))
   })
 
+  /** Open a filter pill by its label, then choose an option in the list that opens. */
+  async function choose(pill: string, option: string) {
+    await act(async () => {
+      screen.getByRole('button', { name: new RegExp(`^${pill}`) }).click()
+    })
+    await act(async () => {
+      screen.getByRole('option', { name: option }).click()
+    })
+  }
+
+  const lastFilters = () => listMock.mock.calls.at(-1)![0]
+
   it('treats the standing filter as three states, not a checkbox', async () => {
     await renderUsers([user()])
 
-    // By role, because "Active" and "Banned" are also row badges.
-    const filter = (name: string) => screen.getByRole('button', { name })
+    await choose('Status', 'Banned')
+    await waitFor(() => expect(lastFilters().banned).toBe(true))
+
+    await choose('Status', 'Active')
+    await waitFor(() => expect(lastFilters().banned).toBe(false))
+
+    await choose('Status', 'Any')
+    // `null`, not `false` - "any" is a different question from "not banned".
+    await waitFor(() => expect(lastFilters().banned).toBeNull())
+  })
+
+  it('narrows to one organisation by id, and offers every organisation to choose from', async () => {
+    await renderUsers([user()])
+
+    await choose('Organisation', 'BITS Hyderabad')
+
+    await waitFor(() => expect(lastFilters().organizationId).toBe('org_bits'))
+    // The choice is in the address, so the view can be shared.
+    expect(window.location.hash).toContain('org=org_bits')
+  })
+
+  it('passes the reports filter and the sort to the server', async () => {
+    await renderUsers([user()])
+
+    await choose('Reports', 'Has reports')
+    await waitFor(() => expect(lastFilters().reported).toBe(true))
+
+    await choose('Sort', 'Most reports')
+    await waitFor(() => expect(lastFilters().sort).toBe('reports'))
+  })
+
+  it('applies an organisation filter from the address, as a shared link would', async () => {
+    window.location.hash = '#users?org=org_iitd&status=banned'
+    await renderUsers([user({ isBanned: true })])
+
+    await waitFor(() => expect(lastFilters()).toMatchObject({ organizationId: 'org_iitd', banned: true }))
+    expect(await screen.findByText('Organisation IIT Delhi')).toBeTruthy()
+  })
+
+  it('clicking a member\'s organisation shows everyone at it', async () => {
+    await renderUsers([user()])
+    await waitFor(() => expect(screen.getByRole('list')).toBeTruthy())
 
     await act(async () => {
-      filter('Banned').click()
+      rowList().getByRole('button', { name: 'IIT Delhi' }).click()
     })
-    await waitFor(() => expect(listMock).toHaveBeenLastCalledWith(undefined, true, 50, 0))
+
+    await waitFor(() => expect(lastFilters().organizationId).toBe('org_iitd'))
+  })
+
+  it('shows what is narrowing the list, and removes one filter or all of them', async () => {
+    window.location.hash = '#users?org=org_iitd&status=banned'
+    await renderUsers([user({ isBanned: true })])
 
     await act(async () => {
-      filter('Active').click()
+      screen.getByRole('button', { name: 'Remove filter Status Banned' }).click()
     })
-    await waitFor(() => expect(listMock).toHaveBeenLastCalledWith(undefined, false, 50, 0))
+    await waitFor(() => expect(lastFilters()).toMatchObject({ organizationId: 'org_iitd', banned: null }))
 
     await act(async () => {
-      filter('Everyone').click()
+      screen.getByRole('button', { name: 'Clear all' }).click()
     })
-    // `null`, not `false` - "everyone" is a different question from "not banned".
-    await waitFor(() => expect(listMock).toHaveBeenLastCalledWith(undefined, null, 50, 0))
+    await waitFor(() => expect(lastFilters()).toMatchObject({ organizationId: undefined, banned: null }))
+    expect(screen.queryByRole('button', { name: 'Clear all' })).toBeNull()
+  })
+
+  it('does not treat the sort as a filter: it is never a removable chip', async () => {
+    await renderUsers([user()])
+
+    await choose('Sort', 'Most listings')
+
+    await waitFor(() => expect(lastFilters().sort).toBe('listings'))
+    expect(screen.queryByRole('button', { name: 'Clear all' })).toBeNull()
   })
 
   it('says how many are shown and offers more only when a page came back full', async () => {

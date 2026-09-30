@@ -70,12 +70,12 @@ export class ErrorBoundary extends Component<Props, State> {
         {/* Shown, not swallowed. The person reading this is the person who
             will fix it, and a generic "something went wrong" would cost them
             a round trip through the browser console. */}
-        <pre className="overflow-x-auto rounded bg-black/30 p-3 text-xs text-[var(--color-text)]">
+        <pre className="overflow-x-auto rounded bg-[var(--c-scrim)] p-3 text-xs text-[var(--color-text)]">
           {error.message}
         </pre>
         <button
           onClick={() => this.setState({ error: null })}
-          className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm font-semibold text-[var(--color-text)] hover:bg-white/5"
+          className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--c-hover)]"
         >
           Try again
         </button>
