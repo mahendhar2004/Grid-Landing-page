@@ -101,7 +101,12 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
           {step === 'email' ? 'Welcome back' : 'Check your email'}
         </h1>
         <p className="mb-6 mt-2 text-sm text-[var(--c-muted)]">
-          {step === 'email' ? 'Sign in to run Grid.' : `Enter the six-digit code we sent to ${email}.`}
+          {step === 'email'
+            ? 'Sign in to run Grid.'
+            : // Worded as a condition on purpose: the server sends a code only to an
+              // administrator and answers everyone else the same way, so this screen
+              // must not claim a code was sent.
+              `If ${email} has console access, a six-digit code is on its way.`}
         </p>
 
         {step === 'email' ? (
@@ -144,7 +149,7 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
               value={otp}
               onChange={setOtp}
               placeholder="000000"
-              hint="Codes expire quickly. Request a new one if it fails."
+              hint="No code after a minute? Only addresses with console access receive one. Check the spelling, or ask an existing admin to add you. Google sign-in tells you straight away."
             />
             <ErrorNote error={error} />
             <div className="flex gap-2">

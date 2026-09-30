@@ -53,7 +53,7 @@ describe('SignIn', () => {
 
     // Trimmed and lower-cased, so "Owner@Grid.Example " and the allowlist agree.
     await waitFor(() => expect(sendMock).toHaveBeenCalledWith('owner@grid.example'))
-    expect(await screen.findByText(/six-digit code we sent to Owner@Grid.Example/)).toBeTruthy()
+    expect(await screen.findByText(/If Owner@Grid.Example has console access, a six-digit code is on its way/)).toBeTruthy()
   })
 
   it('signs in with the six-digit code and tells the app', async () => {
@@ -68,6 +68,17 @@ describe('SignIn', () => {
 
     await waitFor(() => expect(verifyMock).toHaveBeenCalledWith('owner@grid.example', '123456'))
     expect(onSignedIn).toHaveBeenCalled()
+  })
+
+  it('stays on the email step and shows the reason when the address is refused, for instance a personal one', async () => {
+    sendMock.mockRejectedValueOnce(new Error('Personal email addresses cannot sign in to Grid. Use your organisation address.'))
+    render(<SignIn onSignedIn={() => undefined} />)
+
+    typeInto(screen.getByLabelText('Email'), 'someone@gmail.com')
+    await act(async () => screen.getByRole('button', { name: 'Send code' }).click())
+
+    expect(await screen.findByText(/Personal email addresses cannot sign in to Grid/)).toBeTruthy()
+    expect(screen.queryByLabelText(/^Six-digit code/)).toBeNull()
   })
 
   it('shows no Google button when the build has no client id, so it is exactly the email-code console', () => {
