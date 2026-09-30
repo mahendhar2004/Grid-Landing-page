@@ -5,6 +5,7 @@ import { NAV, NAV_GROUPS } from '../nav'
 import { navigate } from '../lib/route'
 import { useTheme } from '../lib/theme'
 import { Avatar, IconButton } from './ui'
+import { Logo } from './brand'
 import { Icon } from './icons'
 
 /**
@@ -30,11 +31,8 @@ export function Sidebar({ current, open, onClose, onSignOut }: { current: string
           open ? 'translate-x-0' : '-translate-x-[120%]'
         }`}
       >
-        <div className="flex items-center gap-2.5 px-2 font-[family-name:var(--font-display)] text-[15px] font-semibold text-[var(--c-nav-strong)]">
-          <span className="grid h-7 w-7 place-items-center rounded-xl bg-[var(--c-attn)] text-[#0f2a2e]">
-            <Icon name="home" size={15} />
-          </span>
-          Grid Console
+        <div className="px-2 text-[var(--c-nav-strong)]">
+          <Logo size={28} />
         </div>
 
         <nav className="grid gap-5">

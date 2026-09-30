@@ -4,7 +4,7 @@ import { ApiError, sendOtp, signInWithGoogle, verifyOtp } from '../lib/api'
 import { googleClientId, renderGoogleButton } from '../lib/googleIdentity'
 import { useTheme } from '../lib/theme'
 import { Button, ErrorNote, Field } from '../components/ui'
-import { Icon } from '../components/icons'
+import { Logo } from '../components/brand'
 
 /**
  * Sign in with Google, or with the same email code the app uses.
@@ -93,11 +93,8 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
   return (
     <div className="relative grid min-h-screen place-items-center bg-[var(--c-bg)] p-4">
       <main className="w-full max-w-[420px] rounded-[var(--r-card)] border border-[var(--c-line)] bg-[var(--c-surface)] p-8 shadow-[var(--c-shadow-lg)]">
-        <div className="mb-8 flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--c-attn)] text-[#0f2a2e]">
-            <Icon name="home" size={20} />
-          </span>
-          <span className="font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--c-text)]">Grid Console</span>
+        <div className="mb-8 text-[var(--c-text)]">
+          <Logo size={34} />
         </div>
 
         <h1 className="font-[family-name:var(--font-display)] text-[28px] font-semibold leading-tight tracking-tight text-[var(--c-text)]">
