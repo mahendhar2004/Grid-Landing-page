@@ -358,17 +358,23 @@ export function Analytics() {
   const [from, setFrom] = useState(() => daysAgo(30))
   const [to, setTo] = useState(today)
 
-  const { data, error, reload } = useAsyncData(
-    () =>
-      api.analytics.fetch<Envelope<Growth | Marketplace | Money | Trust>>(dashboard, {
-        // The API takes instants. A date input gives a day, and the end of a
-        // day is the start of the next - sending `to` bare would silently
-        // exclude everything that happened on the day the admin picked.
+  // The payload is kept together with the dashboard it belongs to. `useAsyncData`
+  // holds the previous answer until the next one arrives, so on switching from
+  // Growth to Marketplace `dashboard` says "marketplace" for a moment while the
+  // data in hand is still Growth's - which has no `listingsPosted`, and rendering
+  // Marketplace from it threw "Cannot read properties of undefined (reading
+  // 'reduce')". A result is only drawn by the dashboard that asked for it.
+  const { data: loaded, error, reload } = useAsyncData(
+    async () => ({
+      dashboard,
+      envelope: await api.analytics.fetch<Envelope<Growth | Marketplace | Money | Trust>>(dashboard, {
         from: new Date(`${from}T00:00:00.000Z`).toISOString(),
         to: new Date(`${to}T00:00:00.000Z`).toISOString(),
       }),
+    }),
     [dashboard, from, to],
   )
+  const data = loaded !== null && loaded.dashboard === dashboard ? loaded.envelope : null
 
   function applyPreset(days: number) {
     setFrom(daysAgo(days))
