@@ -163,3 +163,106 @@ html[data-console] h2 {
 html[data-console] table th {
   font-weight: 500;
 }
+
+/* ------------------------------------------------------------------ motion
+ * One vocabulary, so the console moves the same way everywhere:
+ *   - durations: fast for hover and press, normal for things that open, slow
+ *     for a screen arriving;
+ *   - one easing that decelerates (things settle rather than stop);
+ *   - entrances only where something appears because a person asked for it
+ *     (a menu, a dialog, a new screen). Nothing loops and nothing moves on its
+ *     own, and `prefers-reduced-motion` turns all of it off (see the rule at
+ *     the top of this file).
+ * Components use the classes below; screens never write a keyframe.
+ */
+html[data-console] {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 140ms;
+  --dur: 220ms;
+  --dur-slow: 380ms;
+}
+
+@keyframes gc-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes gc-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes gc-pop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes gc-sheet {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes gc-chip {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes gc-spin-in {
+  from { opacity: 0; transform: rotate(-70deg) scale(0.6); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes gc-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* A screen arriving. */
+html[data-console] .motion-page { animation: gc-rise var(--dur-slow) var(--ease-out) both; }
+/* A menu opening under the thing that opened it. */
+html[data-console] .motion-pop { animation: gc-pop var(--dur) var(--ease-out) both; transform-origin: top left; }
+html[data-console] .motion-pop-right { transform-origin: top right; }
+/* A dialog, and the veil behind it. */
+html[data-console] .motion-sheet { animation: gc-sheet var(--dur-slow) var(--ease-out) both; }
+html[data-console] .motion-fade { animation: gc-fade var(--dur) ease both; }
+/* A filter appearing. */
+html[data-console] .motion-chip { animation: gc-chip var(--dur) var(--ease-out) both; }
+/* An icon swapping (the theme toggle). */
+html[data-console] .motion-icon { animation: gc-spin-in var(--dur-slow) var(--ease-out) both; }
+/* The first rows of a list arriving one after another; later rows just appear. */
+html[data-console] .motion-stagger > * { animation: gc-rise var(--dur-slow) var(--ease-out) both; }
+html[data-console] .motion-stagger > :nth-child(2) { animation-delay: 30ms; }
+html[data-console] .motion-stagger > :nth-child(3) { animation-delay: 60ms; }
+html[data-console] .motion-stagger > :nth-child(4) { animation-delay: 90ms; }
+html[data-console] .motion-stagger > :nth-child(5) { animation-delay: 120ms; }
+html[data-console] .motion-stagger > :nth-child(6) { animation-delay: 150ms; }
+html[data-console] .motion-stagger > :nth-child(n + 7) { animation-delay: 180ms; }
+
+/* Something is loading: a soft sheen, not a spinner. */
+html[data-console] .motion-shimmer {
+  background: linear-gradient(90deg, var(--c-surface-2) 30%, var(--c-hover) 50%, var(--c-surface-2) 70%);
+  background-size: 200% 100%;
+  animation: gc-shimmer 1.6s linear infinite;
+}
+
+/* Every control eases between states instead of snapping, and presses in. */
+html[data-console] button,
+html[data-console] a,
+html[data-console] input,
+html[data-console] textarea,
+html[data-console] select,
+html[data-console] [role='option'] {
+  transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+  transition-duration: var(--dur-fast);
+  transition-timing-function: var(--ease-out);
+}
+html[data-console] button:not(:disabled):active {
+  transform: scale(0.97);
+}
+html[data-console] li,
+html[data-console] [data-hover-row] {
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+/* Switching theme fades the whole page's colours together, once. */
+html[data-console].theme-switching *,
+html[data-console].theme-switching *::before,
+html[data-console].theme-switching *::after {
+  transition: background-color 320ms var(--ease-in-out), border-color 320ms var(--ease-in-out), color 320ms var(--ease-in-out),
+    fill 320ms var(--ease-in-out), stroke 320ms var(--ease-in-out) !important;
+}

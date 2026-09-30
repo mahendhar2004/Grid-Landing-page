@@ -209,7 +209,7 @@ export function ActionCentre({ onOpenTab }: { onOpenTab: (tab: string) => void }
         {waiting.length === 0 ? (
           <EmptyNote>All clear.</EmptyNote>
         ) : (
-          <ul className="grid gap-0.5 p-2">
+          <ul className="motion-stagger grid gap-0.5 p-2">
             {waiting.map((row) => (
               <li key={row.key}>
                 <button

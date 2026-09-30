@@ -80,7 +80,9 @@ export function AdminApp() {
           navigation, so a fixed screen recovers by switching tabs rather than
           by reloading.
         */}
-        <div className="mx-auto max-w-[var(--page-max)]">
+        {/* Keyed by screen: a new screen arrives with one soft rise; changing a
+            filter on the same screen does not replay it. */}
+        <div key={tab} className="motion-page mx-auto max-w-[var(--page-max)]">
           <ErrorBoundary resetKey={tab} label={NAV.find((entry) => entry.id === tab)?.label ?? tab}>
             {tab === 'home' ? <ActionCentre onOpenTab={(next) => navigate(next)} /> : null}
             {tab === 'reports' ? <Reports /> : null}

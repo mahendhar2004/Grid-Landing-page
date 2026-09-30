@@ -18,10 +18,15 @@ import { Icon } from './icons'
 export function Sidebar({ current, open, onClose, onSignOut }: { current: string; open: boolean; onClose: () => void; onSignOut: () => void }) {
   return (
     <>
-      {open ? <button aria-label="Close menu" className="fixed inset-0 z-30 bg-[var(--c-scrim)] lg:hidden" onClick={onClose} /> : null}
+      <button
+        aria-label="Close menu"
+        tabIndex={open ? 0 : -1}
+        className={`fixed inset-0 z-30 bg-[var(--c-scrim)] transition-opacity duration-[var(--dur)] lg:hidden ${open ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+        onClick={onClose}
+      />
       <aside
         aria-label="Console navigation"
-        className={`fixed inset-y-[var(--side-inset)] left-[var(--side-inset)] z-40 flex w-[var(--sidebar-w)] flex-col gap-6 overflow-auto rounded-[var(--side-radius)] bg-[var(--c-nav-bg)] px-3.5 py-5 text-[var(--c-nav-text)] transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-[var(--side-inset)] left-[var(--side-inset)] z-40 flex w-[var(--sidebar-w)] flex-col gap-6 overflow-auto rounded-[var(--side-radius)] bg-[var(--c-nav-bg)] px-3.5 py-5 text-[var(--c-nav-text)] transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] lg:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-[120%]'
         }`}
       >
@@ -101,7 +106,9 @@ export function UtilityBar({ current, onMenu, onSearch }: { current: string; onM
           <kbd className="ml-auto rounded-md border border-[var(--c-line-strong)] px-1.5 py-0.5 text-[11px] text-[var(--c-muted)]">Ctrl K</kbd>
         </button>
         <IconButton label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={toggle}>
-          <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
+          <span key={theme} className="motion-icon grid place-items-center">
+            <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
+          </span>
         </IconButton>
         <Avatar name="Grid Admin" />
       </div>
@@ -144,13 +151,13 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   }
 
   return (
-    <div className="fixed inset-0 z-[70] bg-[var(--c-scrim)]" onMouseDown={onClose}>
+    <div className="motion-fade fixed inset-0 z-[70] bg-[var(--c-scrim)]" onMouseDown={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
         onMouseDown={(event) => event.stopPropagation()}
-        className="mx-auto mt-[14vh] w-[min(560px,94vw)] overflow-clip rounded-[var(--r-card)] border border-[var(--c-line-strong)] bg-[var(--c-surface)] shadow-[var(--c-shadow-lg)]"
+        className="motion-sheet mx-auto mt-[14vh] w-[min(560px,94vw)] overflow-clip rounded-[var(--r-card)] border border-[var(--c-line-strong)] bg-[var(--c-surface)] shadow-[var(--c-shadow-lg)]"
       >
         <input
           ref={input}

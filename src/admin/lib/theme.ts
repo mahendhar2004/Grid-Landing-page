@@ -21,8 +21,17 @@ function subscribe(listener: () => void): () => void {
   return () => listeners.delete(listener)
 }
 
+/** How long the colour fade lasts; `tokens.css` uses the same 320ms. */
+const SWITCH_MS = 340
+let switching: ReturnType<typeof setTimeout> | undefined
+
 export function setTheme(theme: Theme): void {
   const root = document.documentElement
+  // Fade every colour together instead of snapping, then stop fading so hovers
+  // are not slowed down afterwards.
+  root.classList.add('theme-switching')
+  clearTimeout(switching)
+  switching = setTimeout(() => root.classList.remove('theme-switching'), SWITCH_MS)
   root.setAttribute('data-theme', theme)
   root.classList.toggle('dark', theme === 'dark')
   try {

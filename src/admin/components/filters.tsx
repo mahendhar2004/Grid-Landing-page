@@ -114,7 +114,7 @@ export function Dropdown<T extends string>({
       >
         <span className={filtering ? 'opacity-80' : 'text-[var(--c-muted)]'}>{label}</span>
         <span>{selected?.label ?? ''}</span>
-        <span className="opacity-60">
+        <span className={`opacity-60 transition-transform duration-[var(--dur)] ease-[var(--ease-out)] ${open ? 'rotate-180' : ''}`}>
           <Icon name="chevron" size={14} />
         </span>
       </button>
@@ -124,8 +124,8 @@ export function Dropdown<T extends string>({
           id={listId}
           role="listbox"
           aria-label={label}
-          className={`absolute top-[calc(100%+8px)] z-30 max-h-[340px] min-w-[250px] overflow-auto rounded-[var(--r-inner)] border border-[var(--c-line)] bg-[var(--c-surface)] p-2 shadow-[var(--c-shadow-lg)] ${
-            alignRight ? 'right-0' : 'left-0'
+          className={`motion-pop absolute top-[calc(100%+8px)] z-30 max-h-[340px] min-w-[250px] overflow-auto rounded-[var(--r-inner)] border border-[var(--c-line)] bg-[var(--c-surface)] p-2 shadow-[var(--c-shadow-lg)] ${
+            alignRight ? 'motion-pop-right right-0' : 'left-0'
           }`}
         >
           {searchable ? (
@@ -167,7 +167,7 @@ export function Dropdown<T extends string>({
 /** A removable pill saying what is narrowing the list. */
 export function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--c-brand-soft)] py-1 pl-3.5 pr-1.5 text-[13px] font-semibold text-[var(--c-brand)]">
+    <span className="motion-chip inline-flex items-center gap-1.5 rounded-full bg-[var(--c-brand-soft)] py-1 pl-3.5 pr-1.5 text-[13px] font-semibold text-[var(--c-brand)]">
       {label}
       <button
         type="button"

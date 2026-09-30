@@ -7,7 +7,7 @@ import { usePagedData } from '../lib/usePagedData'
 import { useAdminAction } from '../lib/useAdminAction'
 import { useFilters } from '../lib/useFilters'
 import { Dropdown, FilterChips, Toolbar } from '../components/filters'
-import { Badge, Button, EmptyNote, ErrorNote, MoreRow, PageHeader, Panel, ReasonPrompt, Segmented } from '../components/ui'
+import { Badge, Button, EmptyNote, ErrorNote, LoadingRows, MoreRow, PageHeader, Panel, ReasonPrompt, Segmented } from '../components/ui'
 
 /**
  * The moderation queue - the screen this console exists for.
@@ -190,7 +190,7 @@ export function Reports() {
 
       <Panel>
         {reports === null ? (
-          <EmptyNote>Loading…</EmptyNote>
+          <LoadingRows />
         ) : reports.length === 0 ? (
           <EmptyNote>
             {category
@@ -200,9 +200,9 @@ export function Reports() {
                 : `No ${status.toLowerCase()} reports.`}
           </EmptyNote>
         ) : (
-          <ul className="divide-y divide-[var(--color-border)]">
+          <ul className="motion-stagger grid gap-0.5 p-2">
             {reports.map((report) => (
-              <li key={report.id} className="p-4">
+              <li key={report.id} className="rounded-[var(--r-inner)] px-4 py-4 transition hover:bg-[var(--c-hover)]">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={CATEGORY_TONE[report.category] ?? 'neutral'}>{report.category}</Badge>
                   <span className="text-xs text-[var(--color-text-muted)]">{targetKind(report)}</span>

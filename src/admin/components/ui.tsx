@@ -212,12 +212,12 @@ export function ReasonPrompt({
   children?: ReactNode
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--c-scrim)] p-4">
+    <div className="motion-fade fixed inset-0 z-50 flex items-center justify-center bg-[var(--c-scrim)] p-4">
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="w-full max-w-md overflow-clip rounded-[var(--r-card)] border border-[var(--c-line)] bg-[var(--c-surface)] p-6 shadow-[var(--c-shadow-lg)]"
+        className="motion-sheet w-full max-w-md overflow-clip rounded-[var(--r-card)] border border-[var(--c-line)] bg-[var(--c-surface)] p-6 shadow-[var(--c-shadow-lg)]"
       >
         <h2 className="mb-3 font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--c-text)]">{title}</h2>
         {children}
@@ -269,6 +269,22 @@ export function ErrorNote({ error }: { error: { message: string; correlationId?:
     >
       {error.message}
       {error.correlationId ? <span className="mt-1 block font-mono text-xs opacity-70">ref {error.correlationId}</span> : null}
+    </div>
+  )
+}
+
+/**
+ * A list that is still loading: soft rows with a sheen instead of the word
+ * "Loading…", which is kept for screen readers. Same height as a real row, so
+ * the page does not jump when the data arrives.
+ */
+export function LoadingRows({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className="grid gap-2 p-4" aria-busy="true">
+      <span className="sr-only">Loading…</span>
+      {Array.from({ length: rows }, (_, index) => (
+        <div key={index} className="motion-shimmer h-[60px] rounded-[var(--r-inner)]" aria-hidden="true" />
+      ))}
     </div>
   )
 }

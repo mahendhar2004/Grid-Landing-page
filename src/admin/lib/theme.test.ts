@@ -41,4 +41,14 @@ describe('setTheme', () => {
     expect(() => setTheme('dark')).not.toThrow()
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
   })
+
+  it('fades the colours while switching, then stops so hovers are not slowed down afterwards', () => {
+    vi.useFakeTimers()
+    setTheme('dark')
+    expect(document.documentElement.classList.contains('theme-switching')).toBe(true)
+
+    vi.advanceTimersByTime(400)
+    expect(document.documentElement.classList.contains('theme-switching')).toBe(false)
+    vi.useRealTimers()
+  })
 })

@@ -2,7 +2,7 @@ import { api } from '../api/endpoints'
 import { usePagedData } from '../lib/usePagedData'
 import { useFilters } from '../lib/useFilters'
 import { Dropdown, FilterChips, SearchBox, Toolbar } from '../components/filters'
-import { Badge, EmptyNote, ErrorNote, MoreRow, PageHeader, Panel } from '../components/ui'
+import { Badge, EmptyNote, ErrorNote, LoadingRows, MoreRow, PageHeader, Panel } from '../components/ui'
 
 /**
  * Every admin action, newest first.
@@ -95,7 +95,7 @@ export function AuditLog() {
 
       <Panel>
         {entries === null ? (
-          <EmptyNote>Loading…</EmptyNote>
+          <LoadingRows />
         ) : entries.length === 0 ? (
           <EmptyNote>
             {targetType || targetId.trim()
@@ -103,9 +103,9 @@ export function AuditLog() {
               : 'No admin actions recorded yet.'}
           </EmptyNote>
         ) : (
-          <ul className="divide-y divide-[var(--color-border)]">
+          <ul className="motion-stagger grid gap-0.5 p-2">
             {entries.map((entry) => (
-              <li key={entry.id} className="p-4">
+              <li key={entry.id} className="rounded-[var(--r-inner)] px-4 py-4 transition hover:bg-[var(--c-hover)]">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={DESTRUCTIVE.test(entry.action) ? 'bad' : 'neutral'}>{entry.action}</Badge>
                   <span className="text-xs text-[var(--color-text-muted)]">

@@ -8,7 +8,7 @@ import { useFilters } from '../lib/useFilters'
 import { usePagedData } from '../lib/usePagedData'
 import { Dropdown, FilterChips, SearchBox, Toolbar } from '../components/filters'
 import type { Option } from '../components/filters'
-import { Avatar, Badge, Button, EmptyNote, ErrorNote, MoreRow, PageHeader, Panel, ReasonPrompt } from '../components/ui'
+import { Avatar, Badge, Button, EmptyNote, ErrorNote, LoadingRows, MoreRow, PageHeader, Panel, ReasonPrompt } from '../components/ui'
 
 /**
  * Who someone is, and what their standing is.
@@ -168,11 +168,11 @@ export function Users() {
 
       <Panel>
         {users === null ? (
-          <EmptyNote>Loading…</EmptyNote>
+          <LoadingRows />
         ) : users.length === 0 ? (
           <EmptyNote>{filterChips.length > 0 ? 'Nobody matches these filters. Remove one to see more.' : 'No members yet.'}</EmptyNote>
         ) : (
-          <ul className="grid gap-0.5 p-2">
+          <ul className="motion-stagger grid gap-0.5 p-2">
             {users.map((user) => {
               const standing = standingOf(user)
               return (
