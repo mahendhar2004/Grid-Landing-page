@@ -25,6 +25,11 @@ import type {
   OrganizationDomain,
   OrganizationType,
   AdminMonetizationView,
+  AdminPlan,
+  AppVersionConfig,
+  CreditGrantConfigEntry,
+  PlanGrantResult,
+  PlanStatus,
   PendingReview,
   TriageCounts,
   TriageInbox,
@@ -386,6 +391,63 @@ const monetization = {
   setPlanFeature(body: SetPlanFeatureBody): Promise<unknown> {
     return apiPut('/v1/admin/monetization/plan-features', body)
   },
+
+  /** A new plan, as a draft: no price, no store product, invisible to members. */
+  createPlan(body: { key: string; name: string }): Promise<AdminPlan> {
+    return apiPost<AdminPlan>('/v1/admin/monetization/plans', body)
+  },
+
+  /** A plan's own details. Replaces them, so every field is stated. */
+  updatePlan(key: string, body: UpdatePlanBody): Promise<AdminPlan> {
+    return apiPut<AdminPlan>(`/v1/admin/monetization/plans/${encodeURIComponent(key)}`, body)
+  },
+
+  /** What the app lists a plan at for one organisation type. The store charges what its product says; the two must match. */
+  setPlanPricing(body: { planKey: string; orgType: OrganizationType; basePricePaise: number; discountPaise: number }): Promise<AdminPlan> {
+    return apiPut<AdminPlan>('/v1/admin/monetization/plan-pricing', body)
+  },
+
+  /** Records that the plan's product has been checked in that store's console. */
+  confirmPlanProduct(body: { planKey: string; store: 'IOS' | 'ANDROID' }): Promise<AdminPlan> {
+    return apiPost<AdminPlan>('/v1/admin/monetization/plan-products/confirm', body)
+  },
+}
+
+/** A plan's own details. An empty text field is sent as `null`: the route refuses an empty string. */
+export interface UpdatePlanBody {
+  name: string
+  badgeLabel: string | null
+  sortOrder: number
+  status: PlanStatus
+  isRecommended: boolean
+  iosProductId: string | null
+  androidProductId: string | null
+}
+
+// ---------------------------------------------------- app version
+
+const appVersion = {
+  get(): Promise<AppVersionConfig> {
+    return apiGet<AppVersionConfig>('/v1/admin/app-version')
+  },
+
+  /** Raising the floor blocks older builds, so a reason is required either way. */
+  set(body: { minSupportedVersion: string; latestVersion: string; reason: string }): Promise<{ minSupportedVersion: string; latestVersion: string }> {
+    return apiPut('/v1/admin/app-version', body)
+  },
+}
+
+// ---------------------------------------------------- credit rewards
+
+const creditRewards = {
+  list(): Promise<CreditGrantConfigEntry[]> {
+    return apiGet<CreditGrantConfigEntry[]>('/v1/admin/credit-grant-config')
+  },
+
+  /** This amount goes to everyone who qualifies, so a reason is required and recorded. */
+  set(body: { source: CreditGrantConfigEntry['source']; amountPaise: number; reason: string }): Promise<CreditGrantConfigEntry> {
+    return apiPut<CreditGrantConfigEntry>('/v1/admin/credit-grant-config', body)
+  },
 }
 
 // ---------------------------------------------------------- audit
@@ -459,6 +521,21 @@ const users = {
       limit,
       offset,
     })
+  },
+
+  /**
+   * Give a member a plan for a number of days, without a store purchase - the
+   * support and testing path. It ends on its own. The server refuses a member
+   * with a live subscription bought in a store, because replacing it would stop
+   * the benefits they are paying for while the store carried on charging them.
+   */
+  grantPlan(userId: string, input: { planKey: string; days: number; reason: string }): Promise<PlanGrantResult> {
+    return apiPost<PlanGrantResult>(`/v1/admin/users/${userId}/plan-grant`, input)
+  },
+
+  /** End a plan that was granted from here, now. A store subscription is the member's to cancel. */
+  revokePlan(userId: string, reason: string): Promise<unknown> {
+    return apiPost(`/v1/admin/users/${userId}/plan-grant/revoke`, { reason })
   },
 
   /** Ban without a report behind it — for something an admin found themselves. */
@@ -842,6 +919,8 @@ export const api = {
   creatives,
   lineItems,
   monetization,
+  appVersion,
+  creditRewards,
   audit,
   analytics,
 }

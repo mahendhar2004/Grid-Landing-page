@@ -170,6 +170,8 @@ export interface AdminUser {
   /** Distinct people who have reported them, or anything they own. One report is noise; five is a pattern. */
   reportCount: number
   listingCount: number
+  /** The plan they are on right now, or null on the free plan. `isGrant` is true for a plan an admin gave rather than one bought in a store. */
+  plan: { key: string; name: string; isGrant: boolean; expiresAt: string | null } | null
 }
 
 export interface AuditEntry {
@@ -268,9 +270,14 @@ export interface AdminPlan {
   badgeLabel: string | null
   sortOrder: number
   isDefault: boolean
+  /** The plan the member app stars on its plan screen. At most one; never the default. */
+  isRecommended: boolean
   status: PlanStatus
   iosProductId: string | null
   androidProductId: string | null
+  /** When somebody confirmed the product exists in each store's console, or null. A paid plan cannot be made available until both are set. */
+  iosVerifiedAt: string | null
+  androidVerifiedAt: string | null
   /** Why this plan cannot be sold yet, in a sentence, or null when it can. The stores are the constraint no configuration removes. */
   blockedReason: string | null
   pricing: PlanPrice[]
@@ -546,4 +553,24 @@ export interface LineItemDeliveryReport {
   impressionGoal: number | null
   shareOfVoicePercent: number | null
   days: { day: string; impressions: number; clicks: number; spendPaise: number }[]
+}
+
+/** `GET /v1/admin/app-version`: the build floor and the latest build, as stored. */
+export interface AppVersionConfig {
+  minSupportedVersion: string
+  latestVersion: string
+  /** When an admin last saved them, or null while they are still the values the backend started with. */
+  updatedAt: string | null
+}
+
+/** One earning source's configured amount (`GET /v1/admin/credit-grant-config`). */
+export interface CreditGrantConfigEntry {
+  source: 'SIGNUP_BONUS' | 'REFERRAL_REWARD' | 'SEVEN_DAY_STREAK' | 'PLAN_MONTHLY_CREDIT'
+  amountPaise: number
+}
+
+export interface PlanGrantResult {
+  planKey: string
+  planName: string
+  expiresAt: string
 }

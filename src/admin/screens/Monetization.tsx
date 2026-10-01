@@ -5,6 +5,7 @@ import type { AdminFeature, AdminPlan, OrganizationType, PlanFeature } from '../
 import type { ApiError } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, Panel } from '../components/ui'
+import { NewPlanForm, PlanEditor } from './PlanEditor'
 
 /**
  * What costs money, and what each plan includes.
@@ -29,9 +30,10 @@ import { Badge, Button, EmptyNote, ErrorNote, Panel } from '../components/ui'
  * configured with a quantity that nothing reads — the server refuses those,
  * and this screen does not offer them in the first place.
  *
- * **Plan prices are shown, not edited.** What a subscriber pays is the price of
- * a product in App Store Connect and Play Console; a number changed here alone
- * would display one price and charge another. Each plan says instead why it
+ * **A plan's listed price is what members are shown, not what the store charges.**
+ * What a subscriber pays is the price of a product in App Store Connect and Play
+ * Console, so the editor says the two have to match, and refuses to put a plan on
+ * sale until both its products have been confirmed to exist. Each plan says why it
  * cannot be sold yet, which is the part an admin cannot work out from here.
  */
 
@@ -519,11 +521,14 @@ export function Monetization() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--color-text)]">Plans</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-base font-bold text-[var(--color-text)]">Plans</h2>
+          <NewPlanForm existingKeys={plans.map((plan) => plan.key)} onCreated={reload} />
+        </div>
         <p className="text-xs text-[var(--color-text-muted)]">
-          What each plan includes, one feature at a time. A plan's own price comes from its product in the stores
-          and is shown here rather than edited, because a price changed only here would display one number and
-          charge another.
+          What each plan includes, one feature at a time, and under &ldquo;Plan details&rdquo; the plan itself: its name,
+          position, whether it is on sale, which one is recommended, its store products and the price the app lists.
+          The store charges what its product says, so the listed price has to match it.
         </p>
 
         {view === null ? (
@@ -543,6 +548,7 @@ export function Monetization() {
                   {plan.status}
                 </Badge>
                 {plan.isDefault ? <Badge>Default</Badge> : null}
+                {plan.isRecommended ? <Badge tone="brand">Recommended</Badge> : null}
                 {plan.badgeLabel ? <Badge tone="good">{plan.badgeLabel}</Badge> : null}
                 <span className="text-xs text-[var(--color-text-muted)]">{planPriceLabel(plan)}</span>
               </div>
@@ -552,6 +558,8 @@ export function Monetization() {
                   {plan.blockedReason}
                 </p>
               ) : null}
+
+              <PlanEditor plan={plan} onChanged={reload} />
 
               <ul className="divide-y divide-[var(--color-border)]">
                 {features.map((feature) => {
