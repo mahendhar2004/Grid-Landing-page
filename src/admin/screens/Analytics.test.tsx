@@ -92,4 +92,34 @@ describe('Analytics', () => {
       await waitFor(() => expect(screen.getByText(marker)).toBeTruthy())
     }
   })
+
+  it('keeps plans given away apart from paying subscribers, so a free plan never reads as revenue', async () => {
+    fetchMock.mockImplementation(((dashboard: string) =>
+      Promise.resolve(
+        envelope(
+          dashboard === 'money'
+            ? {
+                topUpPaise: 0,
+                spendByType: [],
+                spendTotalPaise: 0,
+                revenueByHub: [],
+                activeSubscriptions: [{ label: 'PLUS', count: 4 }],
+                grantedPlans: [{ label: 'PRO', count: 2 }],
+                creditsGrantedPaise: 0,
+              }
+            : dashboard === 'growth'
+              ? GROWTH
+              : MARKETPLACE,
+        ),
+      )) as never)
+    render(<Analytics />)
+    await screen.findByText('Signups by organization')
+
+    await act(async () => screen.getByRole('button', { name: 'Money' }).click())
+
+    await waitFor(() => expect(screen.getByText('Paying subscriptions by plan')).toBeTruthy())
+    expect(screen.getByText('Plans given away, still running (not revenue)')).toBeTruthy()
+    // Four paying subscribers - the two given plans are not among them.
+    expect(screen.getByText('Subscribers').parentElement?.textContent).toMatch(/4/)
+  })
 })

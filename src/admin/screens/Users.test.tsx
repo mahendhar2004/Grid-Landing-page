@@ -7,8 +7,9 @@ import type { AdminUser } from '../api/types'
 
 vi.mock('../api/endpoints', () => ({
   api: {
-    users: { list: vi.fn(), ban: vi.fn(), unban: vi.fn() },
+    users: { list: vi.fn(), ban: vi.fn(), unban: vi.fn(), grantPlan: vi.fn(), revokePlan: vi.fn() },
     organizations: { list: vi.fn() },
+    monetization: { get: vi.fn() },
   },
 }))
 
@@ -16,6 +17,9 @@ const listMock = vi.mocked(api.users.list)
 const banMock = vi.mocked(api.users.ban)
 const unbanMock = vi.mocked(api.users.unban)
 const orgsMock = vi.mocked(api.organizations.list)
+const grantMock = vi.mocked(api.users.grantPlan)
+const revokeMock = vi.mocked(api.users.revokePlan)
+const monetizationMock = vi.mocked(api.monetization.get)
 
 function user(overrides: Partial<AdminUser> = {}): AdminUser {
   return {
@@ -48,6 +52,17 @@ describe('Users', () => {
     vi.clearAllMocks()
     banMock.mockResolvedValue(undefined)
     unbanMock.mockResolvedValue(undefined)
+    grantMock.mockResolvedValue({ planKey: 'PRO', planName: 'Pro', expiresAt: '2026-11-01T00:00:00.000Z' })
+    revokeMock.mockResolvedValue(undefined)
+    monetizationMock.mockResolvedValue({
+      features: [],
+      plans: [
+        { id: 'p0', key: 'FREE', name: 'Free', badgeLabel: null, sortOrder: 0, isDefault: true, isRecommended: false, status: 'AVAILABLE', iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, pricing: [], features: [] },
+        { id: 'p1', key: 'PLUS', name: 'Plus', badgeLabel: null, sortOrder: 1, isDefault: false, isRecommended: false, status: 'AVAILABLE', iosProductId: 'a', androidProductId: 'a', iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, pricing: [], features: [] },
+        { id: 'p2', key: 'PRO', name: 'Pro', badgeLabel: null, sortOrder: 2, isDefault: false, isRecommended: true, status: 'AVAILABLE', iosProductId: 'b', androidProductId: 'b', iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, pricing: [], features: [] },
+        { id: 'p3', key: 'OLD', name: 'Old', badgeLabel: null, sortOrder: 3, isDefault: false, isRecommended: false, status: 'RETIRED', iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, pricing: [], features: [] },
+      ],
+    })
     orgsMock.mockResolvedValue([
       { id: 'org_iitd', name: 'IIT Delhi' },
       { id: 'org_bits', name: 'BITS Hyderabad' },
@@ -119,6 +134,99 @@ describe('Users', () => {
     })
 
     await waitFor(() => expect(unbanMock).toHaveBeenCalledWith('usr_1', 'Appeal upheld'))
+  })
+
+  /** Types into the reason box of the open prompt. */
+  function writeReason(text: string) {
+    const textarea = document.querySelector('textarea')!
+    act(() => {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')!.set!
+      setter.call(textarea, text)
+      textarea.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+  }
+
+  describe('plans', () => {
+    it('shows which plan a member is on, and says when it was given rather than bought', async () => {
+      await renderUsers([
+        user({ id: 'a', email: 'a@x.ac.in', plan: { key: 'PLUS', name: 'Plus', isGrant: false, expiresAt: '2026-12-01T00:00:00.000Z' } }),
+        user({ id: 'b', email: 'b@x.ac.in', plan: { key: 'PRO', name: 'Pro', isGrant: true, expiresAt: '2026-11-01T00:00:00.000Z' } }),
+      ])
+
+      await waitFor(() => expect(screen.getByRole('list')).toBeTruthy())
+      expect(rowList().getByText('Plus')).toBeTruthy()
+      expect(rowList().getByText(/Pro · given until/)).toBeTruthy()
+    })
+
+    it('offers to give a plan only to someone on the free plan, and to end it only where it was given', async () => {
+      await renderUsers([
+        user({ id: 'free', email: 'free@x.ac.in' }),
+        user({ id: 'paid', email: 'paid@x.ac.in', plan: { key: 'PLUS', name: 'Plus', isGrant: false, expiresAt: null } }),
+        user({ id: 'given', email: 'given@x.ac.in', plan: { key: 'PRO', name: 'Pro', isGrant: true, expiresAt: '2026-11-01T00:00:00.000Z' } }),
+      ])
+
+      await waitFor(() => expect(rowList().getAllByText('Give a plan')).toHaveLength(1))
+      expect(rowList().getAllByText('End given plan')).toHaveLength(1)
+    })
+
+    it('gives the chosen plan for the days typed, with the reason, never offering the free or a retired plan', async () => {
+      await renderUsers([user()])
+      await waitFor(() => expect(rowList().getByText('Give a plan').hasAttribute('disabled')).toBe(false))
+      act(() => rowList().getByText('Give a plan').click())
+
+      const dialog = within(screen.getByRole('dialog'))
+      expect(dialog.getByText('Plus')).toBeTruthy()
+      expect(dialog.getByText('Pro')).toBeTruthy()
+      expect(dialog.queryByText('Free')).toBeNull()
+      expect(dialog.queryByText('Old')).toBeNull()
+
+      act(() => dialog.getByText('Pro').click())
+      const days = screen.getByLabelText(/For how many days/) as HTMLInputElement
+      act(() => {
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')!.set!
+        setter.call(days, '14')
+        days.dispatchEvent(new Event('input', { bubbles: true }))
+      })
+      writeReason('Charged twice, credited by hand.')
+      await act(async () => {
+        screen.getByText('Confirm').click()
+      })
+
+      await waitFor(() => expect(grantMock).toHaveBeenCalledWith('usr_1', { planKey: 'PRO', days: 14, reason: 'Charged twice, credited by hand.' }))
+    })
+
+    it('sends nothing while the number of days is wrong, and says why', async () => {
+      await renderUsers([user()])
+      await waitFor(() => expect(rowList().getByText('Give a plan').hasAttribute('disabled')).toBe(false))
+      act(() => rowList().getByText('Give a plan').click())
+
+      const days = screen.getByLabelText(/For how many days/) as HTMLInputElement
+      act(() => {
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')!.set!
+        setter.call(days, '400')
+        days.dispatchEvent(new Event('input', { bubbles: true }))
+      })
+      writeReason('Too long.')
+      await act(async () => {
+        screen.getByText('Confirm').click()
+      })
+
+      expect(screen.getByText('A plan can be given for 1 to 365 days.')).toBeTruthy()
+      expect(grantMock).not.toHaveBeenCalled()
+    })
+
+    it('ends a given plan with a reason', async () => {
+      await renderUsers([user({ plan: { key: 'PRO', name: 'Pro', isGrant: true, expiresAt: '2026-11-01T00:00:00.000Z' } })])
+      await waitFor(() => expect(screen.getByRole('list')).toBeTruthy())
+      act(() => rowList().getByText('End given plan').click())
+
+      writeReason('Test finished.')
+      await act(async () => {
+        screen.getByText('Confirm').click()
+      })
+
+      await waitFor(() => expect(revokeMock).toHaveBeenCalledWith('usr_1', 'Test finished.'))
+    })
   })
 
   /** Open a filter pill by its label, then choose an option in the list that opens. */

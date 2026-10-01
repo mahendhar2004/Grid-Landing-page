@@ -21,7 +21,9 @@ export const NAV: ReadonlyArray<NavEntry> = [
   { id: 'organizations', label: 'Organizations', icon: 'building', group: 'People' },
   { id: 'ads', label: 'Ads', icon: 'tag', group: 'Money' },
   { id: 'monetization', label: 'Monetization', icon: 'rupee', group: 'Money' },
+  { id: 'rewards', label: 'Credit rewards', icon: 'rupee', group: 'Money' },
   { id: 'analytics', label: 'Analytics', icon: 'chart', group: 'Money' },
+  { id: 'app-version', label: 'App versions', icon: 'tag', group: 'Records' },
   { id: 'audit', label: 'Audit log', icon: 'log', group: 'Records' },
 ]
 

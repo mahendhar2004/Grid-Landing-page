@@ -87,6 +87,8 @@ interface Money {
   spendTotalPaise: number
   revenueByHub: NamedAmount[]
   activeSubscriptions: NamedCount[]
+  /** Plans an admin gave away that are still running. Kept apart so a free plan never reads as a paying subscriber. */
+  grantedPlans?: NamedCount[]
   creditsGrantedPaise: number
 }
 
@@ -299,7 +301,7 @@ function MoneyView({ data }: { data: Money }) {
           value={rupees(data.creditsGrantedPaise)}
           hint="Signup, referral and streak grants - a real cost"
         />
-        <Stat label="Subscribers" value={subscribers.toLocaleString('en-IN')} hint="Active right now, not in the window" />
+        <Stat label="Subscribers" value={subscribers.toLocaleString('en-IN')} hint="Paying a store right now, not in the window. Plans given away are counted apart." />
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         <BarList
@@ -314,9 +316,15 @@ function MoneyView({ data }: { data: Money }) {
         />
       </div>
       <BarList
-        title="Active subscriptions by tier"
+        title="Paying subscriptions by plan"
         rows={data.activeSubscriptions.map((row) => ({ label: row.label, value: row.count }))}
       />
+      {(data.grantedPlans ?? []).length > 0 ? (
+        <BarList
+          title="Plans given away, still running (not revenue)"
+          rows={(data.grantedPlans ?? []).map((row) => ({ label: row.label, value: row.count }))}
+        />
+      ) : null}
     </div>
   )
 }

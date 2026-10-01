@@ -8,7 +8,9 @@ import { NAV } from './nav'
 import { ActionCentre } from './screens/ActionCentre'
 import { Ads } from './screens/Ads'
 import { Analytics } from './screens/Analytics'
+import { AppVersion } from './screens/AppVersion'
 import { AuditLog } from './screens/AuditLog'
+import { CreditRewards } from './screens/CreditRewards'
 import { Monetization } from './screens/Monetization'
 import { OrganizationReview } from './screens/OrganizationReview'
 import { Organizations } from './screens/Organizations'
@@ -101,7 +103,9 @@ export function AdminApp() {
             {tab === 'organization-review' ? <OrganizationReview /> : null}
             {tab === 'monetization' ? <Monetization /> : null}
             {tab === 'ads' ? <Ads /> : null}
+            {tab === 'rewards' ? <CreditRewards /> : null}
             {tab === 'analytics' ? <Analytics /> : null}
+            {tab === 'app-version' ? <AppVersion /> : null}
             {tab === 'audit' ? <AuditLog /> : null}
           </ErrorBoundary>
         </div>

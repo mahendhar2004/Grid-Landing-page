@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { api } from '../api/endpoints'
 import type { AdminUser } from '../api/types'
+import { daysError } from './grantDays'
 import { useAdminAction } from '../lib/useAdminAction'
 import { fetchAllByOffset } from '../lib/fetchAll'
 import { useAsyncData } from '../lib/useAsyncData'
@@ -9,7 +10,7 @@ import { useFilters } from '../lib/useFilters'
 import { usePagedData } from '../lib/usePagedData'
 import { Dropdown, FilterChips, SearchBox, Toolbar } from '../components/filters'
 import type { Option } from '../components/filters'
-import { Avatar, Badge, Button, EmptyNote, ErrorNote, LoadingRows, MoreRow, PageHeader, Panel, ReasonPrompt } from '../components/ui'
+import { Avatar, Badge, Button, EmptyNote, ErrorNote, Field, LoadingRows, MoreRow, PageHeader, Panel, ReasonPrompt, Segmented } from '../components/ui'
 
 /**
  * Who someone is, and what their standing is.
@@ -36,6 +37,8 @@ import { Avatar, Badge, Button, EmptyNote, ErrorNote, LoadingRows, MoreRow, Page
 type Pending =
   | { kind: 'BAN'; user: AdminUser; durationDays: number | null }
   | { kind: 'UNBAN'; user: AdminUser }
+  | { kind: 'GRANT'; user: AdminUser }
+  | { kind: 'END_GRANT'; user: AdminUser }
 
 const PAGE_SIZE = 50
 
@@ -84,6 +87,15 @@ export function Users() {
   const { q, org, status, reported, sort } = filters.values
   const search = q.trim()
   const [pending, setPending] = useState<Pending | null>(null)
+  // The plan and the length of a grant being filled in. Held here, not in the
+  // prompt, because the prompt only hands back the reason.
+  const [grantPlanKey, setGrantPlanKey] = useState<string | null>(null)
+  const [grantDays, setGrantDays] = useState('30')
+  // Every plan that could be given: not the free one, and not a retired one.
+  const monetization = useAsyncData(() => api.monetization.get(), [])
+  const grantablePlans = (monetization.data?.plans ?? [])
+    .filter((plan) => !plan.isDefault && plan.status !== 'RETIRED')
+    .sort((a, b) => a.sortOrder - b.sortOrder)
 
   // Every organisation to choose from (pages of 100, the route's maximum), so the
   // dropdown's own search box finds any of them.
@@ -115,13 +127,18 @@ export function Users() {
 
   async function confirm(reason: string) {
     if (!pending) return
-    const succeeded = await run(() =>
-      pending.kind === 'UNBAN'
-        ? api.users.unban(pending.user.id, reason)
-        : // `null` is permanent, not omitted - the endpoint's own union keeps
-          // the two from being confused at this call site.
-          api.users.ban(pending.user.id, { durationDays: pending.durationDays, reason }),
-    )
+    // The days problem is already on screen under the field; nothing is sent until it is fixed.
+    if (pending.kind === 'GRANT' && (daysError(grantDays) !== null || grantPlanKey === null)) return
+    const succeeded = await run(() => {
+      if (pending.kind === 'UNBAN') return api.users.unban(pending.user.id, reason)
+      if (pending.kind === 'END_GRANT') return api.users.revokePlan(pending.user.id, reason)
+      if (pending.kind === 'GRANT') {
+        return api.users.grantPlan(pending.user.id, { planKey: grantPlanKey ?? '', days: Number(grantDays), reason })
+      }
+      // `null` is permanent, not omitted - the endpoint's own union keeps
+      // the two from being confused at this call site.
+      return api.users.ban(pending.user.id, { durationDays: pending.durationDays, reason })
+    })
     if (succeeded) setPending(null)
   }
 
@@ -185,6 +202,15 @@ export function Users() {
                         <p className="text-sm font-semibold text-[var(--c-text)]">{user.displayName ?? '(no profile yet)'}</p>
                         <Badge tone={standing.tone}>{standing.label}</Badge>
                         {user.isAdmin ? <Badge tone="warn">Admin</Badge> : null}
+                        {/* Which plan they are on, and whether it was bought or given. */}
+                        {user.plan ? (
+                          <Badge tone={user.plan.isGrant ? 'warn' : 'brand'}>
+                            {user.plan.name}
+                            {user.plan.isGrant && user.plan.expiresAt
+                              ? ` · given until ${new Date(user.plan.expiresAt).toLocaleDateString()}`
+                              : ''}
+                          </Badge>
+                        ) : null}
                         {/* The number that decides whether to act. One report is
                             noise; several people is a pattern. */}
                         {user.reportCount > 0 ? (
@@ -207,6 +233,23 @@ export function Users() {
                       </p>
 
                       <div className="mt-3 flex flex-wrap gap-2">
+                        {user.plan?.isGrant ? (
+                          <Button size="sm" onClick={() => setPending({ kind: 'END_GRANT', user })}>
+                            End given plan
+                          </Button>
+                        ) : user.plan ? null : (
+                          <Button
+                            size="sm"
+                            disabled={grantablePlans.length === 0}
+                            onClick={() => {
+                              setGrantPlanKey(grantablePlans[0]?.key ?? null)
+                              setGrantDays('30')
+                              setPending({ kind: 'GRANT', user })
+                            }}
+                          >
+                            Give a plan
+                          </Button>
+                        )}
                         {user.isBanned ? (
                           <Button size="sm" onClick={() => setPending({ kind: 'UNBAN', user })}>
                             Lift ban
@@ -237,21 +280,44 @@ export function Users() {
           title={
             pending.kind === 'UNBAN'
               ? `Lift the ban on ${pending.user.email}`
-              : pending.durationDays === null
-                ? `Ban ${pending.user.email} indefinitely`
-                : `Ban ${pending.user.email} for ${pending.durationDays} days`
+              : pending.kind === 'GRANT'
+                ? `Give ${pending.user.email} a plan`
+                : pending.kind === 'END_GRANT'
+                  ? `End the plan given to ${pending.user.email}`
+                  : pending.durationDays === null
+                    ? `Ban ${pending.user.email} indefinitely`
+                    : `Ban ${pending.user.email} for ${pending.durationDays} days`
           }
           confirmLabel="Confirm"
-          variant={pending.kind === 'UNBAN' ? 'default' : 'danger'}
+          variant={pending.kind === 'BAN' ? 'danger' : 'default'}
           busy={busy}
           onCancel={() => setPending(null)}
           onConfirm={confirm}
         >
-          <p className="mb-3 text-sm text-[var(--c-muted)]">
-            {pending.kind === 'UNBAN'
-              ? 'They can sign in and use Grid again immediately. The ban stays in the history.'
-              : 'They are locked out completely and notified, and their listings are hidden. This is reversible from this screen.'}
-          </p>
+          {pending.kind === 'GRANT' ? (
+            <div className="mb-3 space-y-3">
+              <p className="text-sm text-[var(--c-muted)]">
+                They get the plan&apos;s benefits without a store purchase, and it ends by itself on the date below. It
+                is for support and testing, and is not counted as revenue.
+              </p>
+              <Segmented
+                label="Plan"
+                items={grantablePlans.map((plan) => ({ value: plan.key, label: plan.name }))}
+                value={grantPlanKey ?? ''}
+                onChange={setGrantPlanKey}
+              />
+              <Field label="For how many days" value={grantDays} onChange={setGrantDays} hint="1 to 365. Every grant ends." />
+              {daysError(grantDays) ? <p className="text-xs text-[var(--c-danger)]">{daysError(grantDays)}</p> : null}
+            </div>
+          ) : (
+            <p className="mb-3 text-sm text-[var(--c-muted)]">
+              {pending.kind === 'UNBAN'
+                ? 'They can sign in and use Grid again immediately. The ban stays in the history.'
+                : pending.kind === 'END_GRANT'
+                  ? 'They go back to the free plan now. A plan they bought in a store is not touched by this.'
+                  : 'They are locked out completely and notified, and their listings are hidden. This is reversible from this screen.'}
+            </p>
+          )}
         </ReasonPrompt>
       ) : null}
     </div>
