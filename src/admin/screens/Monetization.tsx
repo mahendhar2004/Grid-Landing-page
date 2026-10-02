@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { api } from '../api/endpoints'
 import type { AdminFeature, AdminPlan, OrganizationType, PlanFeature } from '../api/types'
@@ -6,6 +6,8 @@ import type { ApiError } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, PageHeader, Panel, Segmented } from '../components/ui'
 import { NewPlanForm, PlanEditor } from './PlanEditor'
+import { CompareWarnings, PlanCompare } from './PlanCompare'
+import { comparePlans, savedAllowance, type Allowance, type Warning } from './comparePlans'
 import { ReachDistancesPanel } from './ReachDistances'
 
 /**
@@ -490,11 +492,43 @@ export function Monetization() {
     }
   }
 
-  const features = view?.features ?? []
+  const features = useMemo(() => view?.features ?? [], [view])
   const plans = useMemo(
     () => (view?.plans ?? []).slice().sort((a, b) => a.sortOrder - b.sortOrder),
     [view],
   )
+
+  /**
+   * What a plan gives of a feature, for the comparison: what has been typed in
+   * the editor even if it is not saved yet (so a number can be judged before it
+   * is committed), else what is stored.
+   */
+  const allowanceOf = useCallback(
+    (planKey: string, featureKey: string): Allowance => {
+      const plan = plans.find((entry) => entry.key === planKey)
+      const draft = cellDrafts[cellKey(planKey, featureKey)]
+      if (!draft) return plan ? savedAllowance(plan, featureKey) : { kind: 'none' }
+      if (!draft.included) return { kind: 'none' }
+      if (draft.quantity.trim() === '') return { kind: 'unlimited' }
+      const count = Number(draft.quantity)
+      return Number.isInteger(count) && count > 0 ? { kind: 'count', count } : { kind: 'none' }
+    },
+    [plans, cellDrafts],
+  )
+  const isUnsaved = useCallback(
+    (planKey: string, featureKey: string): boolean => {
+      const plan = plans.find((entry) => entry.key === planKey)
+      const draft = cellDrafts[cellKey(planKey, featureKey)]
+      return plan !== undefined && draft !== undefined && !sameCell(draft, cellDraftFrom(plan, featureKey))
+    },
+    [plans, cellDrafts],
+  )
+  /** Both kinds' warnings, for the strip beside the allowance editor, so a number typed there shows what it does to the ladder without scrolling up. */
+  const ladderWarnings = useMemo((): Warning[] => {
+    const labelled = (orgType: 'ACADEMIC' | 'CORPORATE', label: string) =>
+      comparePlans({ features, plans, orgType, allowanceOf }).warnings.map((warning) => ({ ...warning, text: `${label}: ${warning.text}` }))
+    return [...labelled('ACADEMIC', 'Colleges'), ...labelled('CORPORATE', 'Companies')]
+  }, [features, plans, allowanceOf])
 
   const defaultPlan = plans.find((plan) => plan.isDefault) ?? null
   // Opens on the first plan worth editing: the free plan has little to set.
@@ -695,6 +729,8 @@ export function Monetization() {
                 ))}
               </div>
 
+              <PlanCompare features={features} plans={plans} allowanceOf={allowanceOf} isUnsaved={isUnsaved} />
+
               {selectedPlan ? (
                 <Panel key={selectedPlan.key} className="p-5">
                   <div data-testid={`plan-panel-${selectedPlan.key}`}>
@@ -718,6 +754,10 @@ export function Monetization() {
                       Tick what the plan gives. <b>Per month</b> is how many a month (blank means unlimited), the credit in ₹, or the
                       setting&rsquo;s value, depending on the kind of benefit.
                     </p>
+
+                    <div className="mb-3" data-testid="ladder-warnings">
+                      <CompareWarnings warnings={ladderWarnings} />
+                    </div>
 
                     <ColumnHeads template={INCLUDES_TEMPLATE} columns={['Benefit', 'Included', 'Per month', 'Discount', '']} />
                     <ul className="divide-y divide-[var(--color-border)]">

@@ -144,6 +144,14 @@ export function PlanEditor({ plan, onChanged }: { plan: AdminPlan; onChanged: ()
           />
         </div>
 
+        <Field
+          label="Who it's for"
+          value={draft.audience}
+          onChange={(value) => update({ audience: value })}
+          placeholder="e.g. Shops and businesses selling new items"
+          hint="One line under the price on the plan card, so a member can tell at a glance whether this plan is for them. Up to 80 characters."
+        />
+
         <div className="flex flex-wrap items-end gap-6">
           <div>
             <span className="mb-1.5 block text-[13px] font-semibold text-[var(--c-text)]">Status</span>

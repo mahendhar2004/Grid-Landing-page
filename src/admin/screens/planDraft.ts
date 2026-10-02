@@ -19,6 +19,8 @@ export interface PlanDraft {
   iosProductId: string
   androidProductId: string
   /** The sale: its name, and the first and last day it runs (YYYY-MM-DD, India time). Blank dates mean no bound. */
+  /** "Who it's for" - the line under the price on the plan card. */
+  audience: string
   offerName: string
   offerStarts: string
   offerEnds: string
@@ -71,6 +73,7 @@ export function planDraftFrom(plan: AdminPlan): PlanDraft {
     isRecommended: plan.isRecommended,
     iosProductId: plan.iosProductId ?? '',
     androidProductId: plan.androidProductId ?? '',
+    audience: plan.audience ?? '',
     offerName: plan.offerName ?? '',
     offerStarts: dayInIndia(plan.offerStartsAt),
     offerEnds: dayInIndia(plan.offerEndsAt),
@@ -93,6 +96,7 @@ export function planBodyFrom(draft: PlanDraft): UpdatePlanBody {
     isRecommended: draft.isRecommended,
     iosProductId: textOrNull(draft.iosProductId),
     androidProductId: textOrNull(draft.androidProductId),
+    audience: textOrNull(draft.audience),
     offerName: textOrNull(draft.offerName),
     offerStartsAt: startOfDay(draft.offerStarts),
     offerEndsAt: endOfDay(draft.offerEnds),
@@ -105,6 +109,7 @@ export function problemWithPlanDraft(draft: PlanDraft, plan: AdminPlan): string 
   const order = Number(draft.sortOrder)
   if (draft.sortOrder.trim() === '' || !Number.isInteger(order) || order < 0) return 'Position must be a whole number, 0 or more.'
   if (draft.badgeLabel.trim().length > 24) return 'The profile badge can be at most 24 characters.'
+  if (draft.audience.trim().length > 80) return 'Who it is for can be at most 80 characters: it sits under the price on a card.'
   if (draft.offerName.trim().length > 40) return 'The sale name can be at most 40 characters.'
   if ((draft.offerStarts.trim() !== '' || draft.offerEnds.trim() !== '') && draft.offerName.trim() === '') return 'Name the sale (for example Early bird) - a dated sale with no name tells members nothing.'
   if (draft.offerStarts.trim() !== '' && draft.offerEnds.trim() !== '' && draft.offerEnds < draft.offerStarts) return 'The sale has to end on or after the day it starts.'
@@ -126,6 +131,7 @@ export function sameDetails(a: PlanDraft, b: PlanDraft): boolean {
     a.isRecommended === b.isRecommended &&
     a.iosProductId === b.iosProductId &&
     a.androidProductId === b.androidProductId &&
+    a.audience === b.audience &&
     a.offerName === b.offerName &&
     a.offerStarts === b.offerStarts &&
     a.offerEnds === b.offerEnds

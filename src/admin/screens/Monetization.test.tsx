@@ -53,7 +53,7 @@ function plan(overrides: Partial<AdminPlan> = {}): AdminPlan {
     iosVerifiedAt: null,
     androidVerifiedAt: null,
     blockedReason: null,
-    offerName: null,
+    audience: null, offerName: null,
     offerStartsAt: null,
     offerEndsAt: null,
     pricing: [{ orgType: 'ACADEMIC', basePricePaise: 0, discountPaise: 0, iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null }],
@@ -229,6 +229,44 @@ describe('Monetization', () => {
 
     expect(within(row).getByText('Discount cannot be more than the price.')).toBeTruthy()
     expect(setFeaturePriceMock).not.toHaveBeenCalled()
+  })
+
+  describe('comparing plans while editing', () => {
+    function twoPaidPlans() {
+      const price = (base: number) => [
+        { orgType: 'ACADEMIC' as const, basePricePaise: base, discountPaise: 0, iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null },
+      ]
+      const boosts = (n: number) => [{ featureKey: 'BOOST', included: true, includedQuantity: n, discountPercent: 0, settingValue: null, grantPaise: null }]
+      return view({
+        plans: [
+          plan(),
+          plan({ id: 'pln_plus', key: 'PLUS', name: 'Plus', isDefault: false, sortOrder: 1, pricing: price(9900), features: boosts(5) }),
+          plan({ id: 'pln_pro', key: 'PRO', name: 'Pro', isDefault: false, sortOrder: 2, pricing: price(19900), features: boosts(8) }),
+        ],
+      })
+    }
+
+    it('shows every plan side by side above the editor', async () => {
+      await renderScreen(twoPaidPlans())
+
+      expect(screen.getByTestId('plan-compare')).toBeTruthy()
+      expect(screen.getByTestId('compare-price-PLUS').textContent).toBe('₹99')
+      expect(screen.getByTestId('compare-PRO-BOOST').textContent).toContain('8')
+    })
+
+    it('follows an allowance as it is typed, before it is saved, and warns when the ladder breaks', async () => {
+      await renderScreen(twoPaidPlans())
+
+      // Edit Pro (the plan the screen opens on is the first paid one, so choose Pro first).
+      fireEvent.click(screen.getAllByText('Pro')[0]!)
+      const row = planRow('Pro', 'Boosts')
+      fireEvent.change(within(row).getAllByRole('textbox')[0]!, { target: { value: '2' } })
+
+      expect(screen.getByTestId('compare-PRO-BOOST').textContent).toContain('2')
+      expect(within(screen.getByTestId('compare-PRO-BOOST')).getByLabelText('not saved yet')).toBeTruthy()
+      // The same warning is beside the editor, so it is seen without scrolling up.
+      expect(within(screen.getByTestId('ladder-warnings')).getByText(/Colleges: Pro costs more than Plus but gives fewer boosts \(2 against 5\)/)).toBeTruthy()
+    })
   })
 
   it('sends a per-use cell with its quantity and discount, and nulls for the fields the model has no use for', async () => {

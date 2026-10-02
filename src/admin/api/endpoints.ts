@@ -454,6 +454,8 @@ export interface UpdatePlanBody {
   iosProductId: string | null
   androidProductId: string | null
   /** The sale's name and window. Dates are ISO instants; null is no bound. */
+  /** "Who it's for". Null clears it. */
+  audience: string | null
   offerName: string | null
   offerStartsAt: string | null
   offerEndsAt: string | null

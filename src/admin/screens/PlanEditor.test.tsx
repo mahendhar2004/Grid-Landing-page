@@ -37,7 +37,7 @@ function plan(overrides: Partial<AdminPlan> = {}): AdminPlan {
     iosVerifiedAt: '2026-09-30T00:00:00.000Z',
     androidVerifiedAt: '2026-09-30T00:00:00.000Z',
     blockedReason: null,
-    offerName: null,
+    audience: null, offerName: null,
     offerStartsAt: null,
     offerEndsAt: null,
     pricing: [{ orgType: 'ACADEMIC', basePricePaise: 7900, discountPaise: 1000, iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null }],
@@ -320,5 +320,28 @@ describe('NewPlanForm', () => {
 
     expect(screen.getByText('A plan with the key PLUS already exists.')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Create draft' }).hasAttribute('disabled')).toBe(true)
+  })
+})
+
+describe('PlanEditor - who it is for', () => {
+  afterEach(cleanup)
+
+  it('saves the line with the other details, trimmed, and an empty one as none', async () => {
+    updatePlan.mockResolvedValue(plan())
+    render(<PlanEditor plan={plan({ audience: null })} onChanged={vi.fn()} />)
+
+    fireEvent.change(screen.getByLabelText(/^Who it's for/), { target: { value: '  Shops and businesses  ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save details' }))
+
+    await waitFor(() => expect(updatePlan).toHaveBeenCalledWith('PLUS', expect.objectContaining({ audience: 'Shops and businesses' })))
+  })
+
+  it('refuses a line the card could not hold before asking the server', () => {
+    render(<PlanEditor plan={plan()} onChanged={vi.fn()} />)
+
+    fireEvent.change(screen.getByLabelText(/^Who it's for/), { target: { value: 'x'.repeat(81) } })
+
+    expect(screen.getByText(/at most 80 characters/)).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Save details' }).hasAttribute('disabled')).toBe(true)
   })
 })

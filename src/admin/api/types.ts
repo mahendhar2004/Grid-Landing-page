@@ -290,6 +290,8 @@ export interface AdminPlan {
   /** Why this plan cannot be sold yet, in a sentence, or null when it can. The stores are the constraint no configuration removes. */
   blockedReason: string | null
   /** The sale's name and the window its discount applies in; all null for a plan whose discount simply runs. */
+  /** "Who it's for": one short line under the price on the plan card. */
+  audience: string | null
   offerName: string | null
   offerStartsAt: string | null
   offerEndsAt: string | null
