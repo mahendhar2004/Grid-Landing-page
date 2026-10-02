@@ -114,8 +114,8 @@ export function PlanEditor({ plan, onChanged }: { plan: AdminPlan; onChanged: ()
   }
 
   return (
-    <details className="mb-3 rounded-lg border border-[var(--c-line)] px-4 py-3" data-testid={`plan-editor-${plan.key}`}>
-      <summary className="cursor-pointer text-sm font-semibold text-[var(--c-text)]">Plan details</summary>
+    <details open={!plan.isDefault} className="mb-3 rounded-lg border border-[var(--c-line)] px-4 py-3" data-testid={`plan-editor-${plan.key}`}>
+      <summary className="cursor-pointer text-sm font-semibold text-[var(--c-text)]">Plan details &amp; price</summary>
 
       <div className="mt-4 space-y-5">
         <ErrorNote error={error} />
