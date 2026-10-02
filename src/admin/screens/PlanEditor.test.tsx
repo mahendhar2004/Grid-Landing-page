@@ -97,7 +97,7 @@ describe('the listed price', () => {
     [{ base: '-5', discount: '' }, /number/],
     [{ base: '79', discount: '80' }, /more than the price/],
   ])('%j', (price, message) => {
-    const problem = problemWithPrice(price)
+    const problem = problemWithPrice({ iosProductId: '', androidProductId: '', ...price })
     if (message === null) expect(problem).toBeNull()
     else expect(problem).toMatch(message)
   })

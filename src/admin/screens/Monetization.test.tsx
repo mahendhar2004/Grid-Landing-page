@@ -420,8 +420,8 @@ describe('Monetization', () => {
         features: [
           feature({
             pricing: [
-              { orgType: 'ACADEMIC', isPaid: false, basePricePaise: 5900, discountPaise: 0 },
-              { orgType: 'CORPORATE', isPaid: false, basePricePaise: 5900, discountPaise: 0 },
+              { orgType: 'ACADEMIC', isPaid: false, isOffered: true, basePricePaise: 5900, discountPaise: 0 },
+              { orgType: 'CORPORATE', isPaid: false, isOffered: true, basePricePaise: 5900, discountPaise: 0 },
             ],
           }),
         ],

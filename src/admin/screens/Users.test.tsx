@@ -56,6 +56,7 @@ describe('Users', () => {
     revokeMock.mockResolvedValue(undefined)
     monetizationMock.mockResolvedValue({
       features: [],
+      reachDistancesKm: { NEARBY: 5, CITY: 25, REGION: 100, WIDE: 500 },
       plans: [
         { id: 'p0', key: 'FREE', name: 'Free', badgeLabel: null, sortOrder: 0, isDefault: true, isRecommended: false, status: 'AVAILABLE', iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, offerName: null, offerStartsAt: null, offerEndsAt: null, pricing: [], features: [] },
         { id: 'p1', key: 'PLUS', name: 'Plus', badgeLabel: null, sortOrder: 1, isDefault: false, isRecommended: false, status: 'AVAILABLE', iosProductId: 'a', androidProductId: 'a', iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, offerName: null, offerStartsAt: null, offerEndsAt: null, pricing: [], features: [] },
