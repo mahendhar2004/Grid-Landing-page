@@ -20,6 +20,14 @@ export function CreditRewards() {
   const [drafts, setDrafts] = useState<Record<string, string>>({})
   const [pending, setPending] = useState<CreditGrantConfigEntry['source'] | null>(null)
   const { run, busy, error: actionError } = useAdminAction(reload)
+  // A credit can only pay the posting fee, so none is paid out - and members see no credits anywhere - while posting is free.
+  const { data: monetization } = useAsyncData(() => api.monetization.get(), [])
+  const postingIsCharged =
+    monetization?.features.some(
+      (feature) =>
+        (feature.key === 'LISTING_POST' || feature.key === 'REQUEST_POST') &&
+        feature.pricing.some((row) => row.isPaid && row.basePricePaise - row.discountPaise > 0),
+    ) ?? null
 
   const stored = (source: string): string => rupeesFromPaise(data?.find((row) => row.source === source)?.amountPaise ?? 0)
 
@@ -51,6 +59,17 @@ export function CreditRewards() {
         title="Credit rewards"
         subtitle="What Grid gives away. Each amount goes to everyone who qualifies, so every change needs a reason and is recorded in the audit log."
       />
+
+      {postingIsCharged === false ? (
+        <div
+          data-testid="credits-off-note"
+          className="rounded-lg border border-[var(--c-attn)]/40 bg-[var(--c-attn-soft)] px-3 py-2 text-sm text-[var(--c-attn-ink)]"
+        >
+          Posting is free, so credits are switched off: nothing below is paid out and the app shows no credits, wallet
+          credit tab or earnings anywhere. Set the amounts you want now - they take effect on their own the day a posting
+          fee is switched on in Monetization.
+        </div>
+      ) : null}
 
       <ErrorNote error={actionError ?? loadError} />
 

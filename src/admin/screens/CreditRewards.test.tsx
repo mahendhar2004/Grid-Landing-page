@@ -4,10 +4,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CreditRewards } from './CreditRewards'
 import { api } from '../api/endpoints'
 
-vi.mock('../api/endpoints', () => ({ api: { creditRewards: { list: vi.fn(), set: vi.fn() } } }))
+vi.mock('../api/endpoints', () => ({ api: { creditRewards: { list: vi.fn(), set: vi.fn() }, monetization: { get: vi.fn() } } }))
 
 const listMock = vi.mocked(api.creditRewards.list)
 const setMock = vi.mocked(api.creditRewards.set)
+const monetizationMock = vi.mocked(api.monetization.get)
+
+function postingFeature(paid: boolean) {
+  return { key: 'LISTING_POST', label: 'Posting a listing', explain: '', model: 'PER_USE', unit: 'listing', enforcedAt: null, pricing: [{ orgType: 'ACADEMIC', isPaid: paid, basePricePaise: paid ? 1500 : 0, discountPaise: 0 }] }
+}
 
 function writeReason(text: string) {
   const textarea = document.querySelector('textarea')!
@@ -28,6 +33,7 @@ describe('CreditRewards', () => {
       { source: 'PLAN_MONTHLY_CREDIT', amountPaise: 0 },
     ])
     setMock.mockResolvedValue({ source: 'SIGNUP_BONUS', amountPaise: 7500 })
+    monetizationMock.mockResolvedValue({ features: [postingFeature(false)], plans: [] } as never)
   })
   afterEach(cleanup)
 
@@ -35,6 +41,17 @@ describe('CreditRewards', () => {
     render(<CreditRewards />)
     await waitFor(() => expect(screen.getByTestId('reward-SIGNUP_BONUS')).toBeTruthy())
   }
+
+  it('says credits are switched off while posting is free, and not once a posting fee is paid', async () => {
+    await open()
+    await waitFor(() => expect(screen.getByTestId('credits-off-note')).toBeTruthy())
+
+    cleanup()
+    monetizationMock.mockResolvedValue({ features: [postingFeature(true)], plans: [] } as never)
+    await open()
+    await waitFor(() => expect(monetizationMock).toHaveBeenCalledTimes(2))
+    expect(screen.queryByTestId('credits-off-note')).toBeNull()
+  })
 
   it('shows the three rewards in rupees, and leaves out the one a plan decides', async () => {
     await open()
