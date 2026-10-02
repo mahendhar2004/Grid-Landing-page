@@ -48,6 +48,7 @@ function StoreProduct({
   busy,
   disabled,
   onConfirm,
+  notNeededYet,
 }: {
   label: string
   value: string
@@ -58,6 +59,8 @@ function StoreProduct({
   busy: boolean
   disabled: boolean
   onConfirm: () => void
+  /** A store the app is not on yet: unconfirmed is stated plainly, not as a warning, because nothing is blocked by it. */
+  notNeededYet?: boolean
 }) {
   const stored = savedValue.trim() !== '' && savedValue === value
   return (
@@ -67,7 +70,9 @@ function StoreProduct({
         <Badge tone="good">Confirmed {new Date(verifiedAt).toLocaleDateString()}</Badge>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
-          <Badge tone="warn">Not confirmed</Badge>
+          <Badge tone={notNeededYet ? 'neutral' : 'warn'}>
+            {notNeededYet ? 'Not confirmed - not needed until the iOS app ships' : 'Not confirmed'}
+          </Badge>
           <Button size="sm" disabled={!stored || busy || disabled} onClick={onConfirm}>
             I checked it exists
           </Button>
@@ -169,6 +174,7 @@ export function PlanEditor({ plan, onChanged }: { plan: AdminPlan; onChanged: ()
               savedValue={stored.iosProductId}
               busy={busy !== null}
               disabled={dirty}
+              notNeededYet
               onConfirm={() => void run('confirm-ios', () => api.monetization.confirmPlanProduct({ planKey: plan.key, store: 'IOS' }))}
             />
             <StoreProduct

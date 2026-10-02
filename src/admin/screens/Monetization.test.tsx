@@ -291,13 +291,13 @@ describe('Monetization', () => {
             name: 'Pro',
             isDefault: false,
             status: 'DRAFT',
-            blockedReason: 'Not purchasable — this plan has a price but no App Store product id.',
+            blockedReason: 'Not purchasable — this plan has a price but no Play product id.',
           }),
         ],
       }),
     )
 
-    expect(screen.getByText(/no App Store product id/)).toBeTruthy()
+    expect(screen.getByText(/no Play product id/)).toBeTruthy()
   })
 
   it('says plainly when nothing is paid, because a console full of prices reads as if it were', async () => {
