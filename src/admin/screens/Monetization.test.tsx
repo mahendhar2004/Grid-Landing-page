@@ -56,7 +56,7 @@ function plan(overrides: Partial<AdminPlan> = {}): AdminPlan {
     offerName: null,
     offerStartsAt: null,
     offerEndsAt: null,
-    pricing: [{ orgType: 'ACADEMIC', basePricePaise: 0, discountPaise: 0 }],
+    pricing: [{ orgType: 'ACADEMIC', basePricePaise: 0, discountPaise: 0, iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null }],
     features: [],
     ...overrides,
   }
@@ -323,8 +323,8 @@ describe('Monetization', () => {
       view({
         plans: [
           plan(),
-          plan({ id: 'pln_plus', key: 'PLUS', name: 'Plus', isDefault: false, sortOrder: 1, pricing: [{ orgType: 'ACADEMIC', basePricePaise: 9900, discountPaise: 2000 }] }),
-          plan({ id: 'pln_pro', key: 'PRO', name: 'Pro', isDefault: false, sortOrder: 2, pricing: [{ orgType: 'ACADEMIC', basePricePaise: 19900, discountPaise: 5000 }] }),
+          plan({ id: 'pln_plus', key: 'PLUS', name: 'Plus', isDefault: false, sortOrder: 1, pricing: [{ orgType: 'ACADEMIC', basePricePaise: 9900, discountPaise: 2000, iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null }] }),
+          plan({ id: 'pln_pro', key: 'PRO', name: 'Pro', isDefault: false, sortOrder: 2, pricing: [{ orgType: 'ACADEMIC', basePricePaise: 19900, discountPaise: 5000, iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null }] }),
         ],
       }),
     )
