@@ -4,7 +4,7 @@ import { api } from '../api/endpoints'
 import type { AdminFeature, AdminPlan, OrganizationType, PlanFeature } from '../api/types'
 import type { ApiError } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
-import { Badge, Button, EmptyNote, ErrorNote, Panel } from '../components/ui'
+import { Badge, Button, EmptyNote, ErrorNote, PageHeader, Panel, Segmented } from '../components/ui'
 import { NewPlanForm, PlanEditor } from './PlanEditor'
 
 /**
@@ -233,6 +233,20 @@ function planPriceLabel(plan: AdminPlan): string {
     .join(' · ')
 }
 
+const ORG_LABEL: Record<string, string> = { ACADEMIC: 'College', CORPORATE: 'Company' }
+const MODEL_LABEL: Record<string, string> = { PER_USE: 'Per use', PERK: 'Perk', SETTING: 'Setting', GRANT: 'Credit' }
+
+function orgLabel(orgType: string): string {
+  return ORG_LABEL[orgType] ?? orgType
+}
+
+/** What one price row costs a member after its discount, as the member would read it. */
+function finalLabel(draft: PriceDraft): string {
+  if (!draft.isPaid) return 'Free'
+  const net = paiseFromRupees(draft.rupees) - paiseFromRupees(draft.discountRupees)
+  return Number.isFinite(net) ? `₹${net / 100}` : '—'
+}
+
 function Toggle({
   label,
   hint,
@@ -260,7 +274,12 @@ function Toggle({
   )
 }
 
-/** A small labelled input. Narrower than `ui.Field`, because these sit several to a row. */
+/**
+ * A small input that sits under a column heading, so it carries no visible label
+ * of its own - the heading above the whole table is the label, and repeating it
+ * in every row is what made the old screen a wall of identical captions. The
+ * label stays as the accessible name.
+ */
 function SmallField({
   label,
   value,
@@ -277,24 +296,112 @@ function SmallField({
   suffix?: string
 }) {
   return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-        {label}
-      </span>
-      <span className="flex items-center gap-1">
-        {prefix ? <span className="text-sm text-[var(--color-text-muted)]">{prefix}</span> : null}
-        <input
-          value={value}
-          inputMode="decimal"
-          placeholder={placeholder}
-          onChange={(event) => onChange(event.target.value)}
-          className="w-24 rounded-lg border border-[var(--color-border)] bg-[var(--bg-page)] px-2 py-1.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
-        />
-        {suffix ? <span className="text-sm text-[var(--color-text-muted)]">{suffix}</span> : null}
-      </span>
-    </label>
+    <span className="flex items-center gap-1">
+      {prefix ? <span className="text-sm text-[var(--color-text-muted)]">{prefix}</span> : null}
+      <input
+        aria-label={label}
+        value={value}
+        inputMode="decimal"
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full min-w-0 rounded-lg border border-[var(--color-border)] bg-[var(--bg-page)] px-2 py-1.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+      />
+      {suffix ? <span className="text-sm text-[var(--color-text-muted)]">{suffix}</span> : null}
+    </span>
   )
 }
+
+/** The column headings above a table of rows; hidden on a narrow screen, where each row stacks and its inputs carry their own names. */
+function ColumnHeads({ columns, template }: { columns: ReadonlyArray<string>; template: string }) {
+  return (
+    <div
+      className={`hidden gap-x-4 border-b border-[var(--color-border)] pb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)] md:grid ${template}`}
+    >
+      {columns.map((column, index) => (
+        <span key={`${column}-${index}`}>{column}</span>
+      ))}
+    </div>
+  )
+}
+
+const INCLUDES_TEMPLATE = 'md:grid-cols-[minmax(0,1.6fr)_110px_140px_110px_84px]'
+const PRICE_TEMPLATE = 'md:grid-cols-[minmax(0,1fr)_90px_130px_130px_110px_84px]'
+
+/** What a plan gives, in a line a person can skim: "3 boosts · 5 reach". Only what is switched on. */
+function includedSummary(plan: AdminPlan, features: ReadonlyArray<AdminFeature>): string[] {
+  const out: string[] = []
+  for (const row of plan.features) {
+    if (!row.included) continue
+    const feature = features.find((entry) => entry.key === row.featureKey)
+    if (!feature) continue
+    if (feature.model === 'GRANT') out.push(`${feature.label}: ₹${rupeesFromPaise(row.grantPaise ?? 0)}`)
+    else if (feature.model === 'PER_USE') out.push(`${feature.label}: ${row.includedQuantity === null ? 'unlimited' : row.includedQuantity}`)
+    else out.push(feature.label)
+  }
+  return out
+}
+
+function PlanOverviewCard({
+  plan,
+  features,
+  selected,
+  onSelect,
+}: {
+  plan: AdminPlan
+  features: ReadonlyArray<AdminFeature>
+  selected: boolean
+  onSelect: () => void
+}) {
+  const included = includedSummary(plan, features)
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      data-testid={`plan-card-${plan.key}`}
+      className={`flex flex-col gap-3 rounded-[var(--r-card)] border p-4 text-left transition ${
+        selected
+          ? 'border-[var(--color-primary)] bg-[var(--c-surface)] shadow-[var(--c-shadow)] ring-1 ring-[var(--color-primary)]'
+          : 'border-[var(--c-line)] bg-[var(--c-surface)] hover:border-[var(--color-text-muted)]'
+      }`}
+    >
+      <span className="flex flex-wrap items-center gap-2">
+        <span className="text-base font-bold text-[var(--color-text)]">{plan.name}</span>
+        <Badge tone={plan.status === 'AVAILABLE' ? 'good' : plan.status === 'DRAFT' ? 'warn' : 'neutral'}>
+          {plan.status === 'AVAILABLE' ? 'On sale' : plan.status === 'DRAFT' ? 'Draft' : 'Retired'}
+        </Badge>
+        {plan.isRecommended ? <Badge tone="brand">Recommended</Badge> : null}
+      </span>
+
+      <span className="space-y-1">
+        {plan.pricing.length === 0 ? (
+          <span className="text-sm text-[var(--color-text-muted)]">No price set</span>
+        ) : (
+          plan.pricing.map((row) => {
+            const final = row.basePricePaise - row.discountPaise
+            return (
+              <span key={row.orgType} className="flex items-baseline gap-2 text-sm">
+                <span className="w-16 text-xs text-[var(--color-text-muted)]">{orgLabel(row.orgType)}</span>
+                <span className="font-bold text-[var(--color-text)]">{final === 0 ? 'Free' : `₹${rupeesFromPaise(final)}`}</span>
+                {final > 0 ? <span className="text-xs text-[var(--color-text-muted)]">a month</span> : null}
+                {row.discountPaise > 0 ? (
+                  <span className="text-xs text-[var(--color-text-muted)] line-through">₹{rupeesFromPaise(row.basePricePaise)}</span>
+                ) : null}
+              </span>
+            )
+          })
+        )}
+      </span>
+
+      <span className="text-xs text-[var(--color-text-muted)]">
+        {included.length === 0 ? 'Includes nothing yet' : included.join(' · ')}
+      </span>
+      {plan.blockedReason ? <span className="text-xs text-[var(--c-attn-ink)]">{plan.blockedReason}</span> : null}
+    </button>
+  )
+}
+
+type MonetizationTab = 'plans' | 'usage'
 
 export function Monetization() {
   const [priceDrafts, setPriceDrafts] = useState<Record<string, PriceDraft>>({})
@@ -302,6 +409,8 @@ export function Monetization() {
   const [savingKey, setSavingKey] = useState<string | null>(null)
   const [savedKey, setSavedKey] = useState<string | null>(null)
   const [actionError, setActionError] = useState<ApiError | null>(null)
+  const [tab, setTab] = useState<MonetizationTab>('plans')
+  const [selectedPlanKey, setSelectedPlanKey] = useState<string | null>(null)
 
   const { data: view, error: loadError, reload } = useAsyncData(() => api.monetization.get(), [])
   const error = actionError ?? loadError
@@ -379,6 +488,9 @@ export function Monetization() {
   )
 
   const defaultPlan = plans.find((plan) => plan.isDefault) ?? null
+  // Opens on the first plan worth editing: the free plan has little to set.
+  const selectedPlan =
+    plans.find((plan) => plan.key === selectedPlanKey) ?? plans.find((plan) => !plan.isDefault) ?? plans[0] ?? null
 
   /**
    * The check that matters, and it is not "is everything zero".
@@ -404,8 +516,22 @@ export function Monetization() {
     features.length > 0 && features.every((feature) => feature.pricing.every((row) => !row.isPaid))
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-lg font-bold text-[var(--color-text)]">Monetization</h1>
+    <div className="space-y-6">
+      <PageHeader
+        title="Monetization"
+        subtitle="What members pay for, and what each plan gives them. Plans are what a member subscribes to; pay per use is what one boost or one reach costs without a plan."
+        actions={
+          <Segmented
+            label="Monetization section"
+            value={tab}
+            onChange={setTab}
+            items={[
+              { value: 'plans', label: 'Plans' },
+              { value: 'usage', label: 'Pay per use' },
+            ]}
+          />
+        }
+      />
 
       {nothingIsPaid ? (
         <div className="rounded-lg border border-[var(--c-attn)]/40 bg-[var(--c-attn-soft)] px-3 py-2 text-sm text-[var(--c-attn-ink)]">
@@ -424,239 +550,228 @@ export function Monetization() {
 
       <ErrorNote error={error} />
 
-      <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--color-text)]">Features</h2>
-        <p className="text-xs text-[var(--color-text-muted)]">
-          What one use costs, per kind of organisation. A feature that is not marked paid costs nothing, whatever
-          price is stored beside it — that flag is how something free becomes paid.
-        </p>
+      {tab === 'usage' ? (
+        <section className="space-y-4" aria-label="Pay per use">
+          <p className="max-w-3xl text-sm text-[var(--color-text-muted)]">
+            What one use costs, for a college and for a company. A feature that is not marked <b>Paid</b> costs
+            nothing, whatever price is stored beside it — that tick is how something free becomes paid. The last
+            column is what a member is shown.
+          </p>
 
-        {view === null ? (
-          <Panel>
-            <EmptyNote>Loading…</EmptyNote>
-          </Panel>
-        ) : features.length === 0 ? (
-          <Panel>
-            <EmptyNote>No features. The server's registry is empty, which should be impossible.</EmptyNote>
-          </Panel>
-        ) : (
-          features.map((feature) => (
-            <Panel key={feature.key} className="p-5">
-              <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h3 className="text-sm font-bold text-[var(--color-text)]">{feature.label}</h3>
-                <Badge>{feature.model}</Badge>
-                {feature.enforcedAt === null ? null : (
-                  <span className="text-xs text-[var(--color-text-muted)]">charged in {feature.enforcedAt}</span>
+          {view === null ? (
+            <Panel>
+              <EmptyNote>Loading…</EmptyNote>
+            </Panel>
+          ) : features.length === 0 ? (
+            <Panel>
+              <EmptyNote>No features. The server's registry is empty, which should be impossible.</EmptyNote>
+            </Panel>
+          ) : (
+            features.map((feature) => (
+              <Panel key={feature.key} className="p-5">
+                <div className="mb-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 className="text-base font-bold text-[var(--color-text)]">{feature.label}</h3>
+                  <Badge>{MODEL_LABEL[feature.model] ?? feature.model}</Badge>
+                  {feature.enforcedAt === null ? null : (
+                    <span className="text-xs text-[var(--color-text-muted)]">charged in {feature.enforcedAt}</span>
+                  )}
+                </div>
+                <p className="mb-4 max-w-3xl text-sm text-[var(--color-text-muted)]">{feature.explain}</p>
+
+                {feature.model !== 'PER_USE' ? (
+                  <p className="text-sm text-[var(--color-text-muted)]">
+                    Nothing is charged for this one — it is {feature.model === 'GRANT' ? 'handed out by a plan' : 'read from a plan'}, and its value is set on the plan itself.
+                  </p>
+                ) : (
+                  <>
+                    <ColumnHeads
+                      template={PRICE_TEMPLATE}
+                      columns={['Organisation', 'Paid', 'Price (₹)', 'Discount (₹)', 'Members pay', '']}
+                    />
+                    <ul className="divide-y divide-[var(--color-border)]">
+                      {feature.pricing.map((row) => {
+                        const key = priceKey(feature.key, row.orgType)
+                        const draft = priceDrafts[key]
+                        if (!draft) return null
+                        const saved = priceDraftFrom(feature, row.orgType)
+                        const problem = problemWithPrice(draft)
+                        const changed = !samePrice(draft, saved)
+                        const saving = savingKey === key
+
+                        const update = (patch: Partial<PriceDraft>) => {
+                          setSavedKey(null)
+                          setPriceDrafts({ ...priceDrafts, [key]: { ...draft, ...patch } })
+                        }
+
+                        return (
+                          <li key={key} className={`grid items-center gap-x-4 gap-y-2 py-3 ${PRICE_TEMPLATE}`} data-testid={`price-row-${key}`}>
+                            <span className="text-sm font-semibold text-[var(--color-text)]">{orgLabel(row.orgType)}</span>
+                            <Toggle label="Paid" checked={draft.isPaid} onChange={(checked) => update({ isPaid: checked })} />
+                            <SmallField label="Price" prefix="₹" value={draft.rupees} onChange={(value) => update({ rupees: value })} />
+                            <SmallField label="Discount" prefix="₹" value={draft.discountRupees} onChange={(value) => update({ discountRupees: value })} />
+                            <span className="text-sm font-bold text-[var(--color-text)]">{finalLabel(draft)}</span>
+                            <Button
+                              variant="primary"
+                              disabled={!changed || problem !== null || saving}
+                              onClick={() => void savePrice(feature, row.orgType)}
+                            >
+                              {saving ? 'Saving…' : 'Save'}
+                            </Button>
+
+                            {problem !== null ? (
+                              <p className="col-span-full text-xs text-[var(--c-danger)]">{problem}</p>
+                            ) : savedKey === key ? (
+                              <p className="col-span-full text-xs text-[var(--c-ok)]">Saved.</p>
+                            ) : changed ? (
+                              <p className="col-span-full text-xs text-[var(--color-text-muted)]">
+                                Will store {paiseFromRupees(draft.rupees)} paise, {paiseFromRupees(draft.discountRupees)} paise off.
+                              </p>
+                            ) : null}
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </>
                 )}
-              </div>
-              <p className="mb-4 text-xs text-[var(--color-text-muted)]">{feature.explain}</p>
+              </Panel>
+            ))
+          )}
+        </section>
+      ) : (
+        <section className="space-y-5" aria-label="Plans">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="max-w-3xl text-sm text-[var(--color-text-muted)]">
+              Pick a plan to edit it. The price shown is what members see; the store charges what its product says,
+              so the two have to match.
+            </p>
+            <NewPlanForm existingKeys={plans.map((plan) => plan.key)} onCreated={reload} />
+          </div>
 
-              {feature.model !== 'PER_USE' ? (
-                <p className="text-xs text-[var(--color-text-muted)]">
-                  Nothing is charged for this one — it is {feature.model === 'GRANT' ? 'handed out by a plan' : 'read from a plan'}, and its value is set per plan below.
-                </p>
-              ) : (
-                <ul className="divide-y divide-[var(--color-border)]">
-                  {feature.pricing.map((row) => {
-                    const key = priceKey(feature.key, row.orgType)
-                    const draft = priceDrafts[key]
-                    if (!draft) return null
-                    const saved = priceDraftFrom(feature, row.orgType)
-                    const problem = problemWithPrice(draft)
-                    const changed = !samePrice(draft, saved)
-                    const saving = savingKey === key
-
-                    const update = (patch: Partial<PriceDraft>) => {
-                      setSavedKey(null)
-                      setPriceDrafts({ ...priceDrafts, [key]: { ...draft, ...patch } })
-                    }
-
-                    return (
-                      <li key={key} className="flex flex-wrap items-end gap-4 py-3">
-                        <span className="mr-auto text-sm font-semibold text-[var(--color-text)]">{row.orgType}</span>
-
-                        <Toggle
-                          label="Paid"
-                          checked={draft.isPaid}
-                          onChange={(checked) => update({ isPaid: checked })}
-                        />
-                        <SmallField
-                          label="Price"
-                          prefix="₹"
-                          value={draft.rupees}
-                          onChange={(value) => update({ rupees: value })}
-                        />
-                        <SmallField
-                          label="Discount"
-                          prefix="₹"
-                          value={draft.discountRupees}
-                          onChange={(value) => update({ discountRupees: value })}
-                        />
-
-                        <Button
-                          variant="primary"
-                          disabled={!changed || problem !== null || saving}
-                          onClick={() => void savePrice(feature, row.orgType)}
-                        >
-                          {saving ? 'Saving…' : 'Save'}
-                        </Button>
-
-                        {problem !== null ? (
-                          <p className="w-full text-xs text-[var(--c-danger)]">{problem}</p>
-                        ) : savedKey === key ? (
-                          <p className="w-full text-xs text-[var(--c-ok)]">Saved.</p>
-                        ) : changed ? (
-                          <p className="w-full text-xs text-[var(--color-text-muted)]">
-                            Will store {paiseFromRupees(draft.rupees)} paise, {paiseFromRupees(draft.discountRupees)} paise off.
-                          </p>
-                        ) : null}
-                      </li>
-                    )
-                  })}
-                </ul>
-              )}
+          {view === null ? (
+            <Panel>
+              <EmptyNote>Loading…</EmptyNote>
             </Panel>
-          ))
-        )}
-      </section>
-
-      <section className="space-y-2">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-bold text-[var(--color-text)]">Plans</h2>
-          <NewPlanForm existingKeys={plans.map((plan) => plan.key)} onCreated={reload} />
-        </div>
-        <p className="text-xs text-[var(--color-text-muted)]">
-          What each plan includes, one feature at a time, and under &ldquo;Plan details&rdquo; the plan itself: its name,
-          position, whether it is on sale, which one is recommended, its store products and the price the app lists.
-          The store charges what its product says, so the listed price has to match it.
-        </p>
-
-        {view === null ? (
-          <Panel>
-            <EmptyNote>Loading…</EmptyNote>
-          </Panel>
-        ) : plans.length === 0 ? (
-          <Panel>
-            <EmptyNote>No plans. The seed migration may not have run.</EmptyNote>
-          </Panel>
-        ) : (
-          plans.map((plan) => (
-            <Panel key={plan.key} className="p-5">
-              <div className="mb-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h3 className="text-base font-bold text-[var(--color-text)]">{plan.name}</h3>
-                <Badge tone={plan.status === 'AVAILABLE' ? 'good' : plan.status === 'DRAFT' ? 'warn' : 'neutral'}>
-                  {plan.status}
-                </Badge>
-                {plan.isDefault ? <Badge>Default</Badge> : null}
-                {plan.isRecommended ? <Badge tone="brand">Recommended</Badge> : null}
-                {plan.badgeLabel ? <Badge tone="good">{plan.badgeLabel}</Badge> : null}
-                <span className="text-xs text-[var(--color-text-muted)]">{planPriceLabel(plan)}</span>
+          ) : plans.length === 0 ? (
+            <Panel>
+              <EmptyNote>No plans. The seed migration may not have run.</EmptyNote>
+            </Panel>
+          ) : (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {plans.map((plan) => (
+                  <PlanOverviewCard
+                    key={plan.key}
+                    plan={plan}
+                    features={features}
+                    selected={selectedPlan?.key === plan.key}
+                    onSelect={() => setSelectedPlanKey(plan.key)}
+                  />
+                ))}
               </div>
 
-              {plan.blockedReason ? (
-                <p className="mb-3 rounded-lg border border-[var(--c-attn)]/40 bg-[var(--c-attn-soft)] px-3 py-2 text-xs text-[var(--c-attn-ink)]">
-                  {plan.blockedReason}
-                </p>
+              {selectedPlan ? (
+                <Panel key={selectedPlan.key} className="p-5">
+                  <div data-testid={`plan-panel-${selectedPlan.key}`}>
+                    <div className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <h2 className="text-lg font-bold text-[var(--color-text)]">Editing {selectedPlan.name}</h2>
+                      {selectedPlan.isDefault ? <Badge>Default plan</Badge> : null}
+                      {selectedPlan.badgeLabel ? <Badge tone="good">{selectedPlan.badgeLabel}</Badge> : null}
+                      <span className="text-xs text-[var(--color-text-muted)]">{planPriceLabel(selectedPlan)}</span>
+                    </div>
+
+                    {selectedPlan.blockedReason ? (
+                      <p className="mb-4 rounded-lg border border-[var(--c-attn)]/40 bg-[var(--c-attn-soft)] px-3 py-2 text-sm text-[var(--c-attn-ink)]">
+                        {selectedPlan.blockedReason}
+                      </p>
+                    ) : null}
+
+                    <PlanEditor plan={selectedPlan} onChanged={reload} />
+
+                    <h3 className="mb-1 mt-6 text-sm font-bold text-[var(--color-text)]">What this plan includes</h3>
+                    <p className="mb-3 max-w-3xl text-xs text-[var(--color-text-muted)]">
+                      Tick what the plan gives. <b>Per month</b> is how many a month (blank means unlimited), the credit in ₹, or the
+                      setting&rsquo;s value, depending on the kind of benefit.
+                    </p>
+
+                    <ColumnHeads template={INCLUDES_TEMPLATE} columns={['Benefit', 'Included', 'Per month', 'Discount', '']} />
+                    <ul className="divide-y divide-[var(--color-border)]">
+                      {features.map((feature) => {
+                        const plan = selectedPlan
+                        const key = cellKey(plan.key, feature.key)
+                        const draft = cellDrafts[key]
+                        if (!draft) return null
+                        const saved = cellDraftFrom(plan, feature.key)
+                        const problem = problemWithCell(feature, draft)
+                        const changed = !sameCell(draft, saved)
+                        const saving = savingKey === key
+
+                        const update = (patch: Partial<CellDraft>) => {
+                          setSavedKey(null)
+                          setCellDrafts({ ...cellDrafts, [key]: { ...draft, ...patch } })
+                        }
+
+                        return (
+                          <li key={key} className={`grid items-center gap-x-4 gap-y-2 py-3 ${INCLUDES_TEMPLATE}`}>
+                            <span className="min-w-0">
+                              <span className="block text-sm font-semibold text-[var(--color-text)]">{feature.label}</span>
+                              <span className="block text-xs text-[var(--color-text-muted)]">{MODEL_LABEL[feature.model] ?? feature.model}</span>
+                            </span>
+
+                            {feature.model === 'PER_USE' || feature.model === 'PERK' ? (
+                              <Toggle label="Included" checked={draft.included} onChange={(checked) => update({ included: checked })} />
+                            ) : (
+                              <span />
+                            )}
+
+                            {feature.model === 'PER_USE' ? (
+                              <SmallField
+                                label={`Included ${feature.unit ?? 'uses'} / month`}
+                                value={draft.quantity}
+                                placeholder="Unlimited"
+                                onChange={(value) => update({ quantity: value })}
+                              />
+                            ) : feature.model === 'SETTING' ? (
+                              <SmallField label="Value" value={draft.settingValue} placeholder="None" onChange={(value) => update({ settingValue: value })} />
+                            ) : feature.model === 'GRANT' ? (
+                              <SmallField label="Each month" prefix="₹" value={draft.grantRupees} placeholder="None" onChange={(value) => update({ grantRupees: value })} />
+                            ) : (
+                              <span />
+                            )}
+
+                            {feature.model === 'PER_USE' ? (
+                              <SmallField label="Discount" suffix="%" value={draft.discountPercent} onChange={(value) => update({ discountPercent: value })} />
+                            ) : (
+                              <span />
+                            )}
+
+                            <Button
+                              variant="primary"
+                              disabled={!changed || problem !== null || saving}
+                              onClick={() => void saveCell(plan, feature)}
+                            >
+                              {saving ? 'Saving…' : 'Save'}
+                            </Button>
+
+                            {problem !== null ? (
+                              <p className="col-span-full text-xs text-[var(--c-danger)]">{problem}</p>
+                            ) : savedKey === key ? (
+                              <p className="col-span-full text-xs text-[var(--c-ok)]">Saved.</p>
+                            ) : draft.included && feature.model === 'PER_USE' && draft.quantity.trim() === '' ? (
+                              <p className="col-span-full text-xs text-[var(--color-text-muted)]">
+                                Unlimited — this plan never pays for {feature.label.toLowerCase()}.
+                              </p>
+                            ) : null}
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                </Panel>
               ) : null}
-
-              <PlanEditor plan={plan} onChanged={reload} />
-
-              <ul className="divide-y divide-[var(--color-border)]">
-                {features.map((feature) => {
-                  const key = cellKey(plan.key, feature.key)
-                  const draft = cellDrafts[key]
-                  if (!draft) return null
-                  const saved = cellDraftFrom(plan, feature.key)
-                  const problem = problemWithCell(feature, draft)
-                  const changed = !sameCell(draft, saved)
-                  const saving = savingKey === key
-
-                  const update = (patch: Partial<CellDraft>) => {
-                    setSavedKey(null)
-                    setCellDrafts({ ...cellDrafts, [key]: { ...draft, ...patch } })
-                  }
-
-                  return (
-                    <li key={key} className="flex flex-wrap items-end gap-4 py-3">
-                      <span className="mr-auto min-w-0">
-                        <span className="block text-sm font-semibold text-[var(--color-text)]">{feature.label}</span>
-                        <span className="block text-xs text-[var(--color-text-muted)]">{feature.model}</span>
-                      </span>
-
-                      {feature.model === 'PER_USE' ? (
-                        <>
-                          <Toggle
-                            label="Included"
-                            checked={draft.included}
-                            onChange={(checked) => update({ included: checked })}
-                          />
-                          <SmallField
-                            label={`Included ${feature.unit ?? 'uses'} / month`}
-                            value={draft.quantity}
-                            placeholder="Unlimited"
-                            onChange={(value) => update({ quantity: value })}
-                          />
-                          <SmallField
-                            label="Discount"
-                            suffix="%"
-                            value={draft.discountPercent}
-                            onChange={(value) => update({ discountPercent: value })}
-                          />
-                        </>
-                      ) : null}
-
-                      {feature.model === 'PERK' ? (
-                        <Toggle
-                          label="Included"
-                          checked={draft.included}
-                          onChange={(checked) => update({ included: checked })}
-                        />
-                      ) : null}
-
-                      {feature.model === 'SETTING' ? (
-                        <SmallField
-                          label="Value"
-                          value={draft.settingValue}
-                          placeholder="None"
-                          onChange={(value) => update({ settingValue: value })}
-                        />
-                      ) : null}
-
-                      {feature.model === 'GRANT' ? (
-                        <SmallField
-                          label="Each month"
-                          prefix="₹"
-                          value={draft.grantRupees}
-                          placeholder="None"
-                          onChange={(value) => update({ grantRupees: value })}
-                        />
-                      ) : null}
-
-                      <Button
-                        variant="primary"
-                        disabled={!changed || problem !== null || saving}
-                        onClick={() => void saveCell(plan, feature)}
-                      >
-                        {saving ? 'Saving…' : 'Save'}
-                      </Button>
-
-                      {problem !== null ? (
-                        <p className="w-full text-xs text-[var(--c-danger)]">{problem}</p>
-                      ) : savedKey === key ? (
-                        <p className="w-full text-xs text-[var(--c-ok)]">Saved.</p>
-                      ) : draft.included && feature.model === 'PER_USE' && draft.quantity.trim() === '' ? (
-                        <p className="w-full text-xs text-[var(--color-text-muted)]">
-                          Unlimited — this plan never pays for {feature.label.toLowerCase()}.
-                        </p>
-                      ) : null}
-                    </li>
-                  )
-                })}
-              </ul>
-            </Panel>
-          ))
-        )}
-      </section>
+            </>
+          )}
+        </section>
+      )}
     </div>
   )
 }

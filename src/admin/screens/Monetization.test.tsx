@@ -60,27 +60,31 @@ function view(overrides: Partial<AdminMonetizationView> = {}): AdminMonetization
   return { features: [feature()], plans: [plan()], ...overrides }
 }
 
-async function renderScreen(data: AdminMonetizationView = view()) {
+async function renderScreen(data: AdminMonetizationView = view(), options: { usage?: boolean } = {}) {
   getMock.mockResolvedValue(data)
   render(<Monetization />)
   // Waits on the fetch resolving rather than on any particular feature: this
   // screen is rendered from whatever the server sends, and a test that names a
   // feature to wait for would be a test that knows the registry.
-  //
-  // "No loading text" alone is true before the first render commits, which made
-  // this return early and the tests fail one run in three; a list item only
-  // exists once the data has rendered.
-  await screen.findAllByRole('listitem')
+  await waitFor(() => expect(getMock).toHaveBeenCalled())
   await waitFor(() => expect(screen.queryAllByText('Loading…')).toHaveLength(0))
+  // A list item only exists once the data has rendered AND the drafts that fill the rows have been built from it.
+  await screen.findAllByRole('listitem')
+  if (options.usage) {
+    fireEvent.click(screen.getByRole('button', { name: 'Pay per use' }))
+  }
 }
 
-/** The one price row for an org type, so a query cannot pick up the plan's copy of the same feature. */
+const ORG_WORDS: Record<string, string> = { ACADEMIC: 'College', CORPORATE: 'Company' }
+
+/** The one price row for an org type, on the Pay per use tab, so a query cannot pick up a plan's copy of the same feature. */
 function priceRow(orgType: string): HTMLElement {
-  return screen.getByText(orgType).closest('li') as HTMLElement
+  return screen.getByText(ORG_WORDS[orgType] ?? orgType).closest('li') as HTMLElement
 }
 
+/** A benefit's row in the plan being edited, which the screen opens on the first paid plan. */
 function planRow(planName: string, featureLabel: string): HTMLElement {
-  const panel = screen.getByText(planName).closest('div[class*="rounded"]') as HTMLElement
+  const panel = screen.getByTestId(`plan-panel-${planName.toUpperCase()}`)
   return within(panel).getAllByText(featureLabel)[0]!.closest('li') as HTMLElement
 }
 
@@ -102,6 +106,7 @@ describe('Monetization', () => {
           feature({ key: 'SOMETHING_NEW', label: 'Something new', explain: 'Invented after this console shipped.' }),
         ],
       }),
+      { usage: true },
     )
 
     expect(screen.getAllByText('Something new').length).toBeGreaterThan(0)
@@ -109,7 +114,7 @@ describe('Monetization', () => {
   })
 
   it('converts a price typed in rupees into paise before saving it', async () => {
-    await renderScreen()
+    await renderScreen(view(), { usage: true })
 
     const row = priceRow('ACADEMIC')
     const input = within(row).getAllByRole('textbox')[0]!
@@ -128,7 +133,7 @@ describe('Monetization', () => {
   })
 
   it('refuses to save a feature marked paid that is free after its discount', async () => {
-    await renderScreen()
+    await renderScreen(view(), { usage: true })
 
     const row = priceRow('ACADEMIC')
     const [price, discount] = within(row).getAllByRole('textbox')
@@ -141,7 +146,7 @@ describe('Monetization', () => {
   })
 
   it('refuses a discount larger than the price, before the round trip', async () => {
-    await renderScreen()
+    await renderScreen(view(), { usage: true })
 
     const row = priceRow('ACADEMIC')
     const [price, discount] = within(row).getAllByRole('textbox')
@@ -239,6 +244,40 @@ describe('Monetization', () => {
     )
   })
 
+  it('shows every plan as a card with what a member pays, and edits the one picked', async () => {
+    await renderScreen(
+      view({
+        plans: [
+          plan(),
+          plan({ id: 'pln_plus', key: 'PLUS', name: 'Plus', isDefault: false, sortOrder: 1, pricing: [{ orgType: 'ACADEMIC', basePricePaise: 9900, discountPaise: 2000 }] }),
+          plan({ id: 'pln_pro', key: 'PRO', name: 'Pro', isDefault: false, sortOrder: 2, pricing: [{ orgType: 'ACADEMIC', basePricePaise: 19900, discountPaise: 5000 }] }),
+        ],
+      }),
+    )
+
+    // The offer price large, the list price struck through - what a member sees.
+    const plusCard = screen.getByTestId('plan-card-PLUS')
+    expect(within(plusCard).getByText('₹79')).toBeTruthy()
+    expect(within(plusCard).getByText('₹99')).toBeTruthy()
+
+    // Opens on the first paid plan; picking another card switches the editor to it.
+    expect(screen.getByTestId('plan-panel-PLUS')).toBeTruthy()
+    fireEvent.click(screen.getByTestId('plan-card-PRO'))
+    expect(screen.getByTestId('plan-panel-PRO')).toBeTruthy()
+    expect(screen.queryByTestId('plan-panel-PLUS')).toBeNull()
+  })
+
+  it('shows what a member will pay beside the price being typed', async () => {
+    await renderScreen(view(), { usage: true })
+
+    const row = priceRow('ACADEMIC')
+    const [price, discount] = within(row).getAllByRole('textbox')
+    fireEvent.change(price!, { target: { value: '59' } })
+    fireEvent.change(discount!, { target: { value: '10' } })
+
+    expect(within(row).getByText('₹49')).toBeTruthy()
+  })
+
   it('warns when a paid plan gives exactly what the default plan gives', async () => {
     await renderScreen(
       view({
@@ -297,7 +336,8 @@ describe('Monetization', () => {
       }),
     )
 
-    expect(screen.getByText(/no Play product id/)).toBeTruthy()
+    // Said on the plan's card and again where it is edited.
+    expect(screen.getAllByText(/no Play product id/).length).toBeGreaterThan(0)
   })
 
   it('says plainly when nothing is paid, because a console full of prices reads as if it were', async () => {
