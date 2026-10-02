@@ -18,8 +18,27 @@ export interface PlanDraft {
   isRecommended: boolean
   iosProductId: string
   androidProductId: string
+  /** The sale: its name, and the first and last day it runs (YYYY-MM-DD, India time). Blank dates mean no bound. */
+  offerName: string
+  offerStarts: string
+  offerEnds: string
   /** Rupees as typed, by organisation type. */
   prices: Record<OrganizationType, { base: string; discount: string }>
+}
+
+/** The calendar day an instant falls on in India, as YYYY-MM-DD - the day an admin means when they pick a date. Blank for no date. */
+export function dayInIndia(iso: string | null): string {
+  if (iso === null) return ''
+  return new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+}
+
+/** A sale starts at the beginning of its first day and ends at the end of its last, India time. */
+function startOfDay(day: string): string | null {
+  return day.trim() === '' ? null : new Date(`${day}T00:00:00+05:30`).toISOString()
+}
+
+function endOfDay(day: string): string | null {
+  return day.trim() === '' ? null : new Date(`${day}T23:59:59+05:30`).toISOString()
 }
 
 function rupees(paise: number): string {
@@ -39,6 +58,9 @@ export function planDraftFrom(plan: AdminPlan): PlanDraft {
     isRecommended: plan.isRecommended,
     iosProductId: plan.iosProductId ?? '',
     androidProductId: plan.androidProductId ?? '',
+    offerName: plan.offerName ?? '',
+    offerStarts: dayInIndia(plan.offerStartsAt),
+    offerEnds: dayInIndia(plan.offerEndsAt),
     prices: { ACADEMIC: price('ACADEMIC'), CORPORATE: price('CORPORATE') },
   }
 }
@@ -58,6 +80,9 @@ export function planBodyFrom(draft: PlanDraft): UpdatePlanBody {
     isRecommended: draft.isRecommended,
     iosProductId: textOrNull(draft.iosProductId),
     androidProductId: textOrNull(draft.androidProductId),
+    offerName: textOrNull(draft.offerName),
+    offerStartsAt: startOfDay(draft.offerStarts),
+    offerEndsAt: endOfDay(draft.offerEnds),
   }
 }
 
@@ -67,6 +92,9 @@ export function problemWithPlanDraft(draft: PlanDraft, plan: AdminPlan): string 
   const order = Number(draft.sortOrder)
   if (draft.sortOrder.trim() === '' || !Number.isInteger(order) || order < 0) return 'Position must be a whole number, 0 or more.'
   if (draft.badgeLabel.trim().length > 24) return 'The profile badge can be at most 24 characters.'
+  if (draft.offerName.trim().length > 40) return 'The sale name can be at most 40 characters.'
+  if ((draft.offerStarts.trim() !== '' || draft.offerEnds.trim() !== '') && draft.offerName.trim() === '') return 'Name the sale (for example Early bird) - a dated sale with no name tells members nothing.'
+  if (draft.offerStarts.trim() !== '' && draft.offerEnds.trim() !== '' && draft.offerEnds < draft.offerStarts) return 'The sale has to end on or after the day it starts.'
   if (draft.isRecommended && draft.status !== 'AVAILABLE') return 'Only a plan that is on sale can be the recommended one.'
   if (plan.isDefault) {
     if (draft.status !== 'AVAILABLE') return `${plan.name} is what everyone starts on, so it has to stay on sale.`
@@ -84,7 +112,10 @@ export function sameDetails(a: PlanDraft, b: PlanDraft): boolean {
     a.status === b.status &&
     a.isRecommended === b.isRecommended &&
     a.iosProductId === b.iosProductId &&
-    a.androidProductId === b.androidProductId
+    a.androidProductId === b.androidProductId &&
+    a.offerName === b.offerName &&
+    a.offerStarts === b.offerStarts &&
+    a.offerEnds === b.offerEnds
   )
 }
 

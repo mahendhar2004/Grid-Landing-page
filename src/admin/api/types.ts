@@ -280,6 +280,10 @@ export interface AdminPlan {
   androidVerifiedAt: string | null
   /** Why this plan cannot be sold yet, in a sentence, or null when it can. The stores are the constraint no configuration removes. */
   blockedReason: string | null
+  /** The sale's name and the window its discount applies in; all null for a plan whose discount simply runs. */
+  offerName: string | null
+  offerStartsAt: string | null
+  offerEndsAt: string | null
   pricing: PlanPrice[]
   features: PlanFeature[]
 }

@@ -57,10 +57,10 @@ describe('Users', () => {
     monetizationMock.mockResolvedValue({
       features: [],
       plans: [
-        { id: 'p0', key: 'FREE', name: 'Free', badgeLabel: null, sortOrder: 0, isDefault: true, isRecommended: false, status: 'AVAILABLE', iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, pricing: [], features: [] },
-        { id: 'p1', key: 'PLUS', name: 'Plus', badgeLabel: null, sortOrder: 1, isDefault: false, isRecommended: false, status: 'AVAILABLE', iosProductId: 'a', androidProductId: 'a', iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, pricing: [], features: [] },
-        { id: 'p2', key: 'PRO', name: 'Pro', badgeLabel: null, sortOrder: 2, isDefault: false, isRecommended: true, status: 'AVAILABLE', iosProductId: 'b', androidProductId: 'b', iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, pricing: [], features: [] },
-        { id: 'p3', key: 'OLD', name: 'Old', badgeLabel: null, sortOrder: 3, isDefault: false, isRecommended: false, status: 'RETIRED', iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, pricing: [], features: [] },
+        { id: 'p0', key: 'FREE', name: 'Free', badgeLabel: null, sortOrder: 0, isDefault: true, isRecommended: false, status: 'AVAILABLE', iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, offerName: null, offerStartsAt: null, offerEndsAt: null, pricing: [], features: [] },
+        { id: 'p1', key: 'PLUS', name: 'Plus', badgeLabel: null, sortOrder: 1, isDefault: false, isRecommended: false, status: 'AVAILABLE', iosProductId: 'a', androidProductId: 'a', iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, offerName: null, offerStartsAt: null, offerEndsAt: null, pricing: [], features: [] },
+        { id: 'p2', key: 'PRO', name: 'Pro', badgeLabel: null, sortOrder: 2, isDefault: false, isRecommended: true, status: 'AVAILABLE', iosProductId: 'b', androidProductId: 'b', iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, offerName: null, offerStartsAt: null, offerEndsAt: null, pricing: [], features: [] },
+        { id: 'p3', key: 'OLD', name: 'Old', badgeLabel: null, sortOrder: 3, isDefault: false, isRecommended: false, status: 'RETIRED', iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null, blockedReason: null, offerName: null, offerStartsAt: null, offerEndsAt: null, pricing: [], features: [] },
       ],
     })
     orgsMock.mockResolvedValue([

@@ -165,6 +165,24 @@ export function PlanEditor({ plan, onChanged }: { plan: AdminPlan; onChanged: ()
         </div>
 
         {plan.isDefault ? null : (
+          <div className="space-y-3 border-t border-[var(--c-line)] pt-4" data-testid={`plan-offer-${plan.key}`}>
+            <div>
+              <h4 className="text-sm font-semibold text-[var(--c-text)]">Sale</h4>
+              <p className="text-xs text-[var(--c-muted)]">
+                Give the discount below a name and the days it runs, and members see the name and the end date beside the
+                struck-through price. Leave the days blank and the discount simply runs. <b>When the sale ends, the
+                price in Play Console has to go back up by hand</b> - the store charges what its product says.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Field label="Sale name" value={draft.offerName} onChange={(value) => update({ offerName: value })} placeholder="Early bird" />
+              <Field label="First day" type="date" value={draft.offerStarts} onChange={(value) => update({ offerStarts: value })} />
+              <Field label="Last day" type="date" value={draft.offerEnds} onChange={(value) => update({ offerEnds: value })} />
+            </div>
+          </div>
+        )}
+
+        {plan.isDefault ? null : (
           <div className="grid gap-4 sm:grid-cols-2">
             <StoreProduct
               label="App Store product id"

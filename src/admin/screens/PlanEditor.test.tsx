@@ -37,6 +37,9 @@ function plan(overrides: Partial<AdminPlan> = {}): AdminPlan {
     iosVerifiedAt: '2026-09-30T00:00:00.000Z',
     androidVerifiedAt: '2026-09-30T00:00:00.000Z',
     blockedReason: null,
+    offerName: null,
+    offerStartsAt: null,
+    offerEndsAt: null,
     pricing: [{ orgType: 'ACADEMIC', basePricePaise: 7900, discountPaise: 1000 }],
     features: [],
     ...overrides,
@@ -130,6 +133,42 @@ describe('PlanEditor', () => {
     render(<PlanEditor plan={plan(overrides)} onChanged={onChanged} />)
     return onChanged
   }
+
+  it('saves a named sale with its first and last day, as the start and end of those days in India', async () => {
+    open()
+
+    fireEvent.change(screen.getByLabelText('Sale name'), { target: { value: 'Early bird' } })
+    fireEvent.change(screen.getByLabelText('First day'), { target: { value: '2026-10-02' } })
+    fireEvent.change(screen.getByLabelText('Last day'), { target: { value: '2026-10-31' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save details' }))
+
+    await waitFor(() =>
+      expect(updatePlan).toHaveBeenCalledWith(
+        'PLUS',
+        expect.objectContaining({ offerName: 'Early bird', offerStartsAt: '2026-10-01T18:30:00.000Z', offerEndsAt: '2026-10-31T18:29:59.000Z' }),
+      ),
+    )
+  })
+
+  it('refuses a dated sale with no name, and a sale that ends before it starts', async () => {
+    open()
+
+    fireEvent.change(screen.getByLabelText('Last day'), { target: { value: '2026-10-31' } })
+    expect(screen.getByText(/Name the sale/)).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Save details' })).toHaveProperty('disabled', true)
+
+    fireEvent.change(screen.getByLabelText('Sale name'), { target: { value: 'Early bird' } })
+    fireEvent.change(screen.getByLabelText('First day'), { target: { value: '2026-11-05' } })
+    expect(screen.getByText(/end on or after the day it starts/)).toBeTruthy()
+  })
+
+  it('shows a plan\'s saved sale back as the days it was set for', () => {
+    open({ offerName: 'Early bird', offerStartsAt: '2026-10-01T18:30:00.000Z', offerEndsAt: '2026-10-31T18:29:59.000Z' })
+
+    expect((screen.getByLabelText('Sale name') as HTMLInputElement).value).toBe('Early bird')
+    expect((screen.getByLabelText('First day') as HTMLInputElement).value).toBe('2026-10-02')
+    expect((screen.getByLabelText('Last day') as HTMLInputElement).value).toBe('2026-10-31')
+  })
 
   it('saves only what changed in the details, with the key in the address, then reloads', async () => {
     const onChanged = open()

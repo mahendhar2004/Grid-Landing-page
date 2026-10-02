@@ -422,6 +422,10 @@ export interface UpdatePlanBody {
   isRecommended: boolean
   iosProductId: string | null
   androidProductId: string | null
+  /** The sale's name and window. Dates are ISO instants; null is no bound. */
+  offerName: string | null
+  offerStartsAt: string | null
+  offerEndsAt: string | null
 }
 
 // ---------------------------------------------------- app version
