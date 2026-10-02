@@ -7,6 +7,7 @@ import { usePagedData } from '../lib/usePagedData'
 import { useAdminAction } from '../lib/useAdminAction'
 import { useFilters } from '../lib/useFilters'
 import { Dropdown, FilterChips, Toolbar } from '../components/filters'
+import { ReportedImages } from '../components/ReportedImages'
 import { Badge, Button, EmptyNote, ErrorNote, LoadingRows, MoreRow, PageHeader, Panel, ReasonPrompt, Segmented } from '../components/ui'
 
 /**
@@ -232,6 +233,10 @@ export function Reports() {
                 <p className="mt-1 text-xs text-[var(--color-text-muted)]">
                   Reported by {report.reporter_email}
                 </p>
+
+                {/* Only a listing has photos of its own. Offered on removed ones
+                    too: the point is to look before deciding to restore. */}
+                {report.target_listing_id ? <ReportedImages load={() => api.reports.images(report.id)} /> : null}
 
                 {status === 'OPEN' ? (
                   <div className="mt-3 flex flex-wrap gap-2">

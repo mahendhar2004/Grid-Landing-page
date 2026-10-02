@@ -21,6 +21,7 @@ import type {
   AdminUser,
   AuditEntry,
   AuthTokens,
+  ModerationImage,
   CorrectDomainResult,
   OrganizationDomain,
   OrganizationType,
@@ -142,6 +143,15 @@ const reports = {
   act(reportId: string, decision: ReportDecision, reason: string): Promise<unknown> {
     return apiPost(`/v1/admin/reports/${reportId}/action`, { ...decision, reason })
   },
+
+  /**
+   * The reported listing's photos. Fetched when a moderator asks to see them,
+   * not with the queue: the links last five minutes, and every call is
+   * recorded in the audit trail on the server. Works for a removed listing too.
+   */
+  images(reportId: string): Promise<ModerationImage[]> {
+    return apiGet<ModerationImage[]>(`/v1/admin/reports/${reportId}/images`)
+  },
 }
 
 // ----------------------------------------------------------- triage
@@ -189,6 +199,11 @@ const triage = {
       limit,
       offset,
     })
+  },
+
+  /** A bug report's screenshots, as five-minute links. Audited server-side. */
+  images(inbox: TriageInbox, itemId: string): Promise<ModerationImage[]> {
+    return apiGet<ModerationImage[]>('/v1/admin/triage/images', { inbox, id: itemId })
   },
 
   counts(): Promise<TriageCounts> {

@@ -578,3 +578,9 @@ export interface PlanGrantResult {
   planName: string
   expiresAt: string
 }
+
+/** One picture behind a report, as a link that opens for about five minutes. Fetch again rather than keeping it. */
+export interface ModerationImage {
+  key: string
+  url: string
+}

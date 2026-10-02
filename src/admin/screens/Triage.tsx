@@ -6,6 +6,7 @@ import type { TriageInbox, TriageItem } from '../api/types'
 import type { ApiError } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
 import { usePagedData } from '../lib/usePagedData'
+import { ReportedImages } from '../components/ReportedImages'
 import { Badge, Button, EmptyNote, ErrorNote, MoreRow, Panel, ReasonPrompt } from '../components/ui'
 
 const PAGE_SIZE = 50
@@ -62,6 +63,7 @@ function text(item: TriageItem, key: string): string | null {
 
 /** One line per inbox, because a contact message and a review have nothing in common to show. */
 function Summary({ inbox, item }: { inbox: Inbox; item: TriageItem }) {
+  const itemId = typeof item['id'] === 'string' ? item['id'] : null
   if (inbox === 'CONTACT_MESSAGE') {
     return (
       <>
@@ -116,6 +118,9 @@ function Summary({ inbox, item }: { inbox: Inbox; item: TriageItem }) {
           .join(' · ')}
       </p>
       {reporter ? <p className="mt-1 text-xs text-[var(--color-text-muted)]">{reporter}</p> : null}
+      {images > 0 && itemId ? (
+        <ReportedImages load={() => api.triage.images(inbox, itemId)} count={images} noun="screenshot" />
+      ) : null}
     </>
   )
 }
