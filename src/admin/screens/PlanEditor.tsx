@@ -8,11 +8,13 @@ import {
   planBodyFrom,
   planDraftFrom,
   pricesDiffer,
+  productIdOrNull,
   problemWithNewPlan,
   problemWithPlanDraft,
   problemWithPrice,
   sameDetails,
   type PlanDraft,
+  type PriceDraft,
 } from './planDraft'
 
 /**
@@ -113,7 +115,7 @@ export function PlanEditor({ plan, onChanged }: { plan: AdminPlan; onChanged: ()
     setDraft({ ...draft, ...patch })
   }
 
-  function setPrice(orgType: OrganizationType, patch: Partial<{ base: string; discount: string }>) {
+  function setPrice(orgType: OrganizationType, patch: Partial<PriceDraft>) {
     setSaved(null)
     setDraft({ ...draft, prices: { ...draft.prices, [orgType]: { ...draft.prices[orgType], ...patch } } })
   }
@@ -230,6 +232,11 @@ export function PlanEditor({ plan, onChanged }: { plan: AdminPlan; onChanged: ()
                 match: set the same price on the product in App Store Connect and Play Console. Leave blank for an
                 organisation type this plan is not sold to.
               </p>
+              <p className="mt-1 text-xs text-[var(--c-muted)]">
+                A store product has <b>one</b> price. If colleges and companies pay different amounts, create a second
+                product at the other price in Play Console and enter its id beside that kind below; leave it blank and
+                that kind buys through the plan&apos;s own product above.
+              </p>
             </div>
             {ORG_TYPES.map(({ type, label }) => {
               const price = draft.prices[type]
@@ -254,6 +261,8 @@ export function PlanEditor({ plan, onChanged }: { plan: AdminPlan; onChanged: ()
                           orgType: type,
                           basePricePaise: Math.round(Number(price.base) * 100),
                           discountPaise: Math.round(Number(price.discount.trim() === '' ? 0 : price.discount) * 100),
+                          iosProductId: productIdOrNull(price.iosProductId),
+                          androidProductId: productIdOrNull(price.androidProductId),
                         }),
                       )
                     }
@@ -262,6 +271,29 @@ export function PlanEditor({ plan, onChanged }: { plan: AdminPlan; onChanged: ()
                   </Button>
                   {saved === `price-${type}` ? <span className="pb-2 text-xs text-[var(--c-ok)]">Saved.</span> : null}
                   {priceProblem ? <p className="w-full text-xs text-[var(--c-danger)]">{priceProblem}</p> : null}
+                  <div className="grid w-full gap-4 sm:grid-cols-2" data-testid={`plan-price-products-${plan.key}-${type}`}>
+                    <StoreProduct
+                      label={`Play product for ${label.toLowerCase()} (optional)`}
+                      value={price.androidProductId}
+                      onChange={(value) => setPrice(type, { androidProductId: value })}
+                      verifiedAt={plan.pricing.find((row) => row.orgType === type)?.androidVerifiedAt ?? null}
+                      savedValue={stored.prices[type].androidProductId}
+                      busy={busy !== null}
+                      disabled={changed}
+                      onConfirm={() => void run(`confirm-android-${type}`, () => api.monetization.confirmPlanProduct({ planKey: plan.key, store: 'ANDROID', orgType: type }))}
+                    />
+                    <StoreProduct
+                      label={`App Store product for ${label.toLowerCase()} (optional)`}
+                      value={price.iosProductId}
+                      onChange={(value) => setPrice(type, { iosProductId: value })}
+                      verifiedAt={plan.pricing.find((row) => row.orgType === type)?.iosVerifiedAt ?? null}
+                      savedValue={stored.prices[type].iosProductId}
+                      busy={busy !== null}
+                      disabled={changed}
+                      notNeededYet
+                      onConfirm={() => void run(`confirm-ios-${type}`, () => api.monetization.confirmPlanProduct({ planKey: plan.key, store: 'IOS', orgType: type }))}
+                    />
+                  </div>
                 </div>
               )
             })}

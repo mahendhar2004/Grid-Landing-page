@@ -23,7 +23,15 @@ export interface PlanDraft {
   offerStarts: string
   offerEnds: string
   /** Rupees as typed, by organisation type. */
-  prices: Record<OrganizationType, { base: string; discount: string }>
+  prices: Record<OrganizationType, PriceDraft>
+}
+
+/** One kind of organisation's listed price, and the store product it buys through if it has one of its own. */
+export interface PriceDraft {
+  base: string
+  discount: string
+  iosProductId: string
+  androidProductId: string
 }
 
 /** The calendar day an instant falls on in India, as YYYY-MM-DD - the day an admin means when they pick a date. Blank for no date. */
@@ -48,7 +56,12 @@ function rupees(paise: number): string {
 export function planDraftFrom(plan: AdminPlan): PlanDraft {
   const price = (orgType: OrganizationType) => {
     const row = plan.pricing.find((entry) => entry.orgType === orgType)
-    return { base: row ? rupees(row.basePricePaise) : '', discount: row ? rupees(row.discountPaise) : '' }
+    return {
+      base: row ? rupees(row.basePricePaise) : '',
+      discount: row ? rupees(row.discountPaise) : '',
+      iosProductId: row?.iosProductId ?? '',
+      androidProductId: row?.androidProductId ?? '',
+    }
   }
   return {
     name: plan.name,
@@ -120,7 +133,7 @@ export function sameDetails(a: PlanDraft, b: PlanDraft): boolean {
 }
 
 /** The first thing wrong with one organisation type's listed price, or null. Blank means "not listed yet". */
-export function problemWithPrice(price: { base: string; discount: string }): string | null {
+export function problemWithPrice(price: PriceDraft): string | null {
   if (price.base.trim() === '') return null
   const base = Number(price.base)
   const discount = price.discount.trim() === '' ? 0 : Number(price.discount)
@@ -131,7 +144,18 @@ export function problemWithPrice(price: { base: string; discount: string }): str
 }
 
 export function pricesDiffer(a: PlanDraft['prices'], b: PlanDraft['prices'], orgType: OrganizationType): boolean {
-  return a[orgType].base !== b[orgType].base || a[orgType].discount !== b[orgType].discount
+  return (
+    a[orgType].base !== b[orgType].base ||
+    a[orgType].discount !== b[orgType].discount ||
+    a[orgType].iosProductId !== b[orgType].iosProductId ||
+    a[orgType].androidProductId !== b[orgType].androidProductId
+  )
+}
+
+/** A blank product id is "none" - back on the plan's shared product - and a whitespace-only one is none too. */
+export function productIdOrNull(value: string): string | null {
+  const trimmed = value.trim()
+  return trimmed === '' ? null : trimmed
 }
 
 

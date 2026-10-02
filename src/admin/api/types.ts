@@ -228,6 +228,8 @@ export interface FeaturePrice {
   orgType: OrganizationType
   /** False means free for everyone regardless of the price beside it — the flag that makes a feature paid. */
   isPaid: boolean
+  /** False when an add-on is not on sale to this kind of organisation at all — different from free, which is `isPaid` false. */
+  isOffered: boolean
   basePricePaise: number
   discountPaise: number
 }
@@ -241,6 +243,8 @@ export interface AdminFeature {
   unit: string | null
   /** The file and function that charges for it, so a paid feature nobody enforces is visible as such. */
   enforcedAt: string | null
+  /** Whether it can be stopped without being made free — an add-on (boost, a reach step) rather than posting. */
+  switchable: boolean
   pricing: FeaturePrice[]
 }
 
@@ -261,6 +265,11 @@ export interface PlanPrice {
   orgType: OrganizationType
   basePricePaise: number
   discountPaise: number
+  /** This kind of organisation's own store product, when its price needs one (a product has one price). Null means it buys through the plan's shared product. */
+  iosProductId: string | null
+  androidProductId: string | null
+  iosVerifiedAt: string | null
+  androidVerifiedAt: string | null
 }
 
 export interface AdminPlan {
@@ -288,9 +297,18 @@ export interface AdminPlan {
   features: PlanFeature[]
 }
 
+/** How far each reach step reaches, in km. Each is farther than the one before. */
+export interface ReachDistancesKm {
+  NEARBY: number
+  CITY: number
+  REGION: number
+  WIDE: number
+}
+
 export interface AdminMonetizationView {
   features: AdminFeature[]
   plans: AdminPlan[]
+  reachDistancesKm: ReachDistancesKm
 }
 
 export interface AuthTokens {

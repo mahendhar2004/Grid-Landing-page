@@ -35,6 +35,7 @@ import type {
   TriageCounts,
   TriageInbox,
   TriageItem,
+  ReachDistancesKm,
 } from './types'
 
 /**
@@ -357,6 +358,8 @@ export interface SetFeaturePriceBody {
   orgType: OrganizationType
   /** The flag that makes a feature paid. Turning it on with nothing to charge is refused server-side, because "paid, free" reads as free to every member. */
   isPaid: boolean
+  /** Only for an add-on: false stops it being offered to this kind of organisation without making it free. Omitted leaves it as it is. */
+  isOffered?: boolean
   basePricePaise: number
   discountPaise: number
 }
@@ -403,6 +406,11 @@ const monetization = {
     return apiPut('/v1/admin/monetization/features', body)
   },
 
+  /** How far each reach step reaches, in km. All four together; each must be farther than the one before. Applies to posts already bought too. */
+  setReachDistances(body: ReachDistancesKm): Promise<ReachDistancesKm> {
+    return apiPut<ReachDistancesKm>('/v1/admin/monetization/reach-distances', body)
+  },
+
   setPlanFeature(body: SetPlanFeatureBody): Promise<unknown> {
     return apiPut('/v1/admin/monetization/plan-features', body)
   },
@@ -418,12 +426,20 @@ const monetization = {
   },
 
   /** What the app lists a plan at for one organisation type. The store charges what its product says; the two must match. */
-  setPlanPricing(body: { planKey: string; orgType: OrganizationType; basePricePaise: number; discountPaise: number }): Promise<AdminPlan> {
+  setPlanPricing(body: {
+    planKey: string
+    orgType: OrganizationType
+    basePricePaise: number
+    discountPaise: number
+    /** This kind's own store product; null puts it back on the plan's shared one. */
+    iosProductId?: string | null
+    androidProductId?: string | null
+  }): Promise<AdminPlan> {
     return apiPut<AdminPlan>('/v1/admin/monetization/plan-pricing', body)
   },
 
   /** Records that the plan's product has been checked in that store's console. */
-  confirmPlanProduct(body: { planKey: string; store: 'IOS' | 'ANDROID' }): Promise<AdminPlan> {
+  confirmPlanProduct(body: { planKey: string; store: 'IOS' | 'ANDROID'; orgType?: OrganizationType }): Promise<AdminPlan> {
     return apiPost<AdminPlan>('/v1/admin/monetization/plan-products/confirm', body)
   },
 }

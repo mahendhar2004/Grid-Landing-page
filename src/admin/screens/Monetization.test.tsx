@@ -11,6 +11,7 @@ vi.mock('../api/endpoints', () => ({
       get: vi.fn(),
       setFeaturePrice: vi.fn(),
       setPlanFeature: vi.fn(),
+      setReachDistances: vi.fn(),
     },
   },
 }))
@@ -18,6 +19,7 @@ vi.mock('../api/endpoints', () => ({
 const getMock = vi.mocked(api.monetization.get)
 const setFeaturePriceMock = vi.mocked(api.monetization.setFeaturePrice)
 const setPlanFeatureMock = vi.mocked(api.monetization.setPlanFeature)
+const setReachDistancesMock = vi.mocked(api.monetization.setReachDistances)
 
 function feature(overrides: Partial<AdminFeature> = {}): AdminFeature {
   return {
@@ -27,9 +29,10 @@ function feature(overrides: Partial<AdminFeature> = {}): AdminFeature {
     model: 'PER_USE',
     unit: 'boost',
     enforcedAt: 'services/boost.ts#purchaseBoost',
+    switchable: true,
     pricing: [
-      { orgType: 'ACADEMIC', isPaid: true, basePricePaise: 5900, discountPaise: 0 },
-      { orgType: 'CORPORATE', isPaid: true, basePricePaise: 5900, discountPaise: 0 },
+      { orgType: 'ACADEMIC', isPaid: true, isOffered: true, basePricePaise: 5900, discountPaise: 0 },
+      { orgType: 'CORPORATE', isPaid: true, isOffered: true, basePricePaise: 5900, discountPaise: 0 },
     ],
     ...overrides,
   }
@@ -60,7 +63,7 @@ function plan(overrides: Partial<AdminPlan> = {}): AdminPlan {
 }
 
 function view(overrides: Partial<AdminMonetizationView> = {}): AdminMonetizationView {
-  return { features: [feature()], plans: [plan()], ...overrides }
+  return { features: [feature()], plans: [plan()], reachDistancesKm: { NEARBY: 5, CITY: 25, REGION: 100, WIDE: 500 }, ...overrides }
 }
 
 async function renderScreen(data: AdminMonetizationView = view(), options: { usage?: boolean } = {}) {
@@ -129,10 +132,78 @@ describe('Monetization', () => {
         featureKey: 'BOOST',
         orgType: 'ACADEMIC',
         isPaid: true,
+        isOffered: true,
         basePricePaise: 7900,
         discountPaise: 0,
       }),
     )
+  })
+
+  it('sends no switch for a feature that cannot be switched off, and none is drawn', async () => {
+    await renderScreen(view({ features: [feature({ key: 'LISTING_POST', label: 'Posting a listing', switchable: false })] }), { usage: true })
+
+    const row = priceRow('ACADEMIC')
+    expect(within(row).queryByLabelText('On sale')).toBeNull()
+    fireEvent.change(within(row).getAllByRole('textbox')[0]!, { target: { value: '5' } })
+    fireEvent.click(within(row).getByText('Save'))
+
+    await waitFor(() => expect(setFeaturePriceMock).toHaveBeenCalled())
+    expect(setFeaturePriceMock.mock.calls.at(-1)![0]).not.toHaveProperty('isOffered')
+  })
+
+  it('switches an add-on off for one kind of organisation without touching its price, and explains it is not the same as free', async () => {
+    await renderScreen(view(), { usage: true })
+
+    const row = priceRow('ACADEMIC')
+    fireEvent.click(within(row).getByLabelText('On sale'))
+
+    expect(within(row).getByText(/This is not the same as free/)).toBeTruthy()
+    fireEvent.click(within(row).getByText('Save'))
+    await waitFor(() =>
+      expect(setFeaturePriceMock).toHaveBeenCalledWith({
+        featureKey: 'BOOST',
+        orgType: 'ACADEMIC',
+        isPaid: true,
+        isOffered: false,
+        basePricePaise: 5900,
+        discountPaise: 0,
+      }),
+    )
+  })
+
+  describe('reach distances', () => {
+    it('shows the live distances and saves a change as four whole numbers', async () => {
+      setReachDistancesMock.mockResolvedValue({ NEARBY: 3, CITY: 25, REGION: 100, WIDE: 800 })
+      await renderScreen(view(), { usage: true })
+
+      expect((screen.getByLabelText('Nearby distance in km') as HTMLInputElement).value).toBe('5')
+      fireEvent.change(screen.getByLabelText('Nearby distance in km'), { target: { value: '3' } })
+      fireEvent.change(screen.getByLabelText('Far and wide distance in km'), { target: { value: '800' } })
+      fireEvent.click(screen.getByText('Save distances'))
+
+      await waitFor(() => expect(setReachDistancesMock).toHaveBeenCalledWith({ NEARBY: 3, CITY: 25, REGION: 100, WIDE: 800 }))
+    })
+
+    it('refuses a step that does not reach farther than the one before it, naming both, and saves nothing', async () => {
+      await renderScreen(view(), { usage: true })
+
+      fireEvent.change(screen.getByLabelText('Across the city distance in km'), { target: { value: '5' } })
+
+      expect(screen.getByText(/Across the city \(5 km\) must reach farther than Nearby \(5 km\)/)).toBeTruthy()
+      expect((screen.getByText('Save distances') as HTMLButtonElement).disabled).toBe(true)
+    })
+
+    it('refuses fractions, blanks and a distance past the Earth', async () => {
+      await renderScreen(view(), { usage: true })
+
+      fireEvent.change(screen.getByLabelText('Nearby distance in km'), { target: { value: '2.5' } })
+      expect(screen.getByText('Nearby must be a whole number of km.')).toBeTruthy()
+      fireEvent.change(screen.getByLabelText('Nearby distance in km'), { target: { value: '' } })
+      expect(screen.getByText('Nearby must be a whole number of km.')).toBeTruthy()
+      fireEvent.change(screen.getByLabelText('Nearby distance in km'), { target: { value: '5' } })
+      fireEvent.change(screen.getByLabelText('Far and wide distance in km'), { target: { value: '20001' } })
+      expect(screen.getByText('Far and wide must be from 1 to 20000 km.')).toBeTruthy()
+    })
   })
 
   it('refuses to save a feature marked paid that is free after its discount', async () => {

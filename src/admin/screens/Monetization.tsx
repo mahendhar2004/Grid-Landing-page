@@ -6,6 +6,7 @@ import type { ApiError } from '../lib/api'
 import { useAsyncData } from '../lib/useAsyncData'
 import { Badge, Button, EmptyNote, ErrorNote, PageHeader, Panel, Segmented } from '../components/ui'
 import { NewPlanForm, PlanEditor } from './PlanEditor'
+import { ReachDistancesPanel } from './ReachDistances'
 
 /**
  * What costs money, and what each plan includes.
@@ -72,6 +73,8 @@ function checkWholeNumber(label: string, raw: string): string | null {
  */
 interface PriceDraft {
   isPaid: boolean
+  /** Only means anything for an add-on; everything else is always on sale. */
+  isOffered: boolean
   rupees: string
   discountRupees: string
 }
@@ -97,6 +100,7 @@ function priceDraftFrom(feature: AdminFeature, orgType: OrganizationType): Price
   const row = feature.pricing.find((entry) => entry.orgType === orgType)
   return {
     isPaid: row?.isPaid ?? false,
+    isOffered: row?.isOffered ?? true,
     rupees: rupeesFromPaise(row?.basePricePaise ?? 0),
     discountRupees: rupeesFromPaise(row?.discountPaise ?? 0),
   }
@@ -116,6 +120,7 @@ function cellDraftFrom(plan: AdminPlan, featureKey: string): CellDraft {
 function samePrice(draft: PriceDraft, saved: PriceDraft): boolean {
   return (
     draft.isPaid === saved.isPaid &&
+    draft.isOffered === saved.isOffered &&
     draft.rupees === saved.rupees &&
     draft.discountRupees === saved.discountRupees
   )
@@ -326,6 +331,8 @@ function ColumnHeads({ columns, template }: { columns: ReadonlyArray<string>; te
 
 const INCLUDES_TEMPLATE = 'md:grid-cols-[minmax(0,1.6fr)_110px_140px_110px_84px]'
 const PRICE_TEMPLATE = 'md:grid-cols-[minmax(0,1fr)_90px_130px_130px_110px_84px]'
+/** The same, with a column for the on-sale switch that only add-ons have. */
+const PRICE_TEMPLATE_SWITCHABLE = 'md:grid-cols-[minmax(0,1fr)_110px_90px_130px_130px_110px_84px]'
 
 /** What a plan gives, in a line a person can skim: "3 boosts · 5 reach". Only what is switched on. */
 function includedSummary(plan: AdminPlan, features: ReadonlyArray<AdminFeature>): string[] {
@@ -450,6 +457,8 @@ export function Monetization() {
         featureKey: feature.key,
         orgType,
         isPaid: draft.isPaid,
+        // Only an add-on has the switch; sending it for anything else would be refused.
+        ...(feature.switchable ? { isOffered: draft.isOffered } : {}),
         basePricePaise: paiseFromRupees(draft.rupees),
         discountPaise: paiseFromRupees(draft.discountRupees),
       })
@@ -558,6 +567,8 @@ export function Monetization() {
             column is what a member is shown.
           </p>
 
+          {view === null || !view.reachDistancesKm ? null : <ReachDistancesPanel key={JSON.stringify(view.reachDistancesKm)} distances={view.reachDistancesKm} onSaved={reload} />}
+
           {view === null ? (
             <Panel>
               <EmptyNote>Loading…</EmptyNote>
@@ -585,8 +596,12 @@ export function Monetization() {
                 ) : (
                   <>
                     <ColumnHeads
-                      template={PRICE_TEMPLATE}
-                      columns={['Organisation', 'Paid', 'Price (₹)', 'Discount (₹)', 'Members pay', '']}
+                      template={feature.switchable ? PRICE_TEMPLATE_SWITCHABLE : PRICE_TEMPLATE}
+                      columns={
+                        feature.switchable
+                          ? ['Organisation', 'On sale', 'Paid', 'Price (₹)', 'Discount (₹)', 'Members pay', '']
+                          : ['Organisation', 'Paid', 'Price (₹)', 'Discount (₹)', 'Members pay', '']
+                      }
                     />
                     <ul className="divide-y divide-[var(--color-border)]">
                       {feature.pricing.map((row) => {
@@ -604,8 +619,15 @@ export function Monetization() {
                         }
 
                         return (
-                          <li key={key} className={`grid items-center gap-x-4 gap-y-2 py-3 ${PRICE_TEMPLATE}`} data-testid={`price-row-${key}`}>
+                          <li
+                            key={key}
+                            className={`grid items-center gap-x-4 gap-y-2 py-3 ${feature.switchable ? PRICE_TEMPLATE_SWITCHABLE : PRICE_TEMPLATE}`}
+                            data-testid={`price-row-${key}`}
+                          >
                             <span className="text-sm font-semibold text-[var(--color-text)]">{orgLabel(row.orgType)}</span>
+                            {feature.switchable ? (
+                              <Toggle label="On sale" checked={draft.isOffered} onChange={(checked) => update({ isOffered: checked })} />
+                            ) : null}
                             <Toggle label="Paid" checked={draft.isPaid} onChange={(checked) => update({ isPaid: checked })} />
                             <SmallField label="Price" prefix="₹" value={draft.rupees} onChange={(value) => update({ rupees: value })} />
                             <SmallField label="Discount" prefix="₹" value={draft.discountRupees} onChange={(value) => update({ discountRupees: value })} />
@@ -622,6 +644,10 @@ export function Monetization() {
                               <p className="col-span-full text-xs text-[var(--c-danger)]">{problem}</p>
                             ) : savedKey === key ? (
                               <p className="col-span-full text-xs text-[var(--c-ok)]">Saved.</p>
+                            ) : feature.switchable && !draft.isOffered ? (
+                              <p className="col-span-full text-xs text-[var(--color-text-muted)]">
+                                Not on sale to {orgLabel(row.orgType).toLowerCase()}: members see nothing to buy, whatever the price, and it is left out of what their plans list. This is not the same as free.
+                              </p>
                             ) : changed ? (
                               <p className="col-span-full text-xs text-[var(--color-text-muted)]">
                                 Will store {paiseFromRupees(draft.rupees)} paise, {paiseFromRupees(draft.discountRupees)} paise off.

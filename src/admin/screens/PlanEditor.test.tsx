@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { NewPlanForm, PlanEditor } from './PlanEditor'
@@ -40,7 +40,7 @@ function plan(overrides: Partial<AdminPlan> = {}): AdminPlan {
     offerName: null,
     offerStartsAt: null,
     offerEndsAt: null,
-    pricing: [{ orgType: 'ACADEMIC', basePricePaise: 7900, discountPaise: 1000 }],
+    pricing: [{ orgType: 'ACADEMIC', basePricePaise: 7900, discountPaise: 1000, iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null }],
     features: [],
     ...overrides,
   }
@@ -51,8 +51,8 @@ describe('the draft', () => {
     const draft = planDraftFrom(plan())
 
     expect(draft).toMatchObject({ name: 'Plus', badgeLabel: 'Plus Member', sortOrder: '1', status: 'AVAILABLE', iosProductId: 'sub_plus' })
-    expect(draft.prices.ACADEMIC).toEqual({ base: '79', discount: '10' })
-    expect(draft.prices.CORPORATE).toEqual({ base: '', discount: '' })
+    expect(draft.prices.ACADEMIC).toEqual({ base: '79', discount: '10', iosProductId: '', androidProductId: '' })
+    expect(draft.prices.CORPORATE).toEqual({ base: '', discount: '', iosProductId: '', androidProductId: '' })
   })
 
   it('sends an empty badge or product id as null, and trims the name', () => {
@@ -234,7 +234,41 @@ describe('PlanEditor', () => {
     fireEvent.change(prices[1]!, { target: { value: '99' } })
     fireEvent.click(screen.getAllByRole('button', { name: 'Save price' })[1]!)
 
-    await waitFor(() => expect(setPlanPricing).toHaveBeenCalledWith({ planKey: 'PLUS', orgType: 'CORPORATE', basePricePaise: 9900, discountPaise: 0 }))
+    await waitFor(() => expect(setPlanPricing).toHaveBeenCalledWith({ planKey: 'PLUS', orgType: 'CORPORATE', basePricePaise: 9900, discountPaise: 0, iosProductId: null, androidProductId: null }))
+  })
+
+  it('saves a product of its own for one kind of organisation with its price, and never touches the other kind', async () => {
+    open()
+
+    fireEvent.change(screen.getAllByLabelText('Price / month (₹)')[1]!, { target: { value: '199' } })
+    fireEvent.change(screen.getByLabelText('Play product for companies (optional)'), { target: { value: 'sub_plus_company_monthly' } })
+    fireEvent.click(screen.getAllByRole('button', { name: 'Save price' })[1]!)
+
+    await waitFor(() =>
+      expect(setPlanPricing).toHaveBeenCalledWith({
+        planKey: 'PLUS',
+        orgType: 'CORPORATE',
+        basePricePaise: 19900,
+        discountPaise: 0,
+        iosProductId: null,
+        androidProductId: 'sub_plus_company_monthly',
+      }),
+    )
+    expect(setPlanPricing).toHaveBeenCalledTimes(1)
+  })
+
+  it('confirms the kind\'s own product, not the plan\'s, once it is saved', async () => {
+    open({
+      pricing: [
+        { orgType: 'ACADEMIC', basePricePaise: 9900, discountPaise: 0, iosProductId: null, androidProductId: null, iosVerifiedAt: null, androidVerifiedAt: null },
+        { orgType: 'CORPORATE', basePricePaise: 19900, discountPaise: 0, iosProductId: null, androidProductId: 'sub_plus_company_monthly', iosVerifiedAt: null, androidVerifiedAt: null },
+      ],
+    })
+
+    const block = screen.getByTestId('plan-price-products-PLUS-CORPORATE')
+    fireEvent.click(within(block).getAllByRole('button', { name: 'I checked it exists' })[0]!)
+
+    await waitFor(() => expect(confirmPlanProduct).toHaveBeenCalledWith({ planKey: 'PLUS', store: 'ANDROID', orgType: 'CORPORATE' }))
   })
 
   it('refuses a discount bigger than the price before asking the server', () => {
